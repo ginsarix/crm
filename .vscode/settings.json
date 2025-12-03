@@ -1,0 +1,6 @@
+{
+	"prisma.pinToPrisma6": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.biome": "explicit"
+	}
+}

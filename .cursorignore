@@ -1,0 +1,4 @@
+# Exclude large generated files from Cursor indexing
+prisma/generated/
+generated/
+.next/

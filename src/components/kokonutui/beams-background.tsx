@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * @author: @dorian_baffier
@@ -10,14 +10,14 @@
  * @github: https://github.com/kokonut-labs/kokonutui
  */
 
-import { motion } from "motion/react";
-import { useEffect, useRef } from "react";
-import { cn } from "~/lib/utils";
+import { motion } from 'motion/react';
+import { useEffect, useRef } from 'react';
+import { cn } from '~/lib/utils';
 
 interface AnimatedGradientBackgroundProps {
   className?: string;
   children?: React.ReactNode;
-  intensity?: "subtle" | "medium" | "strong";
+  intensity?: 'subtle' | 'medium' | 'strong';
 }
 
 interface Beam {
@@ -55,7 +55,7 @@ function createBeam(width: number, height: number, isDarkMode: boolean): Beam {
 export default function BeamsBackground({
   className,
   children,
-  intensity = "strong",
+  intensity = 'strong',
 }: AnimatedGradientBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const beamsRef = useRef<Beam[]>([]);
@@ -73,19 +73,19 @@ export default function BeamsBackground({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     // Check for dark mode
     const updateDarkMode = () => {
       isDarkModeRef.current =
-        document.documentElement.classList.contains("dark");
+        document.documentElement.classList.contains('dark');
     };
 
     const observer = new MutationObserver(updateDarkMode);
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["class"],
+      attributeFilter: ['class'],
     });
 
     updateDarkMode();
@@ -100,12 +100,12 @@ export default function BeamsBackground({
 
       const totalBeams = MINIMUM_BEAMS * 1.5;
       beamsRef.current = Array.from({ length: totalBeams }, () =>
-        createBeam(canvas.width, canvas.height, isDarkModeRef.current)
+        createBeam(canvas.width, canvas.height, isDarkModeRef.current),
       );
     };
 
     updateCanvasSize();
-    window.addEventListener("resize", updateCanvasSize);
+    window.addEventListener('resize', updateCanvasSize);
 
     function resetBeam(beam: Beam, index: number, totalBeams: number) {
       if (!canvas) return beam;
@@ -138,36 +138,36 @@ export default function BeamsBackground({
 
       const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
 
-      const saturation = isDarkModeRef.current ? "85%" : "75%";
-      const lightness = isDarkModeRef.current ? "65%" : "45%";
+      const saturation = isDarkModeRef.current ? '85%' : '75%';
+      const lightness = isDarkModeRef.current ? '65%' : '45%';
 
       gradient.addColorStop(
         0,
-        `hsla(${beam.hue}, ${saturation}, ${lightness}, 0)`
+        `hsla(${beam.hue}, ${saturation}, ${lightness}, 0)`,
       );
       gradient.addColorStop(
         0.1,
         `hsla(${beam.hue}, ${saturation}, ${lightness}, ${
           pulsingOpacity * 0.5
-        })`
+        })`,
       );
       gradient.addColorStop(
         0.4,
-        `hsla(${beam.hue}, ${saturation}, ${lightness}, ${pulsingOpacity})`
+        `hsla(${beam.hue}, ${saturation}, ${lightness}, ${pulsingOpacity})`,
       );
       gradient.addColorStop(
         0.6,
-        `hsla(${beam.hue}, ${saturation}, ${lightness}, ${pulsingOpacity})`
+        `hsla(${beam.hue}, ${saturation}, ${lightness}, ${pulsingOpacity})`,
       );
       gradient.addColorStop(
         0.9,
         `hsla(${beam.hue}, ${saturation}, ${lightness}, ${
           pulsingOpacity * 0.5
-        })`
+        })`,
       );
       gradient.addColorStop(
         1,
-        `hsla(${beam.hue}, ${saturation}, ${lightness}, 0)`
+        `hsla(${beam.hue}, ${saturation}, ${lightness}, 0)`,
       );
 
       ctx.fillStyle = gradient;
@@ -179,7 +179,7 @@ export default function BeamsBackground({
       if (!canvas || !ctx) return;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.filter = "blur(35px)";
+      ctx.filter = 'blur(35px)';
 
       const totalBeams = beamsRef.current.length;
       beamsRef.current.forEach((beam, index) => {
@@ -200,7 +200,7 @@ export default function BeamsBackground({
     animate();
 
     return () => {
-      window.removeEventListener("resize", updateCanvasSize);
+      window.removeEventListener('resize', updateCanvasSize);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -211,14 +211,14 @@ export default function BeamsBackground({
   return (
     <div
       className={cn(
-        "relative min-h-screen w-full overflow-hidden bg-neutral-100 dark:bg-neutral-950",
-        className
+        'relative min-h-screen w-full overflow-hidden bg-neutral-100 dark:bg-neutral-950',
+        className,
       )}
     >
       <canvas
         className="absolute inset-0"
         ref={canvasRef}
-        style={{ filter: "blur(15px)" }}
+        style={{ filter: 'blur(15px)' }}
       />
 
       <motion.div
@@ -227,11 +227,11 @@ export default function BeamsBackground({
         }}
         className="absolute inset-0 bg-neutral-900/5 dark:bg-neutral-950/5"
         style={{
-          backdropFilter: "blur(50px)",
+          backdropFilter: 'blur(50px)',
         }}
         transition={{
           duration: 10,
-          ease: "easeInOut",
+          ease: 'easeInOut',
           repeat: Number.POSITIVE_INFINITY,
         }}
       />

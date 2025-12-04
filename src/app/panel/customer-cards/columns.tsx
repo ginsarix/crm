@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import type { ColumnDef } from "@tanstack/react-table";
-import type { CustomerCard } from "generated/prisma";
-import { MoreHorizontal } from "lucide-react";
-import Link from "next/link";
-import { Button } from "~/components/ui/button";
+import type { ColumnDef } from '@tanstack/react-table';
+import type { CustomerCard } from 'generated/prisma';
+import { MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '~/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,13 +12,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from '~/components/ui/dropdown-menu';
 
 export const createColumns = (
-  onViewCustomerCard: (customerCard: CustomerCard) => void
+  onViewCustomerCard: (customerCard: CustomerCard) => void,
 ): ColumnDef<CustomerCard>[] => [
   {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => {
       const customerCard = row.original;
 
@@ -43,7 +43,7 @@ export const createColumns = (
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Link href={`/panel/visits/${customerCard.id}`}>
-                Ziyareti Görüntüle
+                Ziyaretleri Görüntüle
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -52,96 +52,91 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: "sira",
-    header: "Sıra",
+    accessorKey: 'sira',
+    header: 'Sıra',
     enableSorting: true,
   },
   {
-    accessorKey: "name",
-    header: "Ünvan",
+    accessorKey: 'name',
+    header: 'Ünvan',
     enableSorting: true,
   },
   {
-    accessorKey: "sicil",
-    header: "Sicil",
+    accessorKey: 'sicil',
+    header: 'Sicil',
     enableSorting: true,
   },
   {
-    accessorKey: "address",
-    header: "Adres",
+    accessorKey: 'address',
+    header: 'Adres',
     enableSorting: true,
   },
   {
-    accessorKey: "district",
-    header: "İlçe",
+    accessorKey: 'district',
+    header: 'İlçe',
     enableSorting: true,
   },
   {
-    accessorKey: "region",
-    header: "Bölge",
+    accessorKey: 'region',
+    header: 'Bölge',
     enableSorting: true,
   },
   {
-    accessorKey: "gsm1",
-    header: "GSM 1",
+    accessorKey: 'gsm1',
+    header: 'GSM 1',
     enableSorting: true,
   },
   {
-    accessorKey: "contact1",
-    header: "İletişim 1",
+    accessorKey: 'contact1',
+    header: 'İletişim 1',
     enableSorting: true,
   },
   {
-    accessorKey: "gsm2",
-    header: "GSM 2",
+    accessorKey: 'gsm2',
+    header: 'GSM 2',
     enableSorting: true,
   },
   {
-    accessorKey: "contact2",
-    header: "İletişim 2",
+    accessorKey: 'contact2',
+    header: 'İletişim 2',
     enableSorting: true,
   },
   {
-    accessorKey: "gsm3",
-    header: "GSM 3",
+    accessorKey: 'gsm3',
+    header: 'GSM 3',
     enableSorting: true,
   },
   {
-    accessorKey: "contact3",
-    header: "İletişim 3",
+    accessorKey: 'contact3',
+    header: 'İletişim 3',
     enableSorting: true,
   },
   {
-    accessorKey: "businessGroup",
-    header: "Meslek Grubu",
+    accessorKey: 'businessGroup',
+    header: 'Meslek Grubu',
     enableSorting: true,
   },
   {
-    accessorKey: "positive",
-    header: "Pozitif",
+    accessorKey: 'salesRepresentative',
+    header: 'Satış Temsilcisi',
     enableSorting: true,
   },
   {
-    accessorKey: "salesRepresentative",
-    header: "Satış Temsilcisi",
-    enableSorting: true,
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Oluşturulma Tarihi",
+    accessorKey: 'createdAt',
+    header: 'Oluşturulma Tarihi',
     enableSorting: true,
     cell: ({ row }) => {
-      const date = row.getValue("createdAt") as Date;
-      return new Date(date).toLocaleDateString("tr-TR");
+      const date = row.getValue('createdAt') as Date;
+      return new Date(date).toLocaleDateString('tr-TR');
     },
   },
   {
-    accessorKey: "updatedAt",
-    header: "Güncellenme Tarihi",
+    accessorKey: 'updatedAt',
+    header: 'Güncellenme Tarihi',
     enableSorting: true,
     cell: ({ row }) => {
-      const date = row.getValue("updatedAt") as Date;
-      return new Date(date).toLocaleDateString("tr-TR");
+      const date = row.getValue('updatedAt') as Date;
+      return new Date(date).toLocaleDateString('tr-TR');
     },
   },
 ];

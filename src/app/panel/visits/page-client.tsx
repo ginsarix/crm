@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import type { PaginationState, SortingState } from "@tanstack/react-table";
-import type { Visit } from "generated/prisma";
-import { useParams } from "next/navigation";
-import { useState } from "react";
-import { Card, CardHeader, CardTitle } from "~/components/ui/card";
-import { Spinner } from "~/components/ui/spinner";
-import { cn } from "~/lib/utils";
-import { api } from "~/trpc/react";
-import { DataTable } from "../../_components/data-table";
-import { createColumns } from "./columns";
-import { CreateVisitDialog } from "./create-dialog";
-import { FilterControls } from "./filter-controls";
-import RelatedVisitsDialog from "./related-visits-dialog";
-import { ViewVisitDialog } from "./view-dialog";
+import type { PaginationState, SortingState } from '@tanstack/react-table';
+import type { Visit } from 'generated/prisma';
+import { useParams } from 'next/navigation';
+import { useState } from 'react';
+import { Card, CardHeader, CardTitle } from '~/components/ui/card';
+import { Spinner } from '~/components/ui/spinner';
+import { cn } from '~/lib/utils';
+import { api } from '~/trpc/react';
+import { DataTable } from '../../_components/data-table';
+import { createColumns } from './columns';
+import { CreateVisitDialog } from './create-dialog';
+import { FilterControls } from './filter-controls';
+import RelatedVisitsDialog from './related-visits-dialog';
+import { ViewVisitDialog } from './view-dialog';
 
 export function VisitsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -23,11 +23,11 @@ export function VisitsPageClient() {
   });
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [via, setVia] = useState<
-    "phone" | "inPerson" | "email" | "sms" | "all"
-  >("all");
-  const [searchScope, setSearchScope] = useState<"all" | keyof Visit>("all");
+    'phone' | 'inPerson' | 'email' | 'sms' | 'all'
+  >('all');
+  const [searchScope, setSearchScope] = useState<'all' | keyof Visit>('all');
 
   const { data, isLoading } = api.visit.get.useQuery({
     page: pagination.pageIndex + 1, // Convert 0-based to 1-based for API
@@ -45,7 +45,7 @@ export function VisitsPageClient() {
     setViewDialogOpen(true);
   };
 
-  const pathname = useParams<{ slug: string }>();
+  const pathname = useParams();
 
   const columns = createColumns(handleViewVisit);
 
@@ -62,7 +62,7 @@ export function VisitsPageClient() {
             via={via}
           />
         </div>
-        <Card className={cn(!isLoading && "rounded-b-none border-b-0")}>
+        <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
             <CardTitle className="mr-auto">Ziyaretler</CardTitle>
             <div className="ml-auto">
@@ -77,7 +77,6 @@ export function VisitsPageClient() {
         ) : (
           <div className="overflow-x-auto">
             <DataTable
-              className="rounded-t-none"
               columns={columns}
               data={data?.data ?? []}
               pageCount={data?.pagination?.totalPages ?? -1}
@@ -85,6 +84,7 @@ export function VisitsPageClient() {
               setPagination={setPagination}
               setSorting={setSorting}
               sorting={sorting}
+              tableId="visits"
             />
           </div>
         )}
@@ -98,10 +98,10 @@ export function VisitsPageClient() {
           />
         )}
 
-        {pathname.slug && data?.data && (
+        {pathname.slug?.[0] && data?.data && (
           <RelatedVisitsDialog
             visits={data?.data.filter(
-              (visit) => visit.customerCardId === pathname.slug
+              (visit) => visit.customerCardId === pathname.slug?.[0],
             )}
           />
         )}

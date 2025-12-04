@@ -1,10 +1,10 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon } from "lucide-react";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type { z } from "zod";
-import { Button } from "~/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { PlusIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import type { z } from 'zod';
+import { Button } from '~/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -14,28 +14,29 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+} from '~/components/ui/dialog';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/select";
-import { CustomerCardCreateSchema } from "~/shared/zod-schemas/customer-card";
-import { api } from "~/trpc/react";
-import PositiveControl from "./positive-control";
+} from '~/components/ui/select';
+import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
+import { api } from '~/trpc/react';
+import PositiveControl from './positive-control';
 
 const DISTRICTS = [
-  { value: "avanos", label: "AVANOS" },
-  { value: "urgup", label: "ÜRGÜP" },
-  { value: "hacibektas", label: "HACIBEKTAŞ" },
-  { value: "kozakli", label: "KOZAKLI" },
-  { value: "acigol", label: "ACIGÖL" },
-  { value: "derinkuyu", label: "DERİNKUYU" },
-  { value: "gulsehir", label: "GÜLŞEHİR" },
+  { value: 'merkez', label: 'MERKEZ' },
+  { value: 'avanos', label: 'AVANOS' },
+  { value: 'urgup', label: 'ÜRGÜP' },
+  { value: 'hacibektas', label: 'HACIBEKTAŞ' },
+  { value: 'kozakli', label: 'KOZAKLI' },
+  { value: 'acigol', label: 'ACIGÖL' },
+  { value: 'derinkuyu', label: 'DERİNKUYU' },
+  { value: 'gulsehir', label: 'GÜLŞEHİR' },
 ] as const;
 
 export function CreateCustomerCardDialog() {
@@ -49,9 +50,9 @@ export function CreateCustomerCardDialog() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(CustomerCardCreateSchema),
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues: {
-      positive: "neutral",
+      positive: 'neutral',
     },
     shouldFocusError: false,
   });
@@ -65,12 +66,12 @@ export function CreateCustomerCardDialog() {
   const onSubmit = async (data: z.infer<typeof CustomerCardCreateSchema>) => {
     try {
       await createMutation.mutateAsync(data);
-      toast.success("Cari kart başarıyla eklendi");
+      toast.success('Cari kart başarıyla eklendi');
       reset();
       setOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error("Cari kart eklenirken bir hata oluştu");
+      toast.error('Cari kart eklenirken bir hata oluştu');
     }
   };
 
@@ -95,14 +96,14 @@ export function CreateCustomerCardDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="sira">Sıra</Label>
-              <Input {...register("sira")} id="sira" placeholder="Sıra no" />
+              <Input {...register('sira')} id="sira" placeholder="Sıra no" />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="name">Ünvan *</Label>
               <Input
-                {...register("name")}
-                className={errors.name ? "border-red-500" : ""}
+                {...register('name')}
+                className={errors.name ? 'border-red-500' : ''}
                 id="name"
                 placeholder="Ünvan"
               />
@@ -115,13 +116,13 @@ export function CreateCustomerCardDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="sicil">Sicil</Label>
-              <Input {...register("sicil")} id="sicil" placeholder="Sicil no" />
+              <Input {...register('sicil')} id="sicil" placeholder="Sicil no" />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="businessGroup">Meslek Grubu</Label>
               <Input
-                {...register("businessGroup")}
+                {...register('businessGroup')}
                 id="businessGroup"
                 placeholder="Meslek grubu"
               />
@@ -131,7 +132,7 @@ export function CreateCustomerCardDialog() {
           {/* Address Information */}
           <div className="space-y-2">
             <Label htmlFor="address">Adres</Label>
-            <Input {...register("address")} id="address" placeholder="Adres" />
+            <Input {...register('address')} id="address" placeholder="Adres" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -162,7 +163,7 @@ export function CreateCustomerCardDialog() {
 
             <div className="space-y-2">
               <Label htmlFor="region">Bölge</Label>
-              <Input {...register("region")} id="region" placeholder="Bölge" />
+              <Input {...register('region')} id="region" placeholder="Bölge" />
             </div>
           </div>
 
@@ -173,13 +174,13 @@ export function CreateCustomerCardDialog() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="gsm1">GSM 1</Label>
-                <Input {...register("gsm1")} id="gsm1" placeholder="GSM 1" />
+                <Input {...register('gsm1')} id="gsm1" placeholder="GSM 1" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="contact1">İletişim 1</Label>
                 <Input
-                  {...register("contact1")}
+                  {...register('contact1')}
                   id="contact1"
                   placeholder="İletişim kişisi"
                 />
@@ -189,13 +190,13 @@ export function CreateCustomerCardDialog() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="gsm2">GSM 2</Label>
-                <Input {...register("gsm2")} id="gsm2" placeholder="GSM 2" />
+                <Input {...register('gsm2')} id="gsm2" placeholder="GSM 2" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="contact2">İletişim 2</Label>
                 <Input
-                  {...register("contact2")}
+                  {...register('contact2')}
                   id="contact2"
                   placeholder="İletişim kişisi"
                 />
@@ -205,13 +206,13 @@ export function CreateCustomerCardDialog() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="gsm3">GSM 3</Label>
-                <Input {...register("gsm3")} id="gsm3" placeholder="GSM 3" />
+                <Input {...register('gsm3')} id="gsm3" placeholder="GSM 3" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="contact3">İletişim 3</Label>
                 <Input
-                  {...register("contact3")}
+                  {...register('contact3')}
                   id="contact3"
                   placeholder="İletişim kişisi"
                 />
@@ -223,7 +224,7 @@ export function CreateCustomerCardDialog() {
           <div className="space-y-2">
             <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
             <Input
-              {...register("salesRepresentative")}
+              {...register('salesRepresentative')}
               id="salesRepresentative"
               placeholder="Satış temsilcisi"
             />
@@ -239,7 +240,7 @@ export function CreateCustomerCardDialog() {
               render={({ field }) => (
                 <PositiveControl
                   id="positive"
-                  positive={field.value ?? "neutral"}
+                  positive={field.value ?? 'neutral'}
                   setPositive={field.onChange}
                 />
               )}
@@ -261,7 +262,7 @@ export function CreateCustomerCardDialog() {
               disabled={createMutation.isPending}
               type="submit"
             >
-              {createMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+              {createMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
             </Button>
           </DialogFooter>
         </form>

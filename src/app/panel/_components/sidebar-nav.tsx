@@ -1,16 +1,17 @@
-"use client";
+'use client';
 
 import {
   BookUser,
   Calendar,
   ChevronRight,
+  ClipboardList,
   Home,
   LogOut,
   Settings,
   Users,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -23,41 +24,59 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "~/components/ui/sidebar";
+} from '~/components/ui/sidebar';
+import { authClient } from '~/server/better-auth/client';
 
 const navigationItems = [
   {
-    title: "Dashboard",
+    title: 'Panel',
     icon: Home,
-    href: "/panel/dashboard",
+    href: '/panel/dashboard',
   },
   {
-    title: "Cari Kartları",
+    title: 'Cari Kartları',
     icon: BookUser,
-    href: "/panel/customer-cards",
+    href: '/panel/customer-cards',
   },
   {
-    title: "Ziyaretler",
+    title: 'Ziyaretler',
     icon: Calendar,
-    href: "/panel/visits",
+    href: '/panel/visits',
   },
   {
-    title: "Kullanıcılar",
+    title: 'Kullanıcılar',
     icon: Users,
-    href: "/panel/users",
+    href: '/panel/users',
   },
 ];
 
 const settingsItems = [
   {
-    title: "Ayarlar",
+    title: 'Denetim Kayıtları',
+    icon: ClipboardList,
+    href: '/panel/audit-logs',
+  },
+  {
+    title: 'Ayarlar',
     icon: Settings,
-    href: "/panel/settings",
+    href: '/panel/settings',
   },
 ];
 
 export function SidebarNav() {
   const pathname = usePathname();
+
+  const router = useRouter();
+
+  const signOut = () => {
+    authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.replace('/login');
+        },
+      },
+    });
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -127,11 +146,16 @@ export function SidebarNav() {
       <SidebarFooter className="border-sidebar-border border-t">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Çıkış Yap">
-              <Link href="/api/auth/logout">
+            <SidebarMenuButton
+              asChild
+              className="cursor-pointer"
+              onClick={signOut}
+              tooltip="Çıkış Yap"
+            >
+              <div>
                 <LogOut />
                 <span>Çıkış Yap</span>
-              </Link>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

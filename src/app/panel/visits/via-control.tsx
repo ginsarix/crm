@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Mail, MessageSquare, Phone, Users } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { ButtonGroup } from "~/components/ui/button-group";
-import { cn } from "~/lib/utils";
+import { Mail, MessageSquare, Phone, Users } from 'lucide-react';
+import { Button } from '~/components/ui/button';
+import { ButtonGroup } from '~/components/ui/button-group';
+import { cn } from '~/lib/utils';
 
 export default function ViaControl({
   via,
@@ -11,56 +11,56 @@ export default function ViaControl({
   id,
   includeAll,
 }: {
-  via: "phone" | "inPerson" | "email" | "sms" | "all";
-  setVia: (via: "phone" | "inPerson" | "email" | "sms" | "all") => void;
+  via: 'phone' | 'inPerson' | 'email' | 'sms' | 'all';
+  setVia: (via: 'phone' | 'inPerson' | 'email' | 'sms' | 'all') => void;
   id: string;
   includeAll?: boolean;
 }) {
   return (
     <ButtonGroup id={id}>
       <Button
-        aria-pressed={via === "phone"}
+        aria-pressed={via === 'phone'}
         className={cn(
-          via === "phone" && "bg-emerald-500/10 text-emerald-500",
-          "hover:bg-emerald-500/20 hover:text-emerald-500"
+          via === 'phone' && 'bg-emerald-500/10 text-emerald-500',
+          'hover:bg-emerald-500/20 hover:text-emerald-500',
         )}
-        onClick={() => setVia("phone")}
+        onClick={() => setVia('phone')}
         type="button"
         variant="outline"
       >
         <Phone /> Telefon
       </Button>
       <Button
-        aria-pressed={via === "inPerson"}
+        aria-pressed={via === 'inPerson'}
         className={cn(
-          via === "inPerson" && "bg-amber-500/10 text-amber-500",
-          "hover:bg-amber-500/20 hover:text-amber-500"
+          via === 'inPerson' && 'bg-amber-500/10 text-amber-500',
+          'hover:bg-amber-500/20 hover:text-amber-500',
         )}
-        onClick={() => setVia("inPerson")}
+        onClick={() => setVia('inPerson')}
         type="button"
         variant="outline"
       >
         <Users /> Yüz Yüze
       </Button>
       <Button
-        aria-pressed={via === "email"}
+        aria-pressed={via === 'email'}
         className={cn(
-          via === "email" && "bg-indigo-500/10 text-indigo-500",
-          "hover:bg-indigo-500/20 hover:text-indigo-500"
+          via === 'email' && 'bg-indigo-500/10 text-indigo-500',
+          'hover:bg-indigo-500/20 hover:text-indigo-500',
         )}
-        onClick={() => setVia("email")}
+        onClick={() => setVia('email')}
         type="button"
         variant="outline"
       >
         <Mail /> E-posta
       </Button>
       <Button
-        aria-pressed={via === "sms"}
+        aria-pressed={via === 'sms'}
         className={cn(
-          via === "sms" && "bg-rose-500/10 text-rose-500",
-          "hover:bg-rose-500/20 hover:text-rose-500"
+          via === 'sms' && 'bg-rose-500/10 text-rose-500',
+          'hover:bg-rose-500/20 hover:text-rose-500',
         )}
-        onClick={() => setVia("sms")}
+        onClick={() => setVia('sms')}
         type="button"
         variant="outline"
       >
@@ -68,12 +68,12 @@ export default function ViaControl({
       </Button>
       {includeAll && (
         <Button
-          aria-pressed={via === "all"}
+          aria-pressed={via === 'all'}
           className={cn(
-            via === "all" && "bg-cyan-500/10 text-cyan-500",
-            "hover:bg-cyan-500/20 hover:text-cyan-500"
+            via === 'all' && 'bg-cyan-500/10 text-cyan-500',
+            'hover:bg-cyan-500/20 hover:text-cyan-500',
           )}
-          onClick={() => setVia("all")}
+          onClick={() => setVia('all')}
           type="button"
           variant="outline"
         >

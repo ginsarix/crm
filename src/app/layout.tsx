@@ -1,35 +1,23 @@
-import "~/styles/globals.css";
+import '~/styles/globals.css';
 
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import { env } from "~/env";
-import { auth } from "~/server/better-auth";
-import { TRPCReactProvider } from "~/trpc/react";
+import type { Metadata } from 'next';
+import { Geist } from 'next/font/google';
+import { TRPCReactProvider } from '~/trpc/react';
 
 export const metadata: Metadata = {
-  title: "PanuCRM",
-  description: "CRM Sistemi",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: 'NesbirCRM',
+  description: 'CRM Sistemi',
+  icons: [{ rel: 'icon', url: '/favicon.svg', type: 'image/svg+xml' }],
 };
 
 const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
+  subsets: ['latin'],
+  variable: '--font-geist-sans',
 });
 
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  auth.api
-    .signUpEmail({
-      body: {
-        name: "Default Admin",
-        email: env.DEFAULT_ADMIN_EMAIL,
-        password: env.DEFAULT_ADMIN_PASSWORD,
-      },
-    })
-    .catch(() => {});
-
   return (
     <html className={`${geist.variable}`} lang="tr">
       <body>

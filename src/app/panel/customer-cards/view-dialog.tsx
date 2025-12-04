@@ -1,11 +1,11 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { CustomerCard } from "generated/prisma";
-import { Edit, Meh, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type { z } from "zod";
-import { Button } from "~/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { CustomerCard } from 'generated/prisma';
+import { Edit, Meh, ThumbsDown, ThumbsUp, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import type { z } from 'zod';
+import { Button } from '~/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -14,28 +14,29 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+} from '~/components/ui/dialog';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/select";
-import { CustomerCardCreateSchema } from "~/shared/zod-schemas/customer-card";
-import { api } from "~/trpc/react";
-import PositiveControl from "./positive-control";
+} from '~/components/ui/select';
+import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
+import { api } from '~/trpc/react';
+import PositiveControl from './positive-control';
 
 const DISTRICTS = [
-  { value: "avanos", label: "AVANOS" },
-  { value: "urgup", label: "ÜRGÜP" },
-  { value: "hacibektas", label: "HACIBEKTAŞ" },
-  { value: "kozakli", label: "KOZAKLI" },
-  { value: "acigol", label: "ACIGÖL" },
-  { value: "derinkuyu", label: "DERİNKUYU" },
-  { value: "gulsehir", label: "GÜLŞEHİR" },
+  { value: 'merkez', label: 'MERKEZ' },
+  { value: 'avanos', label: 'AVANOS' },
+  { value: 'urgup', label: 'ÜRGÜP' },
+  { value: 'hacibektas', label: 'HACIBEKTAŞ' },
+  { value: 'kozakli', label: 'KOZAKLI' },
+  { value: 'acigol', label: 'ACIGÖL' },
+  { value: 'derinkuyu', label: 'DERİNKUYU' },
+  { value: 'gulsehir', label: 'GÜLŞEHİR' },
 ] as const;
 
 interface ViewCustomerCardDialogProps {
@@ -64,6 +65,26 @@ export function ViewCustomerCardDialog({
     onOpenChange(newOpen);
   };
 
+  const constructDefaultValues = (customerCard: CustomerCard) => {
+    return {
+      sira: customerCard.sira ?? '',
+      name: customerCard.name ?? '',
+      sicil: customerCard.sicil ?? '',
+      address: customerCard.address ?? '',
+      district: customerCard.district ?? undefined,
+      region: customerCard.region ?? '',
+      gsm1: customerCard.gsm1 ?? '',
+      contact1: customerCard.contact1 ?? '',
+      gsm2: customerCard.gsm2 ?? '',
+      contact2: customerCard.contact2 ?? '',
+      gsm3: customerCard.gsm3 ?? '',
+      contact3: customerCard.contact3 ?? '',
+      businessGroup: customerCard.businessGroup ?? '',
+      positive: customerCard.positive ?? 'neutral',
+      salesRepresentative: customerCard.salesRepresentative ?? '',
+    };
+  };
+
   const {
     register,
     handleSubmit,
@@ -72,49 +93,38 @@ export function ViewCustomerCardDialog({
     formState: { errors },
   } = useForm({
     resolver: zodResolver(CustomerCardCreateSchema),
-    defaultValues: {
-      sira: customerCard.sira ?? "",
-      name: customerCard.name ?? "",
-      sicil: customerCard.sicil ?? "",
-      address: customerCard.address ?? "",
-      district: customerCard.district ?? undefined,
-      region: customerCard.region ?? "",
-      gsm1: customerCard.gsm1 ?? "",
-      contact1: customerCard.contact1 ?? "",
-      gsm2: customerCard.gsm2 ?? "",
-      contact2: customerCard.contact2 ?? "",
-      gsm3: customerCard.gsm3 ?? "",
-      contact3: customerCard.contact3 ?? "",
-      businessGroup: customerCard.businessGroup ?? "",
-      positive: customerCard.positive ?? "neutral",
-      salesRepresentative: customerCard.salesRepresentative ?? "",
-    },
-    mode: "onChange",
+    defaultValues: constructDefaultValues(customerCard),
+    mode: 'onChange',
   });
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: constructDefaultValues is a pure function
+  useEffect(() => {
+    reset(constructDefaultValues(customerCard));
+  }, [customerCard, reset]);
 
   const updateMutation = api.customerCard.update.useMutation({
     onSuccess: (updatedCustomerCard) => {
       utils.customerCard.get.invalidate();
-      toast.success("Cari kart başarıyla güncellendi");
+      toast.success('Cari kart başarıyla güncellendi');
 
       onUpdate(updatedCustomerCard);
       setIsEditMode(false);
     },
     onError: (error) => {
       console.error(error);
-      toast.error("Cari kart güncellenirken bir hata oluştu");
+      toast.error('Cari kart güncellenirken bir hata oluştu');
     },
   });
 
   const deleteMutation = api.customerCard.delete.useMutation({
     onSuccess: () => {
       utils.customerCard.get.invalidate();
-      toast.success("Cari kart başarıyla silindi");
+      toast.success('Cari kart başarıyla silindi');
       handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);
-      toast.error("Cari kart silinirken bir hata oluştu");
+      toast.error('Cari kart silinirken bir hata oluştu');
     },
   });
 
@@ -150,7 +160,7 @@ export function ViewCustomerCardDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>
-              {isEditMode ? "Cari Kartı Düzenle" : "Cari Kart Detayı"}
+              {isEditMode ? 'Cari Kartı Düzenle' : 'Cari Kart Detayı'}
             </span>
             <div className="flex gap-2">
               {!isEditMode && !showDeleteConfirm && (
@@ -208,7 +218,7 @@ export function ViewCustomerCardDialog({
                 onClick={handleDelete}
                 variant="destructive"
               >
-                {deleteMutation.isPending ? "Siliniyor..." : "Evet, Sil"}
+                {deleteMutation.isPending ? 'Siliniyor...' : 'Evet, Sil'}
               </Button>
             </div>
           </div>
@@ -218,14 +228,14 @@ export function ViewCustomerCardDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="sira">Sıra</Label>
-                <Input {...register("sira")} id="sira" placeholder="Sıra no" />
+                <Input {...register('sira')} id="sira" placeholder="Sıra no" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="name">Ünvan *</Label>
                 <Input
-                  {...register("name")}
-                  className={errors.name ? "border-red-500" : ""}
+                  {...register('name')}
+                  className={errors.name ? 'border-red-500' : ''}
                   id="name"
                   placeholder="Ünvan"
                 />
@@ -239,7 +249,7 @@ export function ViewCustomerCardDialog({
               <div className="space-y-2">
                 <Label htmlFor="sicil">Sicil</Label>
                 <Input
-                  {...register("sicil")}
+                  {...register('sicil')}
                   id="sicil"
                   placeholder="Sicil no"
                 />
@@ -248,7 +258,7 @@ export function ViewCustomerCardDialog({
               <div className="space-y-2">
                 <Label htmlFor="businessGroup">Meslek Grubu</Label>
                 <Input
-                  {...register("businessGroup")}
+                  {...register('businessGroup')}
                   id="businessGroup"
                   placeholder="Meslek grubu"
                 />
@@ -259,7 +269,7 @@ export function ViewCustomerCardDialog({
             <div className="space-y-2">
               <Label htmlFor="address">Adres</Label>
               <Input
-                {...register("address")}
+                {...register('address')}
                 id="address"
                 placeholder="Adres"
               />
@@ -297,7 +307,7 @@ export function ViewCustomerCardDialog({
               <div className="space-y-2">
                 <Label htmlFor="region">Bölge</Label>
                 <Input
-                  {...register("region")}
+                  {...register('region')}
                   id="region"
                   placeholder="Bölge"
                 />
@@ -311,13 +321,13 @@ export function ViewCustomerCardDialog({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="gsm1">GSM 1</Label>
-                  <Input {...register("gsm1")} id="gsm1" placeholder="GSM 1" />
+                  <Input {...register('gsm1')} id="gsm1" placeholder="GSM 1" />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="contact1">İletişim 1</Label>
                   <Input
-                    {...register("contact1")}
+                    {...register('contact1')}
                     id="contact1"
                     placeholder="İletişim kişisi"
                   />
@@ -327,13 +337,13 @@ export function ViewCustomerCardDialog({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="gsm2">GSM 2</Label>
-                  <Input {...register("gsm2")} id="gsm2" placeholder="GSM 2" />
+                  <Input {...register('gsm2')} id="gsm2" placeholder="GSM 2" />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="contact2">İletişim 2</Label>
                   <Input
-                    {...register("contact2")}
+                    {...register('contact2')}
                     id="contact2"
                     placeholder="İletişim kişisi"
                   />
@@ -343,13 +353,13 @@ export function ViewCustomerCardDialog({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="gsm3">GSM 3</Label>
-                  <Input {...register("gsm3")} id="gsm3" placeholder="GSM 3" />
+                  <Input {...register('gsm3')} id="gsm3" placeholder="GSM 3" />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="contact3">İletişim 3</Label>
                   <Input
-                    {...register("contact3")}
+                    {...register('contact3')}
                     id="contact3"
                     placeholder="İletişim kişisi"
                   />
@@ -361,7 +371,7 @@ export function ViewCustomerCardDialog({
             <div className="space-y-2">
               <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
               <Input
-                {...register("salesRepresentative")}
+                {...register('salesRepresentative')}
                 id="salesRepresentative"
                 placeholder="Satış temsilcisi"
               />
@@ -377,7 +387,7 @@ export function ViewCustomerCardDialog({
                 render={({ field }) => (
                   <PositiveControl
                     id="positive"
-                    positive={field.value ?? "neutral"}
+                    positive={field.value ?? 'neutral'}
                     setPositive={field.onChange}
                   />
                 )}
@@ -398,7 +408,7 @@ export function ViewCustomerCardDialog({
                 disabled={updateMutation.isPending}
                 type="submit"
               >
-                {updateMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+                {updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
               </Button>
             </DialogFooter>
           </form>
@@ -408,12 +418,12 @@ export function ViewCustomerCardDialog({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-muted-foreground">Sıra</Label>
-                <p className="text-sm">{customerCard.sira || "-"}</p>
+                <p className="text-sm">{customerCard.sira || '-'}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Ünvan</Label>
                 <p className="font-medium text-sm">
-                  {customerCard.name || "-"}
+                  {customerCard.name || '-'}
                 </p>
               </div>
             </div>
@@ -421,17 +431,17 @@ export function ViewCustomerCardDialog({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-muted-foreground">Sicil</Label>
-                <p className="text-sm">{customerCard.sicil || "-"}</p>
+                <p className="text-sm">{customerCard.sicil || '-'}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Meslek Grubu</Label>
-                <p className="text-sm">{customerCard.businessGroup || "-"}</p>
+                <p className="text-sm">{customerCard.businessGroup || '-'}</p>
               </div>
             </div>
 
             <div>
               <Label className="text-muted-foreground">Adres</Label>
-              <p className="text-sm">{customerCard.address || "-"}</p>
+              <p className="text-sm">{customerCard.address || '-'}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -441,12 +451,12 @@ export function ViewCustomerCardDialog({
                   {customerCard.district
                     ? DISTRICTS.find((d) => d.value === customerCard.district)
                         ?.label
-                    : "-"}
+                    : '-'}
                 </p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Bölge</Label>
-                <p className="text-sm">{customerCard.region || "-"}</p>
+                <p className="text-sm">{customerCard.region || '-'}</p>
               </div>
             </div>
 
@@ -456,33 +466,33 @@ export function ViewCustomerCardDialog({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">GSM 1</Label>
-                  <p className="text-sm">{customerCard.gsm1 || "-"}</p>
+                  <p className="text-sm">{customerCard.gsm1 || '-'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">İletişim 1</Label>
-                  <p className="text-sm">{customerCard.contact1 || "-"}</p>
+                  <p className="text-sm">{customerCard.contact1 || '-'}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">GSM 2</Label>
-                  <p className="text-sm">{customerCard.gsm2 || "-"}</p>
+                  <p className="text-sm">{customerCard.gsm2 || '-'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">İletişim 2</Label>
-                  <p className="text-sm">{customerCard.contact2 || "-"}</p>
+                  <p className="text-sm">{customerCard.contact2 || '-'}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">GSM 3</Label>
-                  <p className="text-sm">{customerCard.gsm3 || "-"}</p>
+                  <p className="text-sm">{customerCard.gsm3 || '-'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">İletişim 3</Label>
-                  <p className="text-sm">{customerCard.contact3 || "-"}</p>
+                  <p className="text-sm">{customerCard.contact3 || '-'}</p>
                 </div>
               </div>
             </div>
@@ -490,20 +500,20 @@ export function ViewCustomerCardDialog({
             <div>
               <Label className="text-muted-foreground">Satış Temsilcisi</Label>
               <p className="text-sm">
-                {customerCard.salesRepresentative || "-"}
+                {customerCard.salesRepresentative || '-'}
               </p>
             </div>
 
             <div>
               <Label className="mb-2 text-muted-foreground">Pozitif</Label>
-              {customerCard.positive === "positive" ? (
+              {customerCard.positive === 'positive' ? (
                 <div className="rounded-lg text-green-500">
                   <div className="flex gap-2">
                     <ThumbsUp size={20} /> Pozitif
                   </div>
                 </div>
-              ) : customerCard.positive === "negative" ? (
-                <div className="rounded-lg bg-red-500">
+              ) : customerCard.positive === 'negative' ? (
+                <div className="rounded-lg text-red-500">
                   <div className="flex gap-2">
                     <ThumbsDown size={20} /> Negatif
                   </div>
@@ -523,7 +533,7 @@ export function ViewCustomerCardDialog({
                   Oluşturulma Tarihi
                 </Label>
                 <p className="text-sm">
-                  {new Date(customerCard.createdAt).toLocaleString("tr-TR")}
+                  {new Date(customerCard.createdAt).toLocaleString('tr-TR')}
                 </p>
               </div>
               <div>
@@ -531,7 +541,7 @@ export function ViewCustomerCardDialog({
                   Güncellenme Tarihi
                 </Label>
                 <p className="text-sm">
-                  {new Date(customerCard.updatedAt).toLocaleString("tr-TR")}
+                  {new Date(customerCard.updatedAt).toLocaleString('tr-TR')}
                 </p>
               </div>
             </div>

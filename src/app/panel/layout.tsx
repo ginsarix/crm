@@ -1,8 +1,8 @@
-import { cookies } from "next/headers";
-import { Separator } from "~/components/ui/separator";
-import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
-import { Toaster } from "~/components/ui/sonner";
-import { SidebarNav } from "./_components/sidebar-nav";
+import { cookies } from 'next/headers';
+import { Separator } from '~/components/ui/separator';
+import { SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar';
+import { Toaster } from '~/components/ui/sonner';
+import { SidebarNav } from './_components/sidebar-nav';
 
 export default async function PanelLayout({
   children,
@@ -10,7 +10,7 @@ export default async function PanelLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+  const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>

@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import type { CustomerCard } from "generated/prisma";
-import { SearchIcon } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Combobox } from "~/components/ui/combobox";
+import type { CustomerCard } from 'generated/prisma';
+import { SearchIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { Combobox } from '~/components/ui/combobox';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "~/components/ui/input-group";
-import { columnMap } from "~/lib/column-map";
-import PositiveControl from "./positive-control";
+} from '~/components/ui/input-group';
+import { columnMap } from '~/lib/column-map';
+import PositiveControl from './positive-control';
 
 export function FilterControls({
   search,
@@ -22,21 +22,21 @@ export function FilterControls({
 }: {
   search: string;
   onSearch: (search: string) => void;
-  positive: "positive" | "negative" | "neutral" | "all";
-  onPositive: (positive: "positive" | "negative" | "neutral" | "all") => void;
-  searchScope: "all" | keyof CustomerCard;
-  onSearchScope: (searchScope: "all" | keyof CustomerCard) => void;
+  positive: 'positive' | 'negative' | 'neutral' | 'all';
+  onPositive: (positive: 'positive' | 'negative' | 'neutral' | 'all') => void;
+  searchScope: 'all' | keyof CustomerCard;
+  onSearchScope: (searchScope: 'all' | keyof CustomerCard) => void;
 }) {
   const comboboxOptions = [
-    { key: "all", label: "Tümü" },
+    { key: 'all', label: 'Tümü' },
     ...Object.entries(columnMap.customerCard)
       .filter(
         ([key]) =>
-          key !== "positive" &&
-          key !== "createdAt" &&
-          key !== "updatedAt" &&
-          key !== "id" &&
-          key !== "district"
+          key !== 'positive' &&
+          key !== 'createdAt' &&
+          key !== 'updatedAt' &&
+          key !== 'id' &&
+          key !== 'district',
       )
       .map(([key, label]) => {
         return { key, label };
@@ -60,7 +60,7 @@ export function FilterControls({
         </InputGroup>
         <Combobox
           label="Arama Kapsamı"
-          onChange={(v) => onSearchScope(v as "all" | keyof CustomerCard)}
+          onChange={(v) => onSearchScope(v as 'all' | keyof CustomerCard)}
           options={comboboxOptions}
           selectedKey={searchScope}
         />

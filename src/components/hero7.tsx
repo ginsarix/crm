@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "~/components/ui/button";
+import { Button } from '~/components/ui/button';
 
 interface Hero7Props {
   heading?: string;
@@ -13,11 +13,11 @@ interface Hero7Props {
 }
 
 const Hero7 = ({
-  heading = "Profesyonel, Gelişmiş ve Kolay CRM.",
-  description = "PanuCRM ile müşterilerinizi pratik ve kolay bir şekilde takip edin ve yönetin.",
+  heading = 'Profesyonel, Gelişmiş ve Kolay CRM.',
+  description = 'NesbirCRM ile müşterilerinizi pratik ve kolay bir şekilde takip edin ve yönetin.',
   button = {
-    text: "Başla",
-    url: "/",
+    text: 'Başla',
+    url: '/',
   },
   loggedIn = false,
 }: Hero7Props) => {
@@ -35,8 +35,8 @@ const Hero7 = ({
             href={
               loggedIn !== undefined
                 ? loggedIn
-                  ? "/panel/customer-cards"
-                  : "/login"
+                  ? '/panel/customer-cards'
+                  : '/login'
                 : button.url
             }
           >

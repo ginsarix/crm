@@ -53,7 +53,10 @@
 			"enabled": true
 		},
 		"formatter": {
-			"enabled": true
+			"enabled": true,
+			"quoteStyle": "single",
+			"indentStyle": "space",
+			"indentWidth": 2
 		},
 		"linter": {
 			"enabled": true

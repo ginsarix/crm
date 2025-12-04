@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import type { Visit } from "generated/prisma";
-import { Calendar } from "lucide-react";
-import { useState } from "react";
-import { Button } from "~/components/ui/button";
+import type { Visit } from 'generated/prisma';
+import { Calendar } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '~/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog";
-import { ViewVisitDialog } from "./view-dialog";
+} from '~/components/ui/dialog';
+import { ViewVisitDialog } from './view-dialog';
 
 export default function RelatedVisitsDialog({ visits }: { visits: Visit[] }) {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -41,7 +41,7 @@ export default function RelatedVisitsDialog({ visits }: { visits: Visit[] }) {
               type="button"
               variant="outline"
             >
-              <Calendar /> {visit.date.toLocaleDateString("tr-TR")}
+              <Calendar /> {visit.date.toLocaleDateString('tr-TR')}
             </Button>
           ))}
         </DialogContent>

@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import type { PaginationState, SortingState } from "@tanstack/react-table";
-import type { CustomerCard } from "generated/prisma";
+import type { PaginationState, SortingState } from '@tanstack/react-table';
+import type { CustomerCard } from 'generated/prisma';
 
-import { useState } from "react";
-import { Card, CardHeader, CardTitle } from "~/components/ui/card";
-import { Spinner } from "~/components/ui/spinner";
-import { cn } from "~/lib/utils";
-import { api } from "~/trpc/react";
-import { DataTable } from "../../_components/data-table";
-import { createColumns } from "./columns";
-import { CreateCustomerCardDialog } from "./create-dialog";
-import { FilterControls } from "./filter-controls";
-import { ViewCustomerCardDialog } from "./view-dialog";
+import { useState } from 'react';
+import { Card, CardHeader, CardTitle } from '~/components/ui/card';
+import { Spinner } from '~/components/ui/spinner';
+import { cn } from '~/lib/utils';
+import { api } from '~/trpc/react';
+import { DataTable } from '../../_components/data-table';
+import { createColumns } from './columns';
+import { CreateCustomerCardDialog } from './create-dialog';
+import { FilterControls } from './filter-controls';
+import { ViewCustomerCardDialog } from './view-dialog';
 
 export function CustomerCardsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -23,12 +23,12 @@ export function CustomerCardsPageClient() {
   const [selectedCustomerCard, setSelectedCustomerCard] =
     useState<CustomerCard | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [positive, setPositive] = useState<
-    "positive" | "negative" | "neutral" | "all"
-  >("all");
-  const [searchScope, setSearchScope] = useState<"all" | keyof CustomerCard>(
-    "all"
+    'positive' | 'negative' | 'neutral' | 'all'
+  >('all');
+  const [searchScope, setSearchScope] = useState<'all' | keyof CustomerCard>(
+    'all',
   );
 
   const { data, isLoading } = api.customerCard.get.useQuery({
@@ -62,7 +62,7 @@ export function CustomerCardsPageClient() {
             searchScope={searchScope}
           />
         </div>
-        <Card className={cn(!isLoading && "rounded-b-none border-b-0")}>
+        <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
             <CardTitle className="mr-auto">Cari Kartlar</CardTitle>
             <div className="ml-auto">
@@ -77,7 +77,6 @@ export function CustomerCardsPageClient() {
         ) : (
           <div className="overflow-x-auto">
             <DataTable
-              className="rounded-t-none"
               columns={columns}
               data={data?.data ?? []}
               pageCount={data?.pagination?.totalPages ?? -1}
@@ -85,6 +84,7 @@ export function CustomerCardsPageClient() {
               setPagination={setPagination}
               setSorting={setSorting}
               sorting={sorting}
+              tableId="customer-cards"
             />
           </div>
         )}

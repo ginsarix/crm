@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { CalendarIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CalendarIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
-import { Input } from "~/components/ui/input";
+import { Button } from '~/components/ui/button';
+import { Calendar } from '~/components/ui/calendar';
+import { Input } from '~/components/ui/input';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "~/components/ui/popover";
-import { cn } from "~/lib/utils";
+} from '~/components/ui/popover';
+import { cn } from '~/lib/utils';
 
 function isValidDate(date: Date | undefined) {
   if (!date) {
@@ -25,9 +25,9 @@ function isValidDate(date: Date | undefined) {
  */
 function formatDateToTurkish(date: Date | undefined): string {
   if (!date || !isValidDate(date)) {
-    return "";
+    return '';
   }
-  return date.toLocaleDateString("tr-TR");
+  return date.toLocaleDateString('tr-TR');
 }
 
 /**
@@ -39,9 +39,9 @@ function parseTurkishDate(dateString: string): Date | null {
   // Try to parse Turkish format (DD.MM.YYYY or DD/MM/YYYY)
   const parts = dateString.split(/[./]/);
   if (parts.length === 3) {
-    const day = parseInt(parts[0] ?? "0", 10);
-    const month = parseInt(parts[1] ?? "0", 10) - 1; // Months are 0-based
-    const year = parseInt(parts[2] ?? "0", 10);
+    const day = parseInt(parts[0] ?? '0', 10);
+    const month = parseInt(parts[1] ?? '0', 10) - 1; // Months are 0-based
+    const year = parseInt(parts[2] ?? '0', 10);
 
     if (day && month >= 0 && year) {
       // Create date in UTC to avoid timezone shifts
@@ -114,8 +114,8 @@ export function DatePicker({
           0,
           0,
           0,
-          0
-        )
+          0,
+        ),
       );
       setDate(utcDate);
       setMonth(utcDate);
@@ -128,11 +128,11 @@ export function DatePicker({
   return (
     <div className="relative flex gap-2">
       <Input
-        className={cn("bg-background pr-10", className)}
+        className={cn('bg-background pr-10', className)}
         id={id}
         onChange={handleInputChange}
         onKeyDown={(e) => {
-          if (e.key === "ArrowDown") {
+          if (e.key === 'ArrowDown') {
             e.preventDefault();
             setOpen(true);
           }

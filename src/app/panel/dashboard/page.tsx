@@ -1,25 +1,31 @@
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { api } from '~/trpc/server';
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const [customerTotal, visitTotal] = await Promise.all([
+    api.customerCard.getTotal(),
+    api.visit.getTotal(),
+  ]);
+
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
       <div className="mx-auto w-full max-w-[1600px]">
         <div className="mb-6">
-          <h2 className="font-bold text-3xl tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">Welcome to your CRM dashboard</p>
+          <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
+          <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="font-medium text-sm">
-                Total Customers
+                Toplam Müşteri
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">0</div>
+              <div className="font-bold text-2xl">{customerTotal}</div>
               <p className="text-muted-foreground text-xs">
-                Customer cards in system
+                Sistemdeki toplam müşterilerin sayısı
               </p>
             </CardContent>
           </Card>
@@ -27,13 +33,13 @@ export default function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="font-medium text-sm">
-                Active Users
+                Toplam Ziyaret
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">0</div>
+              <div className="font-bold text-2xl">{visitTotal}</div>
               <p className="text-muted-foreground text-xs">
-                Active system users
+                Sistemdeki toplam ziyaret sayısı
               </p>
             </CardContent>
           </Card>

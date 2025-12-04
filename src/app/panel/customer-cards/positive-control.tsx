@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { MehIcon, ThumbsDownIcon, ThumbsUpIcon } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { ButtonGroup } from "~/components/ui/button-group";
-import { cn } from "~/lib/utils";
+import { MehIcon, ThumbsDownIcon, ThumbsUpIcon } from 'lucide-react';
+import { Button } from '~/components/ui/button';
+import { ButtonGroup } from '~/components/ui/button-group';
+import { cn } from '~/lib/utils';
 
 export default function PositiveControl({
   id,
@@ -12,12 +12,12 @@ export default function PositiveControl({
   includeAll = false,
 }: {
   id?: string;
-  positive: "negative" | "neutral" | "positive" | "all";
-  setPositive: (positive: "negative" | "neutral" | "positive" | "all") => void;
+  positive: 'negative' | 'neutral' | 'positive' | 'all';
+  setPositive: (positive: 'negative' | 'neutral' | 'positive' | 'all') => void;
   includeAll?: boolean;
 }) {
   const handleClick = (
-    positive: "negative" | "neutral" | "positive" | "all"
+    positive: 'negative' | 'neutral' | 'positive' | 'all',
   ) => {
     setPositive(positive);
   };
@@ -25,24 +25,24 @@ export default function PositiveControl({
   return (
     <ButtonGroup id={id}>
       <Button
-        aria-pressed={positive === "negative"}
+        aria-pressed={positive === 'negative'}
         className={cn(
-          positive === "negative" && "bg-red-500/10 text-red-500",
-          "hover:bg-red-500/20 hover:text-red-500"
+          positive === 'negative' && 'bg-red-500/10 text-red-500',
+          'hover:bg-red-500/20 hover:text-red-500',
         )}
-        onClick={() => handleClick("negative")}
+        onClick={() => handleClick('negative')}
         type="button"
         variant="outline"
       >
         <ThumbsDownIcon /> Negatif
       </Button>
       <Button
-        aria-pressed={positive === "neutral"}
+        aria-pressed={positive === 'neutral'}
         className={cn(
-          positive === "neutral" && "bg-yellow-500/10 text-yellow-500",
-          "hover:bg-yellow-500/20 hover:text-yellow-500"
+          positive === 'neutral' && 'bg-yellow-500/10 text-yellow-500',
+          'hover:bg-yellow-500/20 hover:text-yellow-500',
         )}
-        onClick={() => handleClick("neutral")}
+        onClick={() => handleClick('neutral')}
         type="button"
         variant="outline"
       >
@@ -50,12 +50,12 @@ export default function PositiveControl({
         Nötr
       </Button>
       <Button
-        aria-pressed={positive === "positive"}
+        aria-pressed={positive === 'positive'}
         className={cn(
-          positive === "positive" && "bg-green-500/10 text-green-500",
-          "hover:bg-green-500/20 hover:text-green-500"
+          positive === 'positive' && 'bg-green-500/10 text-green-500',
+          'hover:bg-green-500/20 hover:text-green-500',
         )}
-        onClick={() => handleClick("positive")}
+        onClick={() => handleClick('positive')}
         type="button"
         variant="outline"
       >
@@ -63,12 +63,12 @@ export default function PositiveControl({
       </Button>
       {includeAll && (
         <Button
-          aria-pressed={positive === "all"}
+          aria-pressed={positive === 'all'}
           className={cn(
-            positive === "all" && "bg-cyan-500/10 text-cyan-500",
-            "hover:bg-cyan-500/20 hover:text-cyan-500"
+            positive === 'all' && 'bg-cyan-500/10 text-cyan-500',
+            'hover:bg-cyan-500/20 hover:text-cyan-500',
           )}
-          onClick={() => handleClick("all")}
+          onClick={() => handleClick('all')}
           type="button"
           variant="outline"
         >

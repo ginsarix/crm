@@ -1,27 +1,20 @@
-import { redirect } from "next/navigation";
-import { Login1 } from "~/components/login1";
-import { auth } from "~/server/better-auth";
+import { BetterAuthError } from 'better-auth';
+import { redirect } from 'next/navigation';
+import { Login1 } from '~/components/login1';
+import { env } from '~/env';
+import { auth } from '~/server/better-auth';
 
 export default function LoginPage() {
-  async function login(formData: FormData) {
-    "use server";
+  auth.api
+    .createUser({
+      body: {
+        name: 'Default Admin',
+        email: env.DEFAULT_ADMIN_EMAIL,
+        password: env.DEFAULT_ADMIN_PASSWORD,
+        role: 'admin',
+      },
+    })
+    .catch(() => {});
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
-    try {
-      await auth.api.signInEmail({
-        body: {
-          email,
-          password,
-        },
-      });
-    } catch (error) {
-      console.error(error);
-      return;
-    }
-    redirect("/panel/dashboard");
-  }
-
-  return <Login1 action={login} />;
+  return <Login1 />;
 }

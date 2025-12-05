@@ -1,3 +1,5 @@
+'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { CustomerCard } from 'generated/prisma';
 import { Edit, Meh, ThumbsDown, ThumbsUp, Trash2 } from 'lucide-react';
@@ -6,6 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
 import { Button } from '~/components/ui/button';
+import { Combobox } from '~/components/ui/combobox';
 import {
   Dialog,
   DialogClose,
@@ -55,6 +58,14 @@ export function ViewCustomerCardDialog({
   const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const utils = api.useUtils();
+
+  const { data: businessGroups } = api.businessGroup.get.useQuery();
+  const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
+
+  const businessGroupOptions =
+    businessGroups?.map((bg) => ({ key: bg.name, label: bg.name })) ?? [];
+  const salesRepresentativeOptions =
+    salesRepresentatives?.map((sr) => ({ key: sr.name, label: sr.name })) ?? [];
 
   // Reset modes when dialog closes
   const handleOpenChange = (newOpen: boolean) => {
@@ -257,10 +268,17 @@ export function ViewCustomerCardDialog({
 
               <div className="space-y-2">
                 <Label htmlFor="businessGroup">Meslek Grubu</Label>
-                <Input
-                  {...register('businessGroup')}
-                  id="businessGroup"
-                  placeholder="Meslek grubu"
+                <Controller
+                  control={control}
+                  name="businessGroup"
+                  render={({ field }) => (
+                    <Combobox
+                      label="Meslek grubu seçin"
+                      onChange={field.onChange}
+                      options={businessGroupOptions}
+                      selectedKey={field.value ?? ''}
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -370,10 +388,18 @@ export function ViewCustomerCardDialog({
             {/* Additional Information */}
             <div className="space-y-2">
               <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
-              <Input
-                {...register('salesRepresentative')}
-                id="salesRepresentative"
-                placeholder="Satış temsilcisi"
+              <Controller
+                control={control}
+                name="salesRepresentative"
+                render={({ field }) => (
+                  <Combobox
+                    className="w-full"
+                    label="Satış temsilcisi seçin"
+                    onChange={field.onChange}
+                    options={salesRepresentativeOptions}
+                    selectedKey={field.value ?? ''}
+                  />
+                )}
               />
             </div>
 

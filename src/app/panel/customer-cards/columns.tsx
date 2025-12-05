@@ -1,7 +1,7 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
-import type { CustomerCard } from 'generated/prisma';
+import type { $Enums, CustomerCard } from 'generated/prisma';
 import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '~/components/ui/button';
@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
+import { DISTRICTS } from '~/shared/constants';
 
 export const createColumns = (
   onViewCustomerCard: (customerCard: CustomerCard) => void,
@@ -75,6 +76,12 @@ export const createColumns = (
     accessorKey: 'district',
     header: 'İlçe',
     enableSorting: true,
+    cell: ({ row }) => {
+      const district = row.getValue('district') as $Enums.District;
+      return district
+        ? DISTRICTS.find((d) => d.value === district)?.label
+        : '-';
+    },
   },
   {
     accessorKey: 'region',

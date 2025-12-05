@@ -1,5 +1,5 @@
-import { createEnv } from '@t3-oss/env-nextjs';
-import { z } from 'zod';
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
 
 export const env = createEnv({
   /**
@@ -8,17 +8,18 @@ export const env = createEnv({
    */
   server: {
     BETTER_AUTH_SECRET:
-      process.env.NODE_ENV === 'production'
+      process.env.NODE_ENV === "production"
         ? z.string()
         : z.string().optional(),
 
     DEFAULT_ADMIN_EMAIL: z.string().email(),
     DEFAULT_ADMIN_PASSWORD: z.string().min(8),
+    CROSS_ORIGIN_URL: z.string().url(),
 
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
-      .enum(['development', 'test', 'production'])
-      .default('development'),
+      .enum(["development", "test", "production"])
+      .default("development"),
   },
 
   /**
@@ -38,6 +39,7 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     DEFAULT_ADMIN_EMAIL: process.env.DEFAULT_ADMIN_EMAIL,
     DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD,
+    CROSS_ORIGIN_URL: process.env.CROSS_ORIGIN_URL,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
   },

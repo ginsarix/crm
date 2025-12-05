@@ -1,7 +1,7 @@
 'use client';
 
 import type { PaginationState, SortingState } from '@tanstack/react-table';
-import type { CustomerCard } from 'generated/prisma';
+import type { $Enums, CustomerCard } from 'generated/prisma';
 
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
@@ -31,6 +31,14 @@ export function CustomerCardsPageClient() {
     'all',
   );
 
+  const [businessGroup, setBusinessGroup] = useState<string>('');
+  const [salesRepresentative, setSalesRepresentative] = useState<string>('');
+  const [district, setDistrict] = useState<'' | $Enums.District>('');
+
+  const { data: businessGroupOptions } = api.businessGroup.get.useQuery();
+  const { data: salesRepresentativeOptions } =
+    api.salesRepresentative.get.useQuery();
+
   const { data, isLoading } = api.customerCard.get.useQuery({
     page: pagination.pageIndex + 1, // Convert 0-based to 1-based for API
     itemsPerPage: pagination.pageSize,
@@ -38,6 +46,9 @@ export function CustomerCardsPageClient() {
       search,
       positive,
       searchScope,
+      businessGroup,
+      salesRepresentative,
+      district,
     },
     sorting,
   });
@@ -54,10 +65,26 @@ export function CustomerCardsPageClient() {
       <div className="mx-auto w-full max-w-[1600px]">
         <div className="mb-4">
           <FilterControls
+            businessGroup={businessGroup}
+            businessGroupOptions={
+              businessGroupOptions?.map(
+                (businessGroup) => businessGroup.name,
+              ) ?? []
+            }
+            district={district}
+            onBusinessGroup={setBusinessGroup}
+            onDistrict={setDistrict}
             onPositive={setPositive}
+            onSalesRepresentative={setSalesRepresentative}
             onSearch={setSearch}
             onSearchScope={setSearchScope}
             positive={positive}
+            salesRepresentative={salesRepresentative}
+            salesRepresentativeOptions={
+              salesRepresentativeOptions?.map(
+                (salesRepresentative) => salesRepresentative.name,
+              ) ?? []
+            }
             search={search}
             searchScope={searchScope}
           />

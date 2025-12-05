@@ -1,3 +1,4 @@
+'use client';
 import type { AuditLog, User } from 'generated/prisma';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';

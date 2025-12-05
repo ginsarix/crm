@@ -19,11 +19,13 @@ export function Combobox({
   selectedKey,
   onChange,
   label,
+  className,
 }: {
   options: { key: string; label: string }[];
   selectedKey: string;
   onChange: (value: string) => void;
   label?: string;
+  className?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -32,7 +34,7 @@ export function Combobox({
       <PopoverTrigger asChild>
         <Button
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className={cn('w-[200px] justify-between', className)}
           role="combobox"
           variant="outline"
         >
@@ -44,7 +46,7 @@ export function Combobox({
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder="Ara" />
           <CommandList>

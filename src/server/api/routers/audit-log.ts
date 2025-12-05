@@ -136,6 +136,11 @@ export const auditLogRouter = createTRPCRouter({
         },
       };
     }),
+  getLatest: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.auditLog.findFirst({
+      orderBy: { createdAt: 'desc' },
+    });
+  }),
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {

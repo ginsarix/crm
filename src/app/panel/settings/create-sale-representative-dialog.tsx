@@ -5,13 +5,12 @@ import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import type { z } from 'zod';
+import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -19,38 +18,42 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { UserCreateSchema } from '~/shared/zod-schemas/user';
 import { api } from '~/trpc/react';
 
-export function CreateUserDialog() {
+export function CreateSaleRepresentativeDialog() {
   const [open, setOpen] = useState(false);
   const utils = api.useUtils();
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(UserCreateSchema),
+    resolver: zodResolver(
+      z.object({
+        name: z.string().min(1, 'Satış temsilcisi adı zorunludur'),
+      }),
+    ),
     mode: 'onChange',
     shouldFocusError: false,
   });
 
-  const createMutation = api.user.create.useMutation({
+  const createMutation = api.salesRepresentative.create.useMutation({
     onSuccess: () => {
-      utils.user.get.invalidate();
+      utils.salesRepresentative.get.invalidate();
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof UserCreateSchema>) => {
+  const onSubmit = async (data: { name: string }) => {
     try {
       await createMutation.mutateAsync(data);
-      toast.success('Kullanıcı başarıyla eklendi');
+      toast.success('Satış temsilcisi başarıyla eklendi');
       reset();
       setOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error('Kullanıcı eklenirken bir hata oluştu');
+      toast.error('Satış temsilcisi eklenirken bir hata oluştu');
     }
   };
 
@@ -62,58 +65,26 @@ export function CreateUserDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent
-        aria-describedby="Kullanıcı ekleme formu"
+        aria-describedby="Satış temsilcisi ekleme formu"
         className="max-h-[99vh] overflow-y-auto"
       >
         <DialogHeader>
-          <DialogTitle>Kullanıcı Ekle</DialogTitle>
-          <DialogDescription>
-            Yeni bir kullanıcı hesabı oluşturun
-          </DialogDescription>
+          <DialogTitle>Satış Temsilcisi Ekle</DialogTitle>
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-2">
-            <Label htmlFor="name">Ad *</Label>
+            <Label htmlFor="name">Satış temsilcisi adı *</Label>
             <Input
               {...register('name')}
               className={errors.name ? 'border-red-500' : ''}
               id="name"
-              placeholder="Kullanıcı adı"
+              placeholder="Satış temsilcisi adı"
             />
             {errors.name && (
               <p className="text-red-500 text-sm">{errors.name.message}</p>
             )}
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">E-posta *</Label>
-            <Input
-              {...register('email')}
-              className={errors.email ? 'border-red-500' : ''}
-              id="email"
-              placeholder="E-posta adresi"
-              type="email"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Şifre *</Label>
-            <Input
-              {...register('password')}
-              className={errors.password ? 'border-red-500' : ''}
-              id="password"
-              placeholder="En az 8 karakter"
-              type="password"
-            />
-            {errors.password && (
-              <p className="text-red-500 text-sm">{errors.password.message}</p>
-            )}
-          </div>
-
           <DialogFooter>
             <DialogClose asChild>
               <Button

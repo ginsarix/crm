@@ -1,3 +1,5 @@
+'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Visit } from 'generated/prisma';
 import { Edit, Trash2 } from 'lucide-react';

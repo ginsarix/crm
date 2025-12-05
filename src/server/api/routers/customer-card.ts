@@ -13,6 +13,21 @@ const filterSchema = z.object({
   searchScope: z
     .enum(['all', ...Object.keys(columnMap.customerCard)])
     .default('all'),
+  businessGroup: z.string().optional(),
+  salesRepresentative: z.string().optional(),
+  district: z
+    .enum([
+      '',
+      'merkez',
+      'avanos',
+      'urgup',
+      'hacibektas',
+      'kozakli',
+      'acigol',
+      'derinkuyu',
+      'gulsehir',
+    ])
+    .default(''),
 });
 
 const sortingSchema = z.object({
@@ -105,6 +120,24 @@ export const customerCardRouter = createTRPCRouter({
       // Build positive filter
       if (input.filter?.positive && input.filter.positive !== 'all') {
         whereClause.positive = input.filter.positive;
+      }
+
+      // Build businessGroup filter
+      if (input.filter?.businessGroup && input.filter.businessGroup !== '') {
+        whereClause.businessGroup = input.filter.businessGroup;
+      }
+
+      // Build salesRepresentative filter
+      if (
+        input.filter?.salesRepresentative &&
+        input.filter.salesRepresentative !== ''
+      ) {
+        whereClause.salesRepresentative = input.filter.salesRepresentative;
+      }
+
+      // Build district filter
+      if (input.filter?.district) {
+        whereClause.district = input.filter.district;
       }
 
       // Build orderBy clause

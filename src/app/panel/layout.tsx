@@ -21,7 +21,7 @@ export default async function PanelLayout({
             <SidebarTrigger />
             <Separator className="h-6" orientation="vertical" />
             <div className="flex-1">
-              <h1 className="font-semibold text-lg">CRM Dashboard</h1>
+              <h1 className="font-semibold text-lg">CRM</h1>
             </div>
           </header>
           <div className="flex-1 overflow-auto">{children}</div>

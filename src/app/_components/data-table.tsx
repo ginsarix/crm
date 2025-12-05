@@ -36,10 +36,10 @@ import { cn } from '~/lib/utils';
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  sorting: SortingState;
-  pagination: PaginationState;
-  setSorting: OnChangeFn<SortingState>;
-  setPagination: OnChangeFn<PaginationState>;
+  sorting?: SortingState;
+  pagination?: PaginationState;
+  setSorting?: OnChangeFn<SortingState>;
+  setPagination?: OnChangeFn<PaginationState>;
   className?: string;
   pageCount?: number;
   tableId?: string; // Unique ID for localStorage persistence

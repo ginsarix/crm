@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { auditAction } from '~/lib/enum-map';
 import { api } from '~/trpc/server';
 
 export default async function DashboardPage() {
-  const [customerTotal, visitTotal] = await Promise.all([
+  const [customerTotal, visitTotal, latestAudit] = await Promise.all([
     api.customerCard.getTotal(),
     api.visit.getTotal(),
+    api.auditLog.getLatest(),
   ]);
 
   return (
@@ -17,7 +19,7 @@ export default async function DashboardPage() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex pb-2">
               <CardTitle className="font-medium text-sm">
                 Toplam Müşteri
               </CardTitle>
@@ -31,7 +33,7 @@ export default async function DashboardPage() {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex pb-2">
               <CardTitle className="font-medium text-sm">
                 Toplam Ziyaret
               </CardTitle>
@@ -45,7 +47,7 @@ export default async function DashboardPage() {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex pb-2">
               <CardTitle className="font-medium text-sm">
                 Positive Cards
               </CardTitle>
@@ -59,7 +61,7 @@ export default async function DashboardPage() {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex items-center justify-between pb-2">
               <CardTitle className="font-medium text-sm">
                 Negative Cards
               </CardTitle>
@@ -76,11 +78,19 @@ export default async function DashboardPage() {
         <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle>En son aktivite</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-muted-foreground text-sm">
-                No recent activity
+                {
+                  // show custom details if available, otherwise the action text, or 'no activity' if nothing exists
+                  latestAudit
+                    ? (latestAudit.details ??
+                      auditAction[
+                        latestAudit.action as keyof typeof auditAction
+                      ])
+                    : 'Aktivite bulunamadı'
+                }
               </div>
             </CardContent>
           </Card>

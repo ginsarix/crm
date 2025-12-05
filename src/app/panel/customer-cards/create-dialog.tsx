@@ -1,3 +1,5 @@
+'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -5,6 +7,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
 import { Button } from '~/components/ui/button';
+import { Combobox } from '~/components/ui/combobox';
 import {
   Dialog,
   DialogClose,
@@ -24,20 +27,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
+import { DISTRICTS } from '~/shared/constants';
 import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { api } from '~/trpc/react';
 import PositiveControl from './positive-control';
-
-const DISTRICTS = [
-  { value: 'merkez', label: 'MERKEZ' },
-  { value: 'avanos', label: 'AVANOS' },
-  { value: 'urgup', label: 'ÜRGÜP' },
-  { value: 'hacibektas', label: 'HACIBEKTAŞ' },
-  { value: 'kozakli', label: 'KOZAKLI' },
-  { value: 'acigol', label: 'ACIGÖL' },
-  { value: 'derinkuyu', label: 'DERİNKUYU' },
-  { value: 'gulsehir', label: 'GÜLŞEHİR' },
-] as const;
 
 export function CreateCustomerCardDialog() {
   const [open, setOpen] = useState(false);
@@ -56,6 +49,14 @@ export function CreateCustomerCardDialog() {
     },
     shouldFocusError: false,
   });
+
+  const { data: businessGroups } = api.businessGroup.get.useQuery();
+  const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
+
+  const businessGroupOptions =
+    businessGroups?.map((bg) => ({ key: bg.name, label: bg.name })) ?? [];
+  const salesRepresentativeOptions =
+    salesRepresentatives?.map((sr) => ({ key: sr.name, label: sr.name })) ?? [];
 
   const createMutation = api.customerCard.create.useMutation({
     onSuccess: () => {
@@ -121,10 +122,17 @@ export function CreateCustomerCardDialog() {
 
             <div className="space-y-2">
               <Label htmlFor="businessGroup">Meslek Grubu</Label>
-              <Input
-                {...register('businessGroup')}
-                id="businessGroup"
-                placeholder="Meslek grubu"
+              <Controller
+                control={control}
+                name="businessGroup"
+                render={({ field }) => (
+                  <Combobox
+                    label="Meslek grubu seçin"
+                    onChange={field.onChange}
+                    options={businessGroupOptions}
+                    selectedKey={field.value ?? ''}
+                  />
+                )}
               />
             </div>
           </div>
@@ -223,10 +231,18 @@ export function CreateCustomerCardDialog() {
           {/* Additional Information */}
           <div className="space-y-2">
             <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
-            <Input
-              {...register('salesRepresentative')}
-              id="salesRepresentative"
-              placeholder="Satış temsilcisi"
+            <Controller
+              control={control}
+              name="salesRepresentative"
+              render={({ field }) => (
+                <Combobox
+                  className="w-full"
+                  label="Satış temsilcisi seçin"
+                  onChange={field.onChange}
+                  options={salesRepresentativeOptions}
+                  selectedKey={field.value ?? ''}
+                />
+              )}
             />
           </div>
 

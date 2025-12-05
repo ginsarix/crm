@@ -1,5 +1,3 @@
-import { BetterAuthError } from 'better-auth';
-import { redirect } from 'next/navigation';
 import { Login1 } from '~/components/login1';
 import { env } from '~/env';
 import { auth } from '~/server/better-auth';

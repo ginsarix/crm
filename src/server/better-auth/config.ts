@@ -2,6 +2,7 @@ import { APIError, betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { nextCookies } from 'better-auth/next-js';
 import { admin, createAuthMiddleware } from 'better-auth/plugins';
+import { env } from '~/env';
 import { db } from '~/server/db';
 
 // Audit log helper for auth events
@@ -49,7 +50,7 @@ export const auth = betterAuth({
       refreshCache: false, // Disable auto-refresh to enforce timeouts
     },
   },
-
+  trustedOrigins: [env.CROSS_ORIGIN_URL],
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
       const path = ctx.path;

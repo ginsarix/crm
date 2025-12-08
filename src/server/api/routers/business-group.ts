@@ -71,6 +71,8 @@ export const businessGroupRouter = createTRPCRouter({
           undefined,
           `Meslek grubu güncellendi: ${result.name}`,
         );
+
+        return result;
       } catch (error) {
         await createAuditLog(
           ctx.db,

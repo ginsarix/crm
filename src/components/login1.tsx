@@ -35,11 +35,7 @@ const Login1 = ({ heading = 'Giriş', buttonText = 'Devam' }: Login1Props) => {
   const [verificationSent, setVerificationSent] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
 
-  const handleResendVerification = async () => {
-    const email = getValues('email');
-    if (!email) return;
-
-    setResendingEmail(true);
+  const sendVerification = async (email: string) => {
     const { error } = await authClient.sendVerificationEmail({
       email,
       callbackURL: '/panel/dashboard',
@@ -51,6 +47,14 @@ const Login1 = ({ heading = 'Giriş', buttonText = 'Devam' }: Login1Props) => {
       setVerificationSent(true);
       setErrorMessage('');
     }
+  };
+
+  const handleResendVerification = async () => {
+    const email = getValues('email');
+    if (!email) return;
+
+    setResendingEmail(true);
+    await sendVerification(email);
     setResendingEmail(false);
   };
 
@@ -65,11 +69,10 @@ const Login1 = ({ heading = 'Giriş', buttonText = 'Devam' }: Login1Props) => {
         callbackURL: '/panel/dashboard',
       },
       {
-        onError: (ctx) => {
+        onError: async (ctx) => {
           // Handle email verification required error (403)
           if (ctx.error.status === 403) {
-            setErrorMessage('E-posta adresinizi doğrulamanız gerekiyor');
-            setVerificationSent(true);
+            await sendVerification(values.email);
             return;
           }
         },

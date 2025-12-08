@@ -84,26 +84,22 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4">
-            <CardHeader>
-              <CardTitle>En son aktivite</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-muted-foreground text-sm">
-                {
-                  // show custom details if available, otherwise the action text, or 'no activity' if nothing exists
-                  latestAudit
-                    ? (latestAudit.details ??
-                      auditAction[
-                        latestAudit.action as keyof typeof auditAction
-                      ])
-                    : 'Aktivite bulunamadı'
-                }
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>En son aktivite</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-muted-foreground text-sm">
+              {
+                // show custom details if available, otherwise the action text, or 'no activity' if nothing exists
+                latestAudit
+                  ? (latestAudit.details ??
+                    auditAction[latestAudit.action as keyof typeof auditAction])
+                  : 'Aktivite bulunamadı'
+              }
+            </div>
+          </CardContent>
+        </Card>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <ChartPie
             className="mt-6"

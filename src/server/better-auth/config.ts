@@ -37,6 +37,7 @@ export const auth = betterAuth({
   database: prismaAdapter(db, {
     provider: 'postgresql',
   }),
+  baseURL: env.CROSS_ORIGIN_URL ?? 'http://localhost:3000',
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
@@ -46,6 +47,7 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     expiresIn: 14 * 24 * 60 * 60, // 14 days
+
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
@@ -64,7 +66,7 @@ export const auth = betterAuth({
       refreshCache: false, // Disable auto-refresh to enforce timeouts
     },
   },
-  trustedOrigins: [env.CROSS_ORIGIN_URL],
+  trustedOrigins: env.CROSS_ORIGIN_URL ? [env.CROSS_ORIGIN_URL] : [],
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
       const path = ctx.path;

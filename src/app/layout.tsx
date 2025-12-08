@@ -2,7 +2,7 @@ import '~/styles/globals.css';
 
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
-import { ViewTransitions } from 'next-view-transitions';
+import { ViewTransition } from 'react';
 import { TRPCReactProvider } from '~/trpc/react';
 
 export const metadata: Metadata = {
@@ -20,12 +20,12 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ViewTransitions>
-      <html className={`${geist.variable}`} lang="tr">
-        <body>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
-        </body>
-      </html>
-    </ViewTransitions>
+    <html className={`${geist.variable}`} lang="tr">
+      <body>
+        <TRPCReactProvider>
+          <ViewTransition>{children}</ViewTransition>
+        </TRPCReactProvider>
+      </body>
+    </html>
   );
 }

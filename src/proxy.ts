@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
 import { auth } from '~/server/better-auth';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -18,6 +18,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  runtime: 'nodejs', // Required for auth.api calls
-  matcher: ['/panel/:path*'], // Specify the routes the middleware applies to
+  matcher: ['/panel/:path*'], // Specify the routes the proxy applies to
 };

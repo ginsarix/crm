@@ -11,8 +11,7 @@ import {
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useTransitionRouter } from 'next-view-transitions';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import {
   Sidebar,
@@ -65,35 +64,15 @@ const settingsItems = [
   },
 ];
 
-const pageAnimation = () => {
-  // Old page fades out
-  document.documentElement.animate([{ opacity: 1 }, { opacity: 0 }], {
-    duration: 150,
-    easing: 'ease-out',
-    fill: 'forwards',
-    pseudoElement: '::view-transition-old(root)',
-  });
-
-  // New page fades in
-  document.documentElement.animate([{ opacity: 0 }, { opacity: 1 }], {
-    duration: 200,
-    easing: 'ease-in',
-    fill: 'forwards',
-    pseudoElement: '::view-transition-new(root)',
-  });
-};
-
 export function SidebarNav() {
   const pathname = usePathname();
-
-  const router = useTransitionRouter();
-
+  const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: router.replace is not a dependency
   useEffect(() => {
     if (!session && !isPending) {
-      router.replace('/login', { onTransitionReady: pageAnimation });
+      router.replace('/login');
     }
   }, [session]);
 
@@ -101,15 +80,10 @@ export function SidebarNav() {
     authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.replace('/login', { onTransitionReady: pageAnimation });
+          router.replace('/login');
         },
       },
     });
-  };
-
-  const onNavigate = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
-    e.preventDefault();
-    router.push(url, { onTransitionReady: pageAnimation });
   };
 
   return (
@@ -118,7 +92,7 @@ export function SidebarNav() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
-              <Link href="/" onClick={(e) => onNavigate(e, '/')}>
+              <Link href="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <ChevronRight className="size-4" />
                 </div>
@@ -143,10 +117,7 @@ export function SidebarNav() {
                     isActive={pathname === item.href}
                     tooltip={item.title}
                   >
-                    <Link
-                      href={item.href}
-                      onClick={(e) => onNavigate(e, item.href)}
-                    >
+                    <Link href={item.href}>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
@@ -168,10 +139,7 @@ export function SidebarNav() {
                     isActive={pathname === item.href}
                     tooltip={item.title}
                   >
-                    <Link
-                      href={item.href}
-                      onClick={(e) => onNavigate(e, item.href)}
-                    >
+                    <Link href={item.href}>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>

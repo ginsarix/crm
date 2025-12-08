@@ -130,22 +130,41 @@
   }
 }
 
+/* View Transition Animations */
 ::view-transition-group(root) {
   z-index: auto !important;
 }
 
 ::view-transition-image-pair(root) {
   isolation: isolate;
-  will-change: transform, opacity, scale;
+  will-change: transform, opacity;
   z-index: 1;
 }
 
 ::view-transition-old(root) {
   z-index: 2;
-  animation: none !important;
+  animation: fade-out 150ms ease-out forwards;
 }
 
 ::view-transition-new(root) {
   z-index: 1;
-  animation: none !important;
+  animation: fade-in 200ms ease-in forwards;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

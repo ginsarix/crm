@@ -1,12 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { auditAction } from '~/lib/enum-map';
 import { api } from '~/trpc/server';
+import { ChartPie } from '../_components/pie-chart';
 
 export default async function DashboardPage() {
-  const [customerTotal, visitTotal, latestAudit] = await Promise.all([
+  const [
+    customerTotal,
+    positivesCount,
+    negativesCount,
+    visitTotal,
+    latestAudit,
+    customerCardPositives,
+  ] = await Promise.all([
     api.customerCard.getTotal(),
+    api.customerCard.getPositivesCount(),
+    api.customerCard.getNegativesCount(),
     api.visit.getTotal(),
     api.auditLog.getLatest(),
+    api.salesRepresentative.customerCardPositives(),
   ]);
 
   return (
@@ -16,18 +27,17 @@ export default async function DashboardPage() {
           <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
           <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>
         </div>
-
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex pb-2">
               <CardTitle className="font-medium text-sm">
-                Toplam Müşteri
+                Toplam Cari Kart
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="font-bold text-2xl">{customerTotal}</div>
               <p className="text-muted-foreground text-xs">
-                Sistemdeki toplam müşterilerin sayısı
+                Sistemdeki toplam cari kart sayısı
               </p>
             </CardContent>
           </Card>
@@ -49,13 +59,13 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="flex pb-2">
               <CardTitle className="font-medium text-sm">
-                Positive Cards
+                Pozitif Cari Kart Sayısı
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">0</div>
+              <div className="font-bold text-2xl">{positivesCount}</div>
               <p className="text-muted-foreground text-xs">
-                Cards marked positive
+                Pozitif cari kart sayısı
               </p>
             </CardContent>
           </Card>
@@ -63,18 +73,17 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="flex items-center justify-between pb-2">
               <CardTitle className="font-medium text-sm">
-                Negative Cards
+                Negatif Cari Kart Sayısı
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="font-bold text-2xl">0</div>
+              <div className="font-bold text-2xl">{negativesCount}</div>
               <p className="text-muted-foreground text-xs">
-                Cards marked negative
+                Negatif cari kart sayısı
               </p>
             </CardContent>
           </Card>
         </div>
-
         <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
@@ -94,17 +103,16 @@ export default async function DashboardPage() {
               </div>
             </CardContent>
           </Card>
-
-          <Card className="col-span-3">
-            <CardHeader>
-              <CardTitle>Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-muted-foreground text-sm">
-                Statistics will appear here
-              </div>
-            </CardContent>
-          </Card>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <ChartPie
+            className="mt-6"
+            data={customerCardPositives}
+            dataKey="customerCardCount"
+            description="Pozitif bazlı satış temsilcileri grafiği"
+            nameKey="salesRepresentative"
+            title="Pozitif Bazlı Satış Temsilcileri"
+          />
         </div>
       </div>
     </div>

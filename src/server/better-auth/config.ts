@@ -4,6 +4,7 @@ import { nextCookies } from 'better-auth/next-js';
 import { admin, createAuthMiddleware } from 'better-auth/plugins';
 import { env } from '~/env';
 import { db } from '~/server/db';
+import { getVerificationEmailHtml, sendEmail } from './email';
 
 // Audit log helper for auth events
 async function createAuthAuditLog(
@@ -39,6 +40,19 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 14 * 24 * 60 * 60, // 14 days
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: 'E-posta Adresinizi Doğrulayın',
+        html: getVerificationEmailHtml(url, user.name),
+      });
+    },
   },
 
   session: {
@@ -79,6 +93,15 @@ export const auth = betterAuth({
           throw new APIError('UNAUTHORIZED', {
             ...errorResponse.body,
             message: 'E-posta veya parola yanlış',
+          });
+        }
+        if (
+          path.startsWith('/sign-in') &&
+          errorResponse.body?.code === 'EMAIL_NOT_VERIFIED'
+        ) {
+          throw new APIError('FORBIDDEN', {
+            ...errorResponse.body,
+            message: 'E-posta adresinizi doğrulamanız gerekiyor',
           });
         }
         if (

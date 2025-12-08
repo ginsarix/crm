@@ -16,6 +16,14 @@ export const env = createEnv({
     DEFAULT_ADMIN_PASSWORD: z.string().min(8),
     CROSS_ORIGIN_URL: z.string().url(),
 
+    // SMTP configuration for sending emails
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.coerce.number().optional(),
+    SMTP_USER: z.string().optional(),
+    SMTP_PASS: z.string().optional(),
+    // Email address to send verification emails from (e.g., "noreply@yourdomain.com")
+    EMAIL_FROM: z.string().email().optional(),
+
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -40,6 +48,11 @@ export const env = createEnv({
     DEFAULT_ADMIN_EMAIL: process.env.DEFAULT_ADMIN_EMAIL,
     DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD,
     CROSS_ORIGIN_URL: process.env.CROSS_ORIGIN_URL,
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASS: process.env.SMTP_PASS,
+    EMAIL_FROM: process.env.EMAIL_FROM,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
   },

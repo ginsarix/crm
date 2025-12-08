@@ -26,22 +26,59 @@ const Login1 = ({ heading = 'Giriş', buttonText = 'Devam' }: Login1Props) => {
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm({
     resolver: zodResolver(formSchema),
   });
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
 
-  const onSubmit = async (values: { email: string; password: string }) => {
-    setPending(true);
+  const handleResendVerification = async () => {
+    const email = getValues('email');
+    if (!email) return;
 
-    const { error } = await authClient.signIn.email({
-      email: values.email,
-      password: values.password,
+    setResendingEmail(true);
+    const { error } = await authClient.sendVerificationEmail({
+      email,
       callbackURL: '/panel/dashboard',
     });
 
-    if (error?.message) setErrorMessage(error.message);
+    if (error) {
+      setErrorMessage(error.message ?? 'E-posta gönderilemedi');
+    } else {
+      setVerificationSent(true);
+      setErrorMessage('');
+    }
+    setResendingEmail(false);
+  };
+
+  const onSubmit = async (values: { email: string; password: string }) => {
+    setPending(true);
+    setVerificationSent(false);
+
+    const { error } = await authClient.signIn.email(
+      {
+        email: values.email,
+        password: values.password,
+        callbackURL: '/panel/dashboard',
+      },
+      {
+        onError: (ctx) => {
+          // Handle email verification required error (403)
+          if (ctx.error.status === 403) {
+            setErrorMessage('E-posta adresinizi doğrulamanız gerekiyor');
+            setVerificationSent(true);
+            return;
+          }
+        },
+      },
+    );
+
+    if (error?.message && !verificationSent) {
+      setErrorMessage(error.message);
+    }
 
     setPending(false);
   };
@@ -53,7 +90,34 @@ const Login1 = ({ heading = 'Giriş', buttonText = 'Devam' }: Login1Props) => {
         <div className="flex flex-col items-center gap-6 lg:justify-start">
           <div className="flex w-full min-w-sm max-w-sm flex-col items-center gap-y-4 rounded-xl border border-muted bg-background px-6 py-8 shadow-md">
             {heading && <h1 className="font-semibold text-xl">{heading}</h1>}
-            {errorMessage && (
+            {verificationSent && (
+              <Card className="border-amber-500/60 bg-amber-950/20 px-5 py-3 text-sm">
+                <CardContent className="space-y-3">
+                  <p className="text-amber-700 dark:text-amber-400">
+                    E-posta adresinizi doğrulamanız gerekiyor. Gelen kutunuzu
+                    kontrol edin.
+                  </p>
+                  <Button
+                    className="w-full cursor-pointer"
+                    disabled={resendingEmail}
+                    onClick={handleResendVerification}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    {resendingEmail ? (
+                      <>
+                        <Spinner />
+                        Gönderiliyor...
+                      </>
+                    ) : (
+                      'Doğrulama E-postasını Tekrar Gönder'
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+            {errorMessage && !verificationSent && (
               <Card className="border-red-500/60 px-5 py-3 text-sm">
                 <CardContent>
                   <span className="text-red-400">{errorMessage}</span>

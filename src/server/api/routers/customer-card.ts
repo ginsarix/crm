@@ -219,11 +219,10 @@ export const customerCardRouter = createTRPCRouter({
   update: protectedProcedure
     .input(CustomerCardCreateSchema.extend({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
       try {
         const result = await ctx.db.customerCard.update({
-          where: { id },
-          data,
+          where: { id: input.id },
+          data: input,
         });
 
         await createAuditLog(
@@ -231,7 +230,7 @@ export const customerCardRouter = createTRPCRouter({
           ctx.session.user.id,
           'CUSTOMER_CARD_UPDATED',
           'CUSTOMER_CARD',
-          id,
+          input.id,
           'SUCCESS',
           undefined,
           `Cari kart güncellendi: ${result.name}`,
@@ -244,7 +243,7 @@ export const customerCardRouter = createTRPCRouter({
           ctx.session.user.id,
           'CUSTOMER_CARD_UPDATED',
           'CUSTOMER_CARD',
-          id,
+          input.id,
           'FAILURE',
           error instanceof Error ? error.message : 'Bilinmeyen hata',
           `Cari kart güncellenemedi: ${input.name}`,
@@ -292,4 +291,20 @@ export const customerCardRouter = createTRPCRouter({
         throw error;
       }
     }),
+
+  getPositivesCount: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.customerCard.count({
+      where: { positive: 'positive' },
+    });
+  }),
+  getNegativesCount: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.customerCard.count({
+      where: { positive: 'negative' },
+    });
+  }),
+  getNeutralsCount: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.customerCard.count({
+      where: { positive: 'neutral' },
+    });
+  }),
 });

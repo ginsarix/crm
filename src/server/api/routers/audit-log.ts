@@ -1,3 +1,4 @@
+import { sub } from 'date-fns';
 import type { Prisma } from 'generated/prisma';
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../trpc';
@@ -174,4 +175,24 @@ export const auditLogRouter = createTRPCRouter({
     });
     return types.map((t) => t.resourceType);
   }),
+  clearLogs: protectedProcedure
+    .input(
+      z.object({
+        amount: z.number().int().positive(),
+        unit: z.enum(['hours', 'days', 'months', 'years']),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const cutoffDate = sub(new Date(), {
+        [input.unit]: input.amount,
+      });
+
+      // delete logs that occurred WITHIN the last {amount} {unit}
+      // i.e., if amount is 1 and unit is hours, delete logs that occurred in the last hour
+      await ctx.db.auditLog.deleteMany({
+        where: {
+          createdAt: { gt: cutoffDate },
+        },
+      });
+    }),
 });

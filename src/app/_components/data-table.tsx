@@ -239,11 +239,11 @@ export function DataTable<TData, TValue>({
                   <TableRow
                     className={cn(
                       positive === 'positive' &&
-                        'bg-green-950/60 hover:bg-green-950/70',
+                        'bg-green-900/80 hover:bg-green-900/90',
                       positive === 'negative' &&
-                        'bg-red-950/60 hover:bg-red-950/70',
+                        'bg-red-900/80 hover:bg-red-900/90',
                       positive === 'neutral' &&
-                        'bg-yellow-950/60 hover:bg-yellow-950/70',
+                        'bg-yellow-900/80 hover:bg-yellow-900/90',
                     )}
                     data-state={row.getIsSelected() && 'selected'}
                     key={row.id}

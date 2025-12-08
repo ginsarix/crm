@@ -10,7 +10,14 @@ import {
   useReactTable,
   type VisibilityState,
 } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, ArrowUpDown, Columns3 } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Columns3,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '~/components/ui/button';
@@ -182,6 +189,7 @@ export function DataTable<TData, TValue>({
         className={cn(
           'overflow-hidden rounded-lg rounded-t-none border bg-zinc-900',
           className,
+          pagination && setPagination && 'rounded-b-none',
         )}
       >
         <Table>
@@ -272,6 +280,38 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {pagination && setPagination && (
+        <div className="flex items-center justify-between rounded-b-lg border-x border-b bg-zinc-900 px-4 py-3">
+          <span className="text-muted-foreground text-sm">
+            Sayfa {pagination.pageIndex + 1}
+            {pageCount > 0 && ` / ${pageCount}`}
+          </span>
+          <div className="flex gap-2">
+            <Button
+              className="cursor-pointer"
+              disabled={!table.getCanPreviousPage()}
+              onClick={() => table.previousPage()}
+              size="sm"
+              variant="outline"
+            >
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              Önceki
+            </Button>
+            <Button
+              className="cursor-pointer"
+              disabled={!table.getCanNextPage()}
+              onClick={() => table.nextPage()}
+              size="sm"
+              variant="outline"
+            >
+              Sonraki
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

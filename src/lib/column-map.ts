@@ -13,7 +13,7 @@ export const columnMap = {
   customerCard: {
     id: 'ID',
     sira: 'Sıra',
-    name: 'Adı',
+    name: 'Ünvan',
     sicil: 'Sicil',
     address: 'Adres',
     district: 'İlçe',

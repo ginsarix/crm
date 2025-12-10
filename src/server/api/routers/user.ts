@@ -199,6 +199,7 @@ export const userRouter = createTRPCRouter({
                 userId: id,
                 newPassword: password,
               },
+              headers: ctx.headers,
             })
             .catch((error) => {
               console.error(error);

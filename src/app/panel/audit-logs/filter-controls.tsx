@@ -50,7 +50,7 @@ export function FilterControls({
         <InputGroup className="ml-auto w-64">
           <InputGroupInput
             onChange={(e) => onSearch(e.target.value)}
-            placeholder="Ara..."
+            placeholder="Ara"
             type="search"
             value={search}
           />
@@ -60,64 +60,55 @@ export function FilterControls({
         </InputGroup>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap gap-4">
-          <div className="min-w-[180px]">
-            <Select
-              onValueChange={(v) => onAction(v === 'all' ? '' : v)}
-              value={action || 'all'}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="İşlem" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tüm İşlemler</SelectItem>
-                {actions?.map((a) => (
-                  <SelectItem key={a} value={a}>
-                    {auditAction[a as keyof typeof auditAction] ?? a}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="grid grid-cols-1 gap-3 self-center sm:grid-cols-2 lg:grid-cols-3">
+          <Select
+            onValueChange={(v) => onAction(v === 'all' ? '' : v)}
+            value={action || 'all'}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="İşlem" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm İşlemler</SelectItem>
+              {actions?.map((a) => (
+                <SelectItem key={a} value={a}>
+                  {auditAction[a as keyof typeof auditAction] ?? a}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <div className="min-w-[180px]">
-            <Select
-              onValueChange={(v) => onResourceType(v === 'all' ? '' : v)}
-              value={resourceType || 'all'}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Kaynak Türü" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tüm Kaynaklar</SelectItem>
-                {resourceTypes?.map((rt) => (
-                  <SelectItem key={rt} value={rt}>
-                    {resourceTypeLabels[
-                      rt as keyof typeof resourceTypeLabels
-                    ] ?? rt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select
+            onValueChange={(v) => onResourceType(v === 'all' ? '' : v)}
+            value={resourceType || 'all'}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Kaynak Türü" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm Kaynaklar</SelectItem>
+              {resourceTypes?.map((rt) => (
+                <SelectItem key={rt} value={rt}>
+                  {resourceTypeLabels[rt as keyof typeof resourceTypeLabels] ??
+                    rt}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <div className="min-w-[150px]">
-            <Select
-              onValueChange={(v) =>
-                onResult(v as 'SUCCESS' | 'FAILURE' | 'all')
-              }
-              value={result}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sonuç" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tüm Sonuçlar</SelectItem>
-                <SelectItem value="SUCCESS">Başarılı</SelectItem>
-                <SelectItem value="FAILURE">Başarısız</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select
+            onValueChange={(v) => onResult(v as 'SUCCESS' | 'FAILURE' | 'all')}
+            value={result}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Sonuç" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm Sonuçlar</SelectItem>
+              <SelectItem value="SUCCESS">Başarılı</SelectItem>
+              <SelectItem value="FAILURE">Başarısız</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </CardContent>
     </Card>

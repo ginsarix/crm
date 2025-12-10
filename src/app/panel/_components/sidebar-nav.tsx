@@ -25,6 +25,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from '~/components/ui/sidebar';
 import { authClient } from '~/server/better-auth/client';
 
@@ -68,6 +69,13 @@ export function SidebarNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
+  const { setOpenMobile } = useSidebar();
+
+  // Close sidebar on navigation (mobile)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is used to trigger the effect on navigation
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: router.replace is not a dependency
   useEffect(() => {

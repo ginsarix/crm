@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, MessageSquare, Phone, Users } from 'lucide-react';
+import { Layers, Mail, MessageSquare, Phone, Users } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { ButtonGroup } from '~/components/ui/button-group';
 import { cn } from '~/lib/utils';
@@ -28,7 +28,15 @@ export default function ViaControl({
         type="button"
         variant="outline"
       >
-        <Phone /> Telefon
+        <Phone />
+        <span
+          className={cn(
+            'overflow-hidden transition-[max-width] duration-200 sm:max-w-24',
+            via === 'phone' ? 'max-w-24' : 'max-w-0',
+          )}
+        >
+          Telefon
+        </span>
       </Button>
       <Button
         aria-pressed={via === 'inPerson'}
@@ -40,7 +48,15 @@ export default function ViaControl({
         type="button"
         variant="outline"
       >
-        <Users /> Yüz Yüze
+        <Users />
+        <span
+          className={cn(
+            'overflow-hidden transition-[max-width] duration-200 sm:max-w-24',
+            via === 'inPerson' ? 'max-w-24' : 'max-w-0',
+          )}
+        >
+          Yüz Yüze
+        </span>
       </Button>
       <Button
         aria-pressed={via === 'email'}
@@ -52,7 +68,15 @@ export default function ViaControl({
         type="button"
         variant="outline"
       >
-        <Mail /> E-posta
+        <Mail />
+        <span
+          className={cn(
+            'overflow-hidden transition-[max-width] duration-200 sm:max-w-24',
+            via === 'email' ? 'max-w-24' : 'max-w-0',
+          )}
+        >
+          E-posta
+        </span>
       </Button>
       <Button
         aria-pressed={via === 'sms'}
@@ -64,7 +88,15 @@ export default function ViaControl({
         type="button"
         variant="outline"
       >
-        <MessageSquare /> SMS
+        <MessageSquare />
+        <span
+          className={cn(
+            'overflow-hidden transition-[max-width] duration-200 sm:max-w-24',
+            via === 'sms' ? 'max-w-24' : 'max-w-0',
+          )}
+        >
+          SMS
+        </span>
       </Button>
       {includeAll && (
         <Button
@@ -77,7 +109,15 @@ export default function ViaControl({
           type="button"
           variant="outline"
         >
-          Tümü
+          <Layers />
+          <span
+            className={cn(
+              'overflow-hidden transition-[max-width] duration-200 sm:max-w-24',
+              via === 'all' ? 'max-w-24' : 'max-w-0',
+            )}
+          >
+            Tümü
+          </span>
         </Button>
       )}
     </ButtonGroup>

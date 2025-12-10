@@ -84,10 +84,13 @@ export function FilterControls({
 
   return (
     <Card className="mb-4">
-      <CardHeader className="flex flex-row items-center">
-        <CardTitle className="mr-auto">Filtreler</CardTitle>
-        <InputGroup className="ml-auto w-50">
+      <CardHeader className="flex flex-col items-center sm:flex-row">
+        <CardTitle className="mb-2 max-sm:text-lg sm:mr-auto sm:mb-0">
+          Filtreler
+        </CardTitle>
+        <InputGroup className="sm:ml-auto sm:w-75">
           <InputGroupInput
+            className="w-50"
             onChange={(e) => onSearch(e.target.value)}
             placeholder="Ara"
             type="search"
@@ -98,6 +101,7 @@ export function FilterControls({
           </InputGroupAddon>
         </InputGroup>
         <Combobox
+          className="sm:w-50"
           label="Arama Kapsamı"
           onChange={(v) => onSearchScope(v as 'all' | keyof CustomerCard)}
           options={searchScopeComboboxOptions}
@@ -105,7 +109,7 @@ export function FilterControls({
         />
       </CardHeader>
       <CardContent>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <PositiveControl
             id="positive"
             includeAll

@@ -1,6 +1,6 @@
 'use client';
 
-import { MehIcon, ThumbsDownIcon, ThumbsUpIcon } from 'lucide-react';
+import { Layers, MehIcon, ThumbsDownIcon, ThumbsUpIcon } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { ButtonGroup } from '~/components/ui/button-group';
 import { cn } from '~/lib/utils';
@@ -34,7 +34,15 @@ export default function PositiveControl({
         type="button"
         variant="outline"
       >
-        <ThumbsDownIcon /> Negatif
+        <ThumbsDownIcon />
+        <span
+          className={cn(
+            'overflow-hidden transition-[max-width] duration-200 sm:max-w-24',
+            positive === 'negative' ? 'max-w-24' : 'max-w-0',
+          )}
+        >
+          Negatif
+        </span>
       </Button>
       <Button
         aria-pressed={positive === 'neutral'}
@@ -47,7 +55,14 @@ export default function PositiveControl({
         variant="outline"
       >
         <MehIcon />
-        Nötr
+        <span
+          className={cn(
+            'overflow-hidden transition-[max-width] duration-200 sm:max-w-24',
+            positive === 'neutral' ? 'max-w-24' : 'max-w-0',
+          )}
+        >
+          Nötr
+        </span>
       </Button>
       <Button
         aria-pressed={positive === 'positive'}
@@ -59,7 +74,15 @@ export default function PositiveControl({
         type="button"
         variant="outline"
       >
-        <ThumbsUpIcon /> Pozitif
+        <ThumbsUpIcon />
+        <span
+          className={cn(
+            'overflow-hidden transition-[max-width] duration-200 sm:max-w-24',
+            positive === 'positive' ? 'max-w-24' : 'max-w-0',
+          )}
+        >
+          Pozitif
+        </span>
       </Button>
       {includeAll && (
         <Button
@@ -72,7 +95,15 @@ export default function PositiveControl({
           type="button"
           variant="outline"
         >
-          Tümü
+          <Layers />
+          <span
+            className={cn(
+              'overflow-hidden transition-[max-width] duration-200 sm:max-w-24',
+              positive === 'all' ? 'max-w-24' : 'max-w-0',
+            )}
+          >
+            Tümü
+          </span>
         </Button>
       )}
     </ButtonGroup>

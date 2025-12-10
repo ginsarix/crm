@@ -3,7 +3,7 @@
 import type { PaginationState, SortingState } from '@tanstack/react-table';
 import type { Visit } from 'generated/prisma';
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
 import { cn } from '~/lib/utils';
@@ -46,6 +46,15 @@ export function VisitsPageClient() {
   };
 
   const pathname = useParams();
+  const customerCardId = pathname.slug?.[0];
+
+  const relatedVisits = useMemo(
+    () =>
+      customerCardId && data?.data
+        ? data.data.filter((visit) => visit.customerCardId === customerCardId)
+        : [],
+    [data?.data, customerCardId],
+  );
 
   const columns = createColumns(handleViewVisit);
 
@@ -98,12 +107,8 @@ export function VisitsPageClient() {
           />
         )}
 
-        {pathname.slug?.[0] && data?.data && (
-          <RelatedVisitsDialog
-            visits={data?.data.filter(
-              (visit) => visit.customerCardId === pathname.slug?.[0],
-            )}
-          />
+        {customerCardId && relatedVisits.length > 0 && (
+          <RelatedVisitsDialog visits={relatedVisits} />
         )}
       </div>
     </div>

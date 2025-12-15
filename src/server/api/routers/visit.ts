@@ -143,7 +143,10 @@ export const visitRouter = createTRPCRouter({
           },
           include: {
             customerCard: {
-              select: { name: true },
+              select: {
+                name: true,
+                gsm1: true,
+              },
             },
           },
         });

@@ -1,23 +1,30 @@
-'use client';
+"use client";
 
-import type { Visit } from 'generated/prisma';
-import { Calendar } from 'lucide-react';
-import { useState } from 'react';
-import { Button } from '~/components/ui/button';
+import { Calendar } from "lucide-react";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '~/components/ui/dialog';
-import { ViewVisitDialog } from './view-dialog';
+} from "~/components/ui/dialog";
+import type { RouterOutputs } from "~/trpc/types";
+import { ViewVisitDialog } from "./view-dialog";
 
-export default function RelatedVisitsDialog({ visits }: { visits: Visit[] }) {
+type VisitWithCustomerCard = RouterOutputs["visit"]["get"]["data"][number];
+
+export default function RelatedVisitsDialog({
+  visits,
+}: {
+  visits: VisitWithCustomerCard[];
+}) {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
+  const [selectedVisit, setSelectedVisit] =
+    useState<VisitWithCustomerCard | null>(null);
 
-  const handleSelect = (visit: Visit) => {
+  const handleSelect = (visit: VisitWithCustomerCard) => {
     setSelectedVisit(visit);
     setViewDialogOpen(true);
   };
@@ -41,7 +48,7 @@ export default function RelatedVisitsDialog({ visits }: { visits: Visit[] }) {
               type="button"
               variant="outline"
             >
-              <Calendar /> {visit.date.toLocaleDateString('tr-TR')}
+              <Calendar /> {visit.date.toLocaleDateString("tr-TR")}
             </Button>
           ))}
         </DialogContent>

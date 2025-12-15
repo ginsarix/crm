@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import type { Visit } from 'generated/prisma';
-import { SearchIcon } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import { Combobox } from '~/components/ui/combobox';
+import { SearchIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Combobox } from "~/components/ui/combobox";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from '~/components/ui/input-group';
-import { columnMap } from '~/lib/column-map';
-import ViaControl from './via-control';
+} from "~/components/ui/input-group";
+import { columnMap } from "~/lib/column-map";
+import ViaControl from "./via-control";
+
+type VisitSearchScope = "all" | keyof typeof columnMap.visit;
 
 export function FilterControls({
   search,
@@ -22,22 +23,22 @@ export function FilterControls({
 }: {
   search: string;
   onSearch: (search: string) => void;
-  via: 'phone' | 'inPerson' | 'email' | 'sms' | 'all';
-  onVia: (via: 'phone' | 'inPerson' | 'email' | 'sms' | 'all') => void;
-  searchScope: 'all' | keyof Visit;
-  onSearchScope: (searchScope: 'all' | keyof Visit) => void;
+  via: "phone" | "inPerson" | "email" | "sms" | "all";
+  onVia: (via: "phone" | "inPerson" | "email" | "sms" | "all") => void;
+  searchScope: VisitSearchScope;
+  onSearchScope: (searchScope: VisitSearchScope) => void;
 }) {
   const comboboxOptions = [
-    { key: 'all', label: 'Tümü' },
+    { key: "all", label: "Tümü" },
     ...Object.entries(columnMap.visit)
       .filter(
         ([key]) =>
-          key !== 'via' &&
-          key !== 'createdAt' &&
-          key !== 'updatedAt' &&
-          key !== 'id' &&
-          key !== 'date' &&
-          key !== 'time',
+          key !== "via" &&
+          key !== "createdAt" &&
+          key !== "updatedAt" &&
+          key !== "id" &&
+          key !== "date" &&
+          key !== "time"
       )
       .map(([key, label]) => {
         return { key, label };
@@ -64,7 +65,7 @@ export function FilterControls({
         <Combobox
           className="sm:w-50"
           label="Arama Kapsamı"
-          onChange={(v) => onSearchScope(v as 'all' | keyof Visit)}
+          onChange={(v) => onSearchScope(v as VisitSearchScope)}
           options={comboboxOptions}
           selectedKey={searchScope}
         />

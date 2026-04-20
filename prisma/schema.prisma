@@ -72,6 +72,8 @@ model BusinessGroup {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  assignedUsers User[]
 }
 
 model SalesRepresentative {
@@ -133,8 +135,9 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  createdCustomerCards CustomerCard[]
-  createdVisits        Visit[]
+  createdCustomerCards   CustomerCard[]
+  createdVisits          Visit[]
+  assignedBusinessGroups BusinessGroup[]
 
   audits AuditLog[]
 

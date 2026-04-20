@@ -45,19 +45,22 @@ const navigationItems = [
     icon: Calendar,
     href: '/panel/visits',
   },
+];
+
+const adminItems = [
   {
     title: 'Kullanıcılar',
     icon: Users,
     href: '/panel/users',
   },
-];
-
-const settingsItems = [
   {
     title: 'Denetim Kayıtları',
     icon: ClipboardList,
     href: '/panel/audit-logs',
   },
+];
+
+const settingsItems = [
   {
     title: 'Ayarlar',
     icon: Settings,
@@ -70,6 +73,7 @@ export function SidebarNav() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const { setOpenMobile } = useSidebar();
+  const isAdmin = session?.user?.role === 'admin';
 
   // Close sidebar on navigation (mobile)
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is used to trigger the effect on navigation
@@ -140,6 +144,21 @@ export function SidebarNav() {
           <SidebarGroupLabel>Sistem</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {isAdmin &&
+                adminItems.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                      tooltip={item.title}
+                    >
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
               {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton

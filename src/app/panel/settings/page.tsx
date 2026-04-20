@@ -1,12 +1,16 @@
+import { headers } from 'next/headers';
+import { auth } from '~/server/better-auth';
 import { api, HydrateClient } from '~/trpc/server';
 import BusinessGroupsTable from './business-groups-table';
 import SaleRepresentativesTable from './sale-representatives-table';
 
 export default async function SettingsPage() {
-  await Promise.all([
-    api.salesRepresentative.get.prefetch(),
-    api.businessGroup.get.prefetch(),
-  ]);
+  const session = await auth.api.getSession({ headers: await headers() });
+  const isAdmin = session?.user?.role === 'admin';
+
+  const prefetches = [api.salesRepresentative.get.prefetch()];
+  if (isAdmin) prefetches.push(api.businessGroup.get.prefetch());
+  await Promise.all(prefetches);
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
@@ -19,9 +23,9 @@ export default async function SettingsPage() {
         </div>
 
         <HydrateClient>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className={isAdmin ? 'grid grid-cols-1 gap-4 lg:grid-cols-2' : ''}>
             <SaleRepresentativesTable />
-            <BusinessGroupsTable />
+            {isAdmin && <BusinessGroupsTable />}
           </div>
         </HydrateClient>
       </div>

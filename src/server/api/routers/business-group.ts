@@ -1,14 +1,55 @@
 import { z } from 'zod';
-import { createAuditLog, createTRPCRouter, protectedProcedure } from '../trpc';
+import {
+  adminProcedure,
+  createAuditLog,
+  createTRPCRouter,
+  protectedProcedure,
+} from '../trpc';
 
 export const businessGroupRouter = createTRPCRouter({
   getTotal: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.businessGroup.count();
+    const isAdmin = ctx.session.user.role === 'admin';
+    if (isAdmin) return ctx.db.businessGroup.count();
+    return ctx.db.businessGroup.count({
+      where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+    });
   }),
+
   get: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.businessGroup.findMany();
+    const isAdmin = ctx.session.user.role === 'admin';
+    if (isAdmin) return ctx.db.businessGroup.findMany();
+    return ctx.db.businessGroup.findMany({
+      where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+    });
   }),
-  create: protectedProcedure
+
+  getAssigned: adminProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.businessGroup.findMany({
+        where: { assignedUsers: { some: { id: input.userId } } },
+      });
+    }),
+
+  assign: adminProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        businessGroupIds: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.user.update({
+        where: { id: input.userId },
+        data: {
+          assignedBusinessGroups: {
+            set: input.businessGroupIds.map((id) => ({ id })),
+          },
+        },
+      });
+    }),
+
+  create: adminProcedure
     .input(
       z.object({
         name: z.string(),
@@ -47,7 +88,8 @@ export const businessGroupRouter = createTRPCRouter({
         throw error;
       }
     }),
-  update: protectedProcedure
+
+  update: adminProcedure
     .input(
       z.object({
         id: z.string(),
@@ -88,7 +130,8 @@ export const businessGroupRouter = createTRPCRouter({
         throw error;
       }
     }),
-  delete: protectedProcedure
+
+  delete: adminProcedure
     .input(
       z.object({
         id: z.string(),

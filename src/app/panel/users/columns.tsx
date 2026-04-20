@@ -4,6 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { User } from 'generated/prisma';
 import { Check, MoreHorizontal, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
+import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import {
   DropdownMenu,
@@ -81,6 +82,19 @@ export const createColumns = (
     accessorKey: 'email',
     header: 'E-posta',
     enableSorting: true,
+  },
+  {
+    accessorKey: 'role',
+    header: 'Rol',
+    enableSorting: false,
+    cell: ({ row }) => {
+      const r = row.getValue('role') as string | null;
+      return (
+        <Badge variant={r === 'admin' ? 'default' : 'secondary'}>
+          {r === 'admin' ? 'Yönetici' : 'Kullanıcı'}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: 'emailVerified',

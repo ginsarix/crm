@@ -7,7 +7,7 @@ import {
   UserFindManySelectSchema,
   UserUpdateSchema,
 } from '~/shared/zod-schemas/user';
-import { createAuditLog, createTRPCRouter, protectedProcedure } from '../trpc';
+import { adminProcedure, createAuditLog, createTRPCRouter } from '../trpc';
 
 const filterSchema = z.object({
   search: z.string().optional(),
@@ -36,10 +36,10 @@ const sortableFields = [
 type SortableField = (typeof sortableFields)[number];
 
 export const userRouter = createTRPCRouter({
-  getTotal: protectedProcedure.query(async ({ ctx }) => {
+  getTotal: adminProcedure.query(async ({ ctx }) => {
     return await ctx.db.user.count();
   }),
-  get: protectedProcedure
+  get: adminProcedure
     .input(
       z.object({
         select: UserFindManySelectSchema.optional(),
@@ -114,7 +114,7 @@ export const userRouter = createTRPCRouter({
         },
       };
     }),
-  getById: protectedProcedure
+  getById: adminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       return await ctx.db.user.findUnique({
@@ -136,7 +136,7 @@ export const userRouter = createTRPCRouter({
         },
       });
     }),
-  create: protectedProcedure
+  create: adminProcedure
     .input(UserCreateSchema)
     .mutation(async ({ ctx, input }) => {
       try {
@@ -145,7 +145,7 @@ export const userRouter = createTRPCRouter({
             name: input.name,
             email: input.email,
             password: input.password,
-            role: 'admin',
+            role: input.role,
           },
         });
 
@@ -179,13 +179,13 @@ export const userRouter = createTRPCRouter({
         throw error;
       }
     }),
-  update: protectedProcedure
+  update: adminProcedure
     .input(UserUpdateSchema.extend({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { id, password, ...data } = input;
 
       try {
-        // Update user basic info
+        // Update user basic info (role included if provided)
         const updatedUser = await ctx.db.user.update({
           where: { id },
           data,
@@ -244,7 +244,7 @@ export const userRouter = createTRPCRouter({
         throw error;
       }
     }),
-  delete: protectedProcedure
+  delete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Check if trying to delete self

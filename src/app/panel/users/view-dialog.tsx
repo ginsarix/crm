@@ -8,7 +8,9 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
+import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
+import { Checkbox } from '~/components/ui/checkbox';
 import {
   Dialog,
   DialogClose,
@@ -20,6 +22,13 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { UserUpdateSchema } from '~/shared/zod-schemas/user';
 import { api } from '~/trpc/react';
 
@@ -38,9 +47,21 @@ export function ViewUserDialog({
 }: ViewUserDialogProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const utils = api.useUtils();
 
-  // Reset modes when dialog closes
+  const { data: allGroups } = api.businessGroup.get.useQuery();
+  const { data: assignedGroups } = api.businessGroup.getAssigned.useQuery(
+    { userId: user.id },
+    { enabled: open },
+  );
+
+  useEffect(() => {
+    if (assignedGroups) {
+      setSelectedGroupIds(assignedGroups.map((g) => g.id));
+    }
+  }, [assignedGroups]);
+
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setIsEditMode(false);
@@ -49,24 +70,27 @@ export function ViewUserDialog({
     onOpenChange(newOpen);
   };
 
-  const constructDefaultValues = (user: User) => {
-    return {
-      name: user.name ?? '',
-      email: user.email ?? '',
-      password: '',
-    };
-  };
+  const constructDefaultValues = (u: User) => ({
+    name: u.name ?? '',
+    email: u.email ?? '',
+    password: '',
+    role: (u.role as 'admin' | 'user') ?? 'user',
+  });
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(UserUpdateSchema),
     defaultValues: constructDefaultValues(user),
     mode: 'onChange',
   });
+
+  const role = watch('role');
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: constructDefaultValues is a pure function
   useEffect(() => {
@@ -77,7 +101,6 @@ export function ViewUserDialog({
     onSuccess: (updatedUser) => {
       utils.user.get.invalidate();
       toast.success('Kullanıcı başarıyla güncellendi');
-
       onUpdate(updatedUser);
       setIsEditMode(false);
     },
@@ -99,12 +122,18 @@ export function ViewUserDialog({
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof UserUpdateSchema>) => {
-    await updateMutation.mutateAsync({
-      id: user.id,
-      ...data,
-    });
+  const assignMutation = api.businessGroup.assign.useMutation({
+    onSuccess: () => {
+      utils.businessGroup.getAssigned.invalidate({ userId: user.id });
+      toast.success('Meslek grupları güncellendi');
+    },
+    onError: () => {
+      toast.error('Meslek grupları güncellenirken bir hata oluştu');
+    },
+  });
 
+  const onSubmit = async (data: z.infer<typeof UserUpdateSchema>) => {
+    await updateMutation.mutateAsync({ id: user.id, ...data });
     reset();
   };
 
@@ -120,6 +149,21 @@ export function ViewUserDialog({
     if (showDeleteConfirm) {
       setShowDeleteConfirm(false);
     }
+  };
+
+  const handleGroupToggle = (groupId: string) => {
+    setSelectedGroupIds((prev) =>
+      prev.includes(groupId)
+        ? prev.filter((id) => id !== groupId)
+        : [...prev, groupId],
+    );
+  };
+
+  const handleAssignGroups = async () => {
+    await assignMutation.mutateAsync({
+      userId: user.id,
+      businessGroupIds: selectedGroupIds,
+    });
   };
 
   const initials = user.name
@@ -255,6 +299,26 @@ export function ViewUserDialog({
               </p>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="edit-role">Rol *</Label>
+              <Select
+                onValueChange={(v) =>
+                  setValue('role', v as 'admin' | 'user', {
+                    shouldValidate: true,
+                  })
+                }
+                value={role ?? 'user'}
+              >
+                <SelectTrigger id="edit-role">
+                  <SelectValue placeholder="Rol seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Kullanıcı</SelectItem>
+                  <SelectItem value="admin">Yönetici</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <DialogFooter>
               <Button
                 disabled={updateMutation.isPending}
@@ -275,7 +339,6 @@ export function ViewUserDialog({
           </form>
         ) : (
           <div className="space-y-4">
-            {/* View Mode - Display data */}
             <div className="flex justify-center">
               <Avatar className="h-20 w-20">
                 <AvatarImage alt={user.name} src={user.image ?? undefined} />
@@ -284,7 +347,12 @@ export function ViewUserDialog({
             </div>
 
             <div className="text-center">
-              <h3 className="font-semibold text-lg">{user.name}</h3>
+              <div className="flex items-center justify-center gap-2">
+                <h3 className="font-semibold text-lg">{user.name}</h3>
+                <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                  {user.role === 'admin' ? 'Yönetici' : 'Kullanıcı'}
+                </Badge>
+              </div>
               <p className="text-muted-foreground text-sm">{user.email}</p>
             </div>
 
@@ -329,6 +397,44 @@ export function ViewUserDialog({
                 </p>
               </div>
             </div>
+
+            {/* Business Group Assignment */}
+            {allGroups && allGroups.length > 0 && (
+              <div className="space-y-2 border-t pt-4">
+                <Label className="font-medium">Meslek Grupları</Label>
+                <p className="text-muted-foreground text-xs">
+                  Bu kullanıcının görebileceği meslek gruplarını seçin
+                </p>
+                <div className="space-y-2">
+                  {allGroups.map((group) => (
+                    <div className="flex items-center gap-2" key={group.id}>
+                      <Checkbox
+                        checked={selectedGroupIds.includes(group.id)}
+                        id={`group-${group.id}`}
+                        onCheckedChange={() => handleGroupToggle(group.id)}
+                      />
+                      <Label
+                        className="cursor-pointer font-normal"
+                        htmlFor={`group-${group.id}`}
+                      >
+                        {group.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  className="mt-2 w-full cursor-pointer"
+                  disabled={assignMutation.isPending}
+                  onClick={handleAssignGroups}
+                  size="sm"
+                  variant="outline"
+                >
+                  {assignMutation.isPending
+                    ? 'Kaydediliyor...'
+                    : 'Meslek Gruplarını Kaydet'}
+                </Button>
+              </div>
+            )}
 
             <DialogFooter>
               <DialogClose asChild>

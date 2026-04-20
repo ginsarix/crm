@@ -90,8 +90,7 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
 
   if (t._config.isDev) {
-    // artificial delay in dev
-    const waitMs = Math.floor(Math.random() * 400) + 100;
+    const waitMs = 100 + Math.floor(Math.random() * 20);
     await new Promise((resolve) => setTimeout(resolve, waitMs));
   }
 
@@ -158,6 +157,22 @@ export const protectedProcedure = t.procedure
     return next({
       ctx: {
         // infers the `session` as non-nullable
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  });
+
+export const adminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+    if (ctx.session.user.role !== 'admin') {
+      throw new TRPCError({ code: 'FORBIDDEN' });
+    }
+    return next({
+      ctx: {
         session: { ...ctx.session, user: ctx.session.user },
       },
     });

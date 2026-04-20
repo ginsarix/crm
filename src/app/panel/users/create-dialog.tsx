@@ -19,6 +19,13 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { UserCreateSchema } from '~/shared/zod-schemas/user';
 import { api } from '~/trpc/react';
 
@@ -29,12 +36,17 @@ export function CreateUserDialog() {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(UserCreateSchema),
+    defaultValues: { name: '', email: '', password: '', role: 'user' as const },
     mode: 'onChange',
     shouldFocusError: false,
   });
+
+  const role = watch('role');
 
   const createMutation = api.user.create.useMutation({
     onSuccess: () => {
@@ -112,6 +124,26 @@ export function CreateUserDialog() {
             {errors.password && (
               <p className="text-red-500 text-sm">{errors.password.message}</p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="role">Rol *</Label>
+            <Select
+              onValueChange={(v) =>
+                setValue('role', v as 'admin' | 'user', {
+                  shouldValidate: true,
+                })
+              }
+              value={role}
+            >
+              <SelectTrigger id="role">
+                <SelectValue placeholder="Rol seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="user">Kullanıcı</SelectItem>
+                <SelectItem value="admin">Yönetici</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <DialogFooter>

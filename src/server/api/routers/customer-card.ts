@@ -140,6 +140,17 @@ export const customerCardRouter = createTRPCRouter({
         whereClause.district = input.filter.district;
       }
 
+      // Non-admins can only see cards belonging to their assigned business groups
+      const isAdmin = ctx.session.user.role === 'admin';
+      if (!isAdmin) {
+        const assignedGroups = await ctx.db.businessGroup.findMany({
+          where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+          select: { name: true },
+        });
+        const names = assignedGroups.map((g) => g.name);
+        whereClause.businessGroup = { in: names };
+      }
+
       // Build orderBy clause
       const orderBy: Prisma.CustomerCardOrderByWithRelationInput[] = [];
 

@@ -1,12 +1,8 @@
-import * as React from "react"
-import { PlusIcon } from "lucide-react"
+import { PlusIcon } from "lucide-react";
+import * as React from "react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "~/components/ui/avatar"
-import { Button } from "~/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/button";
 import {
   Item,
   ItemActions,
@@ -16,7 +12,7 @@ import {
   ItemMedia,
   ItemSeparator,
   ItemTitle,
-} from "~/components/ui/item"
+} from "~/components/ui/item";
 
 const people = [
   {
@@ -34,7 +30,7 @@ const people = [
     avatar: "https://github.com/evilrabbit.png",
     email: "evilrabbit@vercel.com",
   },
-]
+];
 
 export default function ItemGroupExample() {
   return (
@@ -45,7 +41,7 @@ export default function ItemGroupExample() {
             <Item>
               <ItemMedia>
                 <Avatar>
-                  <AvatarImage src={person.avatar} className="grayscale" />
+                  <AvatarImage className="grayscale" src={person.avatar} />
                   <AvatarFallback>{person.username.charAt(0)}</AvatarFallback>
                 </Avatar>
               </ItemMedia>
@@ -54,7 +50,7 @@ export default function ItemGroupExample() {
                 <ItemDescription>{person.email}</ItemDescription>
               </ItemContent>
               <ItemActions>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button className="rounded-full" size="icon" variant="ghost">
                   <PlusIcon />
                 </Button>
               </ItemActions>
@@ -64,5 +60,5 @@ export default function ItemGroupExample() {
         ))}
       </ItemGroup>
     </div>
-  )
+  );
 }

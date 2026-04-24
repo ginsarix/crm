@@ -1,33 +1,38 @@
-import type { Prisma } from 'generated/prisma';
-import { z } from 'zod';
-import { columnMap } from '~/lib/column-map';
+import type { Prisma } from "generated/prisma";
+import { z } from "zod";
+import { columnMap } from "~/lib/column-map";
 import {
   CustomerCardCreateSchema,
   CustomerCardFindManySelectSchema,
-} from '~/shared/zod-schemas/customer-card';
-import { createAuditLog, createTRPCRouter, protectedProcedure } from '../trpc';
+} from "~/shared/zod-schemas/customer-card";
+import {
+  adminProcedure,
+  createAuditLog,
+  createTRPCRouter,
+  protectedProcedure,
+} from "../trpc";
 
 const filterSchema = z.object({
   search: z.string().optional(),
-  positive: z.enum(['negative', 'neutral', 'positive', 'all']).default('all'),
+  positive: z.enum(["negative", "neutral", "positive", "all"]).default("all"),
   searchScope: z
-    .enum(['all', ...Object.keys(columnMap.customerCard)])
-    .default('all'),
+    .enum(["all", ...Object.keys(columnMap.customerCard)])
+    .default("all"),
   businessGroup: z.string().optional(),
   salesRepresentative: z.string().optional(),
   district: z
     .enum([
-      '',
-      'merkez',
-      'avanos',
-      'urgup',
-      'hacibektas',
-      'kozakli',
-      'acigol',
-      'derinkuyu',
-      'gulsehir',
+      "",
+      "merkez",
+      "avanos",
+      "urgup",
+      "hacibektas",
+      "kozakli",
+      "acigol",
+      "derinkuyu",
+      "gulsehir",
     ])
-    .default(''),
+    .default(""),
 });
 
 const sortingSchema = z.object({
@@ -37,42 +42,42 @@ const sortingSchema = z.object({
 
 // Searchable text fields for "all" scope
 const searchableFields = [
-  'name',
-  'sira',
-  'sicil',
-  'address',
-  'region',
-  'gsm1',
-  'contact1',
-  'gsm2',
-  'contact2',
-  'gsm3',
-  'contact3',
-  'businessGroup',
-  'salesRepresentative',
+  "name",
+  "sira",
+  "sicil",
+  "address",
+  "region",
+  "gsm1",
+  "contact1",
+  "gsm2",
+  "contact2",
+  "gsm3",
+  "contact3",
+  "businessGroup",
+  "salesRepresentative",
 ] as const;
 
 type SearchableField = (typeof searchableFields)[number];
 
 // Sortable fields
 const sortableFields = [
-  'name',
-  'sira',
-  'sicil',
-  'address',
-  'district',
-  'region',
-  'gsm1',
-  'contact1',
-  'gsm2',
-  'contact2',
-  'gsm3',
-  'contact3',
-  'businessGroup',
-  'positive',
-  'salesRepresentative',
-  'createdAt',
-  'updatedAt',
+  "name",
+  "sira",
+  "sicil",
+  "address",
+  "district",
+  "region",
+  "gsm1",
+  "contact1",
+  "gsm2",
+  "contact2",
+  "gsm3",
+  "contact3",
+  "businessGroup",
+  "positive",
+  "salesRepresentative",
+  "createdAt",
+  "updatedAt",
 ] as const;
 
 type SortableField = (typeof sortableFields)[number];
@@ -99,12 +104,12 @@ export const customerCardRouter = createTRPCRouter({
         const searchValue = input.filter.search;
         const scope = input.filter.searchScope;
 
-        if (scope === 'all') {
+        if (scope === "all") {
           // Search across all searchable fields
           whereClause.OR = searchableFields.map((field) => ({
             [field]: {
               contains: searchValue,
-              mode: 'insensitive' as const,
+              mode: "insensitive" as const,
             },
           })) as Prisma.CustomerCardWhereInput[];
         } else if (searchableFields.includes(scope as SearchableField)) {
@@ -112,25 +117,25 @@ export const customerCardRouter = createTRPCRouter({
           const field = scope as SearchableField;
           whereClause[field] = {
             contains: searchValue,
-            mode: 'insensitive' as const,
+            mode: "insensitive" as const,
           };
         }
       }
 
       // Build positive filter
-      if (input.filter?.positive && input.filter.positive !== 'all') {
+      if (input.filter?.positive && input.filter.positive !== "all") {
         whereClause.positive = input.filter.positive;
       }
 
       // Build businessGroup filter
-      if (input.filter?.businessGroup && input.filter.businessGroup !== '') {
+      if (input.filter?.businessGroup && input.filter.businessGroup !== "") {
         whereClause.businessGroup = input.filter.businessGroup;
       }
 
       // Build salesRepresentative filter
       if (
         input.filter?.salesRepresentative &&
-        input.filter.salesRepresentative !== ''
+        input.filter.salesRepresentative !== ""
       ) {
         whereClause.salesRepresentative = input.filter.salesRepresentative;
       }
@@ -141,7 +146,7 @@ export const customerCardRouter = createTRPCRouter({
       }
 
       // Non-admins can only see cards belonging to their assigned business groups
-      const isAdmin = ctx.session.user.role === 'admin';
+      const isAdmin = ctx.session.user.role === "admin";
       if (!isAdmin) {
         const assignedGroups = await ctx.db.businessGroup.findMany({
           where: { assignedUsers: { some: { id: ctx.session.user.id } } },
@@ -158,7 +163,7 @@ export const customerCardRouter = createTRPCRouter({
         for (const sort of input.sorting) {
           if (sortableFields.includes(sort.id as SortableField)) {
             orderBy.push({
-              [sort.id]: sort.desc ? 'desc' : 'asc',
+              [sort.id]: sort.desc ? "desc" : "asc",
             });
           }
         }
@@ -166,7 +171,7 @@ export const customerCardRouter = createTRPCRouter({
 
       // Default sort if no sorting provided
       if (orderBy.length === 0) {
-        orderBy.push({ createdAt: 'desc' });
+        orderBy.push({ createdAt: "desc" });
       }
 
       const totalItems = await ctx.db.customerCard.count({
@@ -204,10 +209,10 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'CUSTOMER_CARD_CREATED',
-          'CUSTOMER_CARD',
+          "CUSTOMER_CARD_CREATED",
+          "CUSTOMER_CARD",
           result.id,
-          'SUCCESS',
+          "SUCCESS",
           undefined,
           `Cari kart oluşturuldu: ${result.name}`,
         );
@@ -217,11 +222,11 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'CUSTOMER_CARD_CREATED',
-          'CUSTOMER_CARD',
-          '',
-          'FAILURE',
-          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          "CUSTOMER_CARD_CREATED",
+          "CUSTOMER_CARD",
+          "",
+          "FAILURE",
+          error instanceof Error ? error.message : "Bilinmeyen hata",
           `Cari kart oluşturulamadı: ${input.name}`,
         );
         throw error;
@@ -239,10 +244,10 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'CUSTOMER_CARD_UPDATED',
-          'CUSTOMER_CARD',
+          "CUSTOMER_CARD_UPDATED",
+          "CUSTOMER_CARD",
           input.id,
-          'SUCCESS',
+          "SUCCESS",
           undefined,
           `Cari kart güncellendi: ${result.name}`,
         );
@@ -252,17 +257,17 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'CUSTOMER_CARD_UPDATED',
-          'CUSTOMER_CARD',
+          "CUSTOMER_CARD_UPDATED",
+          "CUSTOMER_CARD",
           input.id,
-          'FAILURE',
-          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          "FAILURE",
+          error instanceof Error ? error.message : "Bilinmeyen hata",
           `Cari kart güncellenemedi: ${input.name}`,
         );
         throw error;
       }
     }),
-  delete: protectedProcedure
+  delete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -279,10 +284,10 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'CUSTOMER_CARD_DELETED',
-          'CUSTOMER_CARD',
+          "CUSTOMER_CARD_DELETED",
+          "CUSTOMER_CARD",
           input.id,
-          'SUCCESS',
+          "SUCCESS",
           undefined,
           `Cari kart silindi: ${customerCard?.name}`,
         );
@@ -292,11 +297,11 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'CUSTOMER_CARD_DELETED',
-          'CUSTOMER_CARD',
+          "CUSTOMER_CARD_DELETED",
+          "CUSTOMER_CARD",
           input.id,
-          'FAILURE',
-          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          "FAILURE",
+          error instanceof Error ? error.message : "Bilinmeyen hata",
           `Cari kart silinemedi`,
         );
         throw error;
@@ -305,17 +310,17 @@ export const customerCardRouter = createTRPCRouter({
 
   getPositivesCount: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.customerCard.count({
-      where: { positive: 'positive' },
+      where: { positive: "positive" },
     });
   }),
   getNegativesCount: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.customerCard.count({
-      where: { positive: 'negative' },
+      where: { positive: "negative" },
     });
   }),
   getNeutralsCount: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.customerCard.count({
-      where: { positive: 'neutral' },
+      where: { positive: "neutral" },
     });
   }),
 });

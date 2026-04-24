@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
+import { authClient } from '~/server/better-auth/client';
 import { api } from '~/trpc/react';
 import PositiveControl from './positive-control';
 
@@ -58,6 +59,8 @@ export function ViewCustomerCardDialog({
   const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const utils = api.useUtils();
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === 'admin';
 
   const { data: businessGroups } = api.businessGroup.get.useQuery();
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
@@ -187,6 +190,7 @@ export function ViewCustomerCardDialog({
                     <Edit />
                     Düzenle
                   </Button>
+                  {isAdmin && (
                   <Button
                     className="me-4 cursor-pointer"
                     onClick={() => {
@@ -198,6 +202,7 @@ export function ViewCustomerCardDialog({
                   >
                     <Trash2 />
                   </Button>
+                  )}
                 </>
               )}
             </div>

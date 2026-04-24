@@ -23,7 +23,7 @@ const VIA_MAP = {
 } as const;
 
 export const createColumns = (
-  onViewVisit: (visit: VisitWithCustomerCard) => void
+  onViewVisit: (visit: VisitWithCustomerCard) => void,
 ): ColumnDef<VisitWithCustomerCard>[] => [
   {
     id: "actions",
@@ -39,12 +39,9 @@ export const createColumns = (
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Eylemler</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(visit.id)}
-            >
-              ID'yi Kopyala
-            </DropdownMenuItem>
+            <DropdownMenuLabel className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+              Eylemler
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onViewVisit(visit)}>
               Ziyareti Görüntüle
@@ -80,7 +77,7 @@ export const createColumns = (
       const date = row.getValue("date") as Date;
       const d = new Date(date);
       return `${String(d.getUTCDate()).padStart(2, "0")}.${String(
-        d.getUTCMonth() + 1
+        d.getUTCMonth() + 1,
       ).padStart(2, "0")}.${d.getUTCFullYear()}`;
     },
   },
@@ -92,7 +89,7 @@ export const createColumns = (
       const time = row.getValue("time") as Date;
       const date = new Date(time);
       return `${String(date.getUTCHours()).padStart(2, "0")}:${String(
-        date.getUTCMinutes()
+        date.getUTCMinutes(),
       ).padStart(2, "0")}`;
     },
   },

@@ -18,6 +18,7 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { authClient } from '~/server/better-auth/client';
 import { api } from '~/trpc/react';
 
 interface ViewSaleRepresentativeDialogProps {
@@ -36,6 +37,8 @@ export function ViewSaleRepresentativeDialog({
   const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const utils = api.useUtils();
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === 'admin';
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
@@ -143,17 +146,19 @@ export function ViewSaleRepresentativeDialog({
                     <Edit />
                     Düzenle
                   </Button>
-                  <Button
-                    className="me-4 cursor-pointer"
-                    onClick={() => {
-                      setIsEditMode(false);
-                      setShowDeleteConfirm(true);
-                    }}
-                    size="icon"
-                    variant="destructive"
-                  >
-                    <Trash2 />
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      className="me-4 cursor-pointer"
+                      onClick={() => {
+                        setIsEditMode(false);
+                        setShowDeleteConfirm(true);
+                      }}
+                      size="icon"
+                      variant="destructive"
+                    >
+                      <Trash2 />
+                    </Button>
+                  )}
                 </>
               )}
             </div>

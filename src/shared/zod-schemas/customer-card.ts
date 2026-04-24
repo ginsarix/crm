@@ -1,22 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { DistrictValidation } from "./district";
 
 export const CustomerCardCreateSchema = z.object({
   sira: z.string().optional(),
-  name: z.string().min(1, 'Müşteri adı zorunludur'),
+  name: z.string().min(1, "Müşteri adı zorunludur"),
   sicil: z.string().optional(),
   address: z.string().optional(),
-  district: z
-    .enum([
-      'merkez',
-      'avanos',
-      'urgup',
-      'hacibektas',
-      'kozakli',
-      'acigol',
-      'derinkuyu',
-      'gulsehir',
-    ])
-    .optional(),
+  district: DistrictValidation.optional(),
   region: z.string().optional(),
   gsm1: z.string().optional(),
   contact1: z.string().optional(),
@@ -25,7 +15,7 @@ export const CustomerCardCreateSchema = z.object({
   gsm3: z.string().optional(),
   contact3: z.string().optional(),
   businessGroup: z.string().optional(),
-  positive: z.enum(['negative', 'neutral', 'positive']).default('neutral'),
+  positive: z.enum(["negative", "neutral", "positive"]).default("neutral"),
   salesRepresentative: z.string().optional(),
 });
 

@@ -60,11 +60,10 @@ export const auth = betterAuth({
 
   session: {
     expiresIn: 15 * 60, // 15 mins: slide forward by this much on update
-    updateAge: 15 * 60, // Update only after 15 mins of inactivity
+    updateAge: 0, // Every request resets the 15 min clock
     cookieCache: {
       enabled: true,
       maxAge: 5 * 60, // Short cache cookie (5 mins) for perf—refreshes often
-      refreshCache: false, // Disable auto-refresh to enforce timeouts
     },
   },
   trustedOrigins: env.CROSS_ORIGIN_URL ? [env.CROSS_ORIGIN_URL] : [],

@@ -126,7 +126,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="flex flex-col">
       {/* Column Selector */}
-      <div className="flex justify-end border-x border-t bg-zinc-900 px-4 py-2">
+      <div className="flex justify-end border-x border-t bg-card px-4 py-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button className="gap-2" size="sm" variant="outline">
@@ -187,7 +187,7 @@ export function DataTable<TData, TValue>({
       {/* Table */}
       <div
         className={cn(
-          'overflow-hidden rounded-lg rounded-t-none border bg-zinc-900',
+          'overflow-hidden rounded-lg rounded-t-none border bg-card',
           className,
           pagination && setPagination && 'rounded-b-none',
         )}
@@ -283,7 +283,7 @@ export function DataTable<TData, TValue>({
 
       {/* Pagination */}
       {pagination && setPagination && (
-        <div className="flex items-center justify-between rounded-b-lg border-x border-b bg-zinc-900 px-4 py-3">
+        <div className="flex items-center justify-between rounded-b-lg border-x border-b bg-card px-4 py-3">
           <span className="text-muted-foreground text-sm">
             Sayfa {pagination.pageIndex + 1}
             {pageCount > 0 && ` / ${pageCount}`}

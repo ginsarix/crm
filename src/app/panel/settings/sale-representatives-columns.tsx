@@ -1,8 +1,8 @@
-import type { ColumnDef } from '@tanstack/react-table';
-import type { SalesRepresentative } from 'generated/prisma';
-import { MoreHorizontal } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '~/components/ui/button';
+import type { ColumnDef } from "@tanstack/react-table";
+import type { SalesRepresentative } from "generated/prisma";
+import { MoreHorizontal } from "lucide-react";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,13 +10,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
+} from "~/components/ui/dropdown-menu";
 
 export const createColumns = (
   onViewSalesRepresentative: (salesRepresentative: SalesRepresentative) => void,
 ): ColumnDef<SalesRepresentative>[] => [
   {
-    id: 'actions',
+    id: "actions",
     cell: ({ row }) => {
       const salesRepresentative = row.original;
       return (
@@ -28,24 +28,14 @@ export const createColumns = (
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Eylemler</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(salesRepresentative.id)
-              }
-            >
-              ID'yi Kopyala
-            </DropdownMenuItem>
+            <DropdownMenuLabel className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+              Eylemler
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => onViewSalesRepresentative(salesRepresentative)}
             >
               Görüntüle
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href={`/panel/visits/${salesRepresentative.id}`}>
-                Carileri Görüntüle
-              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -53,26 +43,26 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: 'name',
-    header: 'Ad',
+    accessorKey: "name",
+    header: "Ad",
     enableSorting: true,
   },
   {
-    accessorKey: 'createdAt',
-    header: 'Oluşturulma Tarihi',
+    accessorKey: "createdAt",
+    header: "Oluşturulma Tarihi",
     enableSorting: true,
     cell: ({ row }) => {
-      const date = row.getValue('createdAt') as Date;
-      return new Date(date).toLocaleDateString('tr-TR');
+      const date = row.getValue("createdAt") as Date;
+      return new Date(date).toLocaleDateString("tr-TR");
     },
   },
   {
-    accessorKey: 'updatedAt',
-    header: 'Güncellenme Tarihi',
+    accessorKey: "updatedAt",
+    header: "Güncellenme Tarihi",
     enableSorting: true,
     cell: ({ row }) => {
-      const date = row.getValue('updatedAt') as Date;
-      return new Date(date).toLocaleDateString('tr-TR');
+      const date = row.getValue("updatedAt") as Date;
+      return new Date(date).toLocaleDateString("tr-TR");
     },
   },
 ];

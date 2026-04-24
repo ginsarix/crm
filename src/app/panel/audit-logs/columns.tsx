@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import type { ColumnDef } from '@tanstack/react-table';
-import type { AuditLog, User } from 'generated/prisma';
-import { AlertCircle, CheckCircle2, Eye, MoreHorizontal } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
-import { Badge } from '~/components/ui/badge';
-import { Button } from '~/components/ui/button';
+import type { ColumnDef } from "@tanstack/react-table";
+import type { AuditLog, User } from "generated/prisma";
+import { AlertCircle, CheckCircle2, Eye, MoreHorizontal } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,27 +13,27 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
+} from "~/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '~/components/ui/tooltip';
+} from "~/components/ui/tooltip";
 import {
   auditAction,
   resourceType as resourceTypeLabels,
-} from '~/lib/enum-map';
+} from "~/lib/enum-map";
 
 type AuditLogWithUser = AuditLog & {
-  user: Pick<User, 'id' | 'name' | 'email' | 'image'> | null;
+  user: Pick<User, "id" | "name" | "email" | "image"> | null;
 };
 
 export const createColumns = (
   onViewAuditLog: (auditLog: AuditLogWithUser) => void,
 ): ColumnDef<AuditLogWithUser>[] => [
   {
-    id: 'actions',
+    id: "actions",
     cell: ({ row }) => {
       const auditLog = row.original;
 
@@ -46,12 +46,9 @@ export const createColumns = (
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Eylemler</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(auditLog.id)}
-            >
-              ID'yi Kopyala
-            </DropdownMenuItem>
+            <DropdownMenuLabel className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+              Eylemler
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onViewAuditLog(auditLog)}>
               <Eye className="mr-2 h-4 w-4" />
@@ -63,26 +60,26 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: 'createdAt',
-    header: 'Tarih',
+    accessorKey: "createdAt",
+    header: "Tarih",
     enableSorting: true,
     cell: ({ row }) => {
-      const date = row.getValue('createdAt') as Date;
+      const date = row.getValue("createdAt") as Date;
       return (
         <div className="flex flex-col">
           <span className="text-sm">
-            {new Date(date).toLocaleDateString('tr-TR')}
+            {new Date(date).toLocaleDateString("tr-TR")}
           </span>
           <span className="text-muted-foreground text-xs">
-            {new Date(date).toLocaleTimeString('tr-TR')}
+            {new Date(date).toLocaleTimeString("tr-TR")}
           </span>
         </div>
       );
     },
   },
   {
-    accessorKey: 'user',
-    header: 'Kullanıcı',
+    accessorKey: "user",
+    header: "Kullanıcı",
     enableSorting: false,
     cell: ({ row }) => {
       const user = row.original.user;
@@ -94,9 +91,9 @@ export const createColumns = (
       }
 
       const initials = user.name
-        .split(' ')
+        .split(" ")
         .map((n) => n[0])
-        .join('')
+        .join("")
         .toUpperCase()
         .slice(0, 2);
 
@@ -115,11 +112,11 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: 'action',
-    header: 'İşlem',
+    accessorKey: "action",
+    header: "İşlem",
     enableSorting: true,
     cell: ({ row }) => {
-      const action = row.getValue('action') as keyof typeof auditAction;
+      const action = row.getValue("action") as keyof typeof auditAction;
       return (
         <Badge className="font-normal" variant="outline">
           {auditAction[action] ?? action}
@@ -128,22 +125,22 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: 'resourceType',
-    header: 'Kaynak Türü',
+    accessorKey: "resourceType",
+    header: "Kaynak Türü",
     enableSorting: true,
     cell: ({ row }) => {
       const rt = row.getValue(
-        'resourceType',
+        "resourceType",
       ) as keyof typeof resourceTypeLabels;
       return <span className="text-sm">{resourceTypeLabels[rt] ?? rt}</span>;
     },
   },
   {
-    accessorKey: 'resourceId',
-    header: 'Kaynak ID',
+    accessorKey: "resourceId",
+    header: "Kaynak ID",
     enableSorting: false,
     cell: ({ row }) => {
-      const resourceId = row.getValue('resourceId') as string | null;
+      const resourceId = row.getValue("resourceId") as string | null;
       if (!resourceId) {
         return <span className="text-muted-foreground">-</span>;
       }
@@ -164,12 +161,12 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: 'result',
-    header: 'Sonuç',
+    accessorKey: "result",
+    header: "Sonuç",
     enableSorting: true,
     cell: ({ row }) => {
-      const result = row.getValue('result') as string;
-      return result === 'SUCCESS' ? (
+      const result = row.getValue("result") as string;
+      return result === "SUCCESS" ? (
         <div className="flex items-center gap-1 text-green-500">
           <CheckCircle2 className="h-4 w-4" />
           <span className="text-sm">Başarılı</span>
@@ -183,11 +180,11 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: 'details',
-    header: 'Detaylar',
+    accessorKey: "details",
+    header: "Detaylar",
     enableSorting: false,
     cell: ({ row }) => {
-      const details = row.getValue('details') as string | null;
+      const details = row.getValue("details") as string | null;
       if (!details) {
         return <span className="text-muted-foreground">-</span>;
       }
@@ -197,7 +194,7 @@ export const createColumns = (
             <TooltipTrigger asChild>
               <span className="max-w-[200px] cursor-help truncate text-sm">
                 {details.slice(0, 50)}
-                {details.length > 50 ? '...' : ''}
+                {details.length > 50 ? "..." : ""}
               </span>
             </TooltipTrigger>
             <TooltipContent className="max-w-[400px]">

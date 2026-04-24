@@ -1,7 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import { auditAction } from '~/lib/enum-map';
-import { api } from '~/trpc/server';
-import { ChartPie } from '../_components/pie-chart';
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { auditAction } from "~/lib/enum-map";
+import { api } from "~/trpc/server";
+import { BusinessGroupAlerts } from "../_components/business-group-alerts";
+import { ChartPie } from "../_components/pie-chart";
 
 export default async function DashboardPage() {
   const [
@@ -11,6 +13,8 @@ export default async function DashboardPage() {
     visitTotal,
     latestAudit,
     customerCardPositives,
+    customerCardNegatives,
+    businessGroupStats,
   ] = await Promise.all([
     api.customerCard.getTotal(),
     api.customerCard.getPositivesCount(),
@@ -18,6 +22,8 @@ export default async function DashboardPage() {
     api.visit.getTotal(),
     api.auditLog.getLatest(),
     api.salesRepresentative.customerCardPositives(),
+    api.salesRepresentative.customerCardNegatives(),
+    api.businessGroup.getStats(),
   ]);
 
   return (
@@ -27,87 +33,102 @@ export default async function DashboardPage() {
           <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
           <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex pb-2">
-              <CardTitle className="font-medium text-sm">
-                Toplam Cari Kart
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="font-bold text-2xl">{customerTotal}</div>
-              <p className="text-muted-foreground text-xs">
-                Sistemdeki toplam cari kart sayısı
-              </p>
-            </CardContent>
-          </Card>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <Link href="/panel/customer-cards">
+            <Card className="group cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
+              <CardHeader className="pt-4 pb-1">
+                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                  Toplam Cari Kart
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <div className="font-mono font-semibold text-3xl tabular-nums">
+                  {customerTotal}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card>
-            <CardHeader className="flex pb-2">
-              <CardTitle className="font-medium text-sm">
-                Toplam Ziyaret
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="font-bold text-2xl">{visitTotal}</div>
-              <p className="text-muted-foreground text-xs">
-                Sistemdeki toplam ziyaret sayısı
-              </p>
-            </CardContent>
-          </Card>
+          <Link href="/panel/visits">
+            <Card className="group cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
+              <CardHeader className="pt-4 pb-1">
+                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                  Toplam Ziyaret
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <div className="font-mono font-semibold text-3xl tabular-nums">
+                  {visitTotal}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card>
-            <CardHeader className="flex pb-2">
-              <CardTitle className="font-medium text-sm">
-                Pozitif Cari Kart Sayısı
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="font-bold text-2xl">{positivesCount}</div>
-              <p className="text-muted-foreground text-xs">
-                Pozitif cari kart sayısı
-              </p>
-            </CardContent>
-          </Card>
+          <Link href="/panel/customer-cards?positivity=positive">
+            <Card className="group cursor-pointer border-l-2 border-l-[oklch(0.70_0.15_145)] transition-colors hover:bg-accent">
+              <CardHeader className="pt-4 pb-1">
+                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                  Pozitif Cari Kart
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <div className="font-mono font-semibold text-3xl text-[oklch(0.70_0.15_145)] tabular-nums">
+                  {positivesCount}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card>
-            <CardHeader className="flex items-center justify-between pb-2">
-              <CardTitle className="font-medium text-sm">
-                Negatif Cari Kart Sayısı
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="font-bold text-2xl">{negativesCount}</div>
-              <p className="text-muted-foreground text-xs">
-                Negatif cari kart sayısı
-              </p>
-            </CardContent>
-          </Card>
+          <Link href="/panel/customer-cards?positivity=negative">
+            <Card className="group cursor-pointer border-l-2 border-l-destructive transition-colors hover:bg-accent">
+              <CardHeader className="pt-4 pb-1">
+                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                  Negatif Cari Kart
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <div className="font-mono font-semibold text-3xl text-destructive tabular-nums">
+                  {negativesCount}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>En son aktivite</CardTitle>
+        <Card className="mt-4 border-l-2 border-l-primary/40">
+          <CardHeader className="pt-4 pb-2">
+            <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+              Son Aktivite
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-muted-foreground text-sm">
-              {
-                // show custom details if available, otherwise the action text, or 'no activity' if nothing exists
-                latestAudit
-                  ? (latestAudit.details ??
-                    auditAction[latestAudit.action as keyof typeof auditAction])
-                  : 'Aktivite bulunamadı'
-              }
+          <CardContent className="pb-4">
+            <div className="font-mono text-sm">
+              {latestAudit
+                ? (latestAudit.details ??
+                  auditAction[latestAudit.action as keyof typeof auditAction])
+                : "—"}
             </div>
           </CardContent>
         </Card>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <BusinessGroupAlerts
+          negativeGroups={businessGroupStats.negativeGroups}
+          positiveGroups={businessGroupStats.positiveGroups}
+        />
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
           <ChartPie
-            className="mt-6"
+            className="border-l-2 border-l-[oklch(0.70_0.15_145)]"
             data={customerCardPositives}
             dataKey="customerCardCount"
             description="Pozitif bazlı satış temsilcileri grafiği"
             nameKey="salesRepresentative"
             title="Pozitif Bazlı Satış Temsilcileri"
+          />
+          <ChartPie
+            className="border-l-2 border-l-destructive"
+            data={customerCardNegatives}
+            dataKey="customerCardCount"
+            description="Negatif bazlı satış temsilcileri grafiği"
+            nameKey="salesRepresentative"
+            title="Negatif Bazlı Satış Temsilcileri"
           />
         </div>
       </div>

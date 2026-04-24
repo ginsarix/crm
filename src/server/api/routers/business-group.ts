@@ -15,6 +15,57 @@ export const businessGroupRouter = createTRPCRouter({
     });
   }),
 
+  getStats: protectedProcedure.query(async ({ ctx }) => {
+    const isAdmin = ctx.session.user.role === 'admin';
+
+    let allowedGroups: string[] | null = null;
+    if (!isAdmin) {
+      const assigned = await ctx.db.businessGroup.findMany({
+        where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+        select: { name: true },
+      });
+      allowedGroups = assigned.map((g) => g.name);
+    }
+
+    const rows = await ctx.db.customerCard.groupBy({
+      by: ['businessGroup', 'positive'],
+      _count: true,
+      where: {
+        businessGroup: allowedGroups
+          ? { in: allowedGroups }
+          : { not: null },
+      },
+    });
+
+    const map = new Map<string, { total: number; positive: number; negative: number }>();
+
+    for (const row of rows) {
+      const name = row.businessGroup ?? '';
+      if (!name) continue;
+      if (!map.has(name)) map.set(name, { total: 0, positive: 0, negative: 0 });
+      const entry = map.get(name)!;
+      entry.total += row._count;
+      if (row.positive === 'positive') entry.positive += row._count;
+      else if (row.positive === 'negative') entry.negative += row._count;
+    }
+
+    const all = Array.from(map.entries()).map(([name, counts]) => ({
+      name,
+      total: counts.total,
+      positivePercent: counts.total > 0 ? Math.round((counts.positive / counts.total) * 100) : 0,
+      negativePercent: counts.total > 0 ? Math.round((counts.negative / counts.total) * 100) : 0,
+    }));
+
+    return {
+      positiveGroups: all
+        .filter((g) => g.positivePercent >= 40)
+        .sort((a, b) => b.positivePercent - a.positivePercent),
+      negativeGroups: all
+        .filter((g) => g.negativePercent >= 40)
+        .sort((a, b) => b.negativePercent - a.negativePercent),
+    };
+  }),
+
   get: protectedProcedure.query(async ({ ctx }) => {
     const isAdmin = ctx.session.user.role === 'admin';
     if (isAdmin) return ctx.db.businessGroup.findMany();

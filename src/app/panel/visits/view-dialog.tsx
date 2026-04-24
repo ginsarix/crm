@@ -34,6 +34,7 @@ import {
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import { VisitCreateSchema } from "~/shared/zod-schemas/visit";
+import { authClient } from "~/server/better-auth/client";
 import { api } from "~/trpc/react";
 
 const VIA_OPTIONS = [
@@ -60,6 +61,8 @@ export function ViewVisitDialog({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const utils = api.useUtils();
   const [customerCardSearch, setCustomerCardSearch] = useState("");
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   // Fetch all customer cards for the dropdown
   const {
@@ -183,17 +186,19 @@ export function ViewVisitDialog({
                     <Edit />
                     Düzenle
                   </Button>
-                  <Button
-                    className="me-4 cursor-pointer"
-                    onClick={() => {
-                      setIsEditMode(false);
-                      setShowDeleteConfirm(true);
-                    }}
-                    size="icon"
-                    variant="destructive"
-                  >
-                    <Trash2 />
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      className="me-4 cursor-pointer"
+                      onClick={() => {
+                        setIsEditMode(false);
+                        setShowDeleteConfirm(true);
+                      }}
+                      size="icon"
+                      variant="destructive"
+                    >
+                      <Trash2 />
+                    </Button>
+                  )}
                 </>
               )}
             </div>

@@ -17,12 +17,13 @@ export default async function PanelLayout({
       <div className="flex min-h-screen w-full">
         <SidebarNav />
         <main className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
-            <SidebarTrigger />
-            <Separator className="h-6" orientation="vertical" />
-            <div className="flex-1">
-              <h1 className="font-semibold text-lg">CRM</h1>
-            </div>
+          <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur-sm sm:px-6">
+            <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+            <Separator className="h-4" orientation="vertical" />
+            <div className="flex-1" />
+            <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase select-none">
+              Nesbir CRM
+            </span>
           </header>
           <div className="flex-1 overflow-auto">{children}</div>
         </main>

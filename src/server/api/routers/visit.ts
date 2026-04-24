@@ -1,13 +1,18 @@
-import type { Prisma } from 'generated/prisma';
-import { z } from 'zod';
-import { columnMap } from '~/lib/column-map';
-import { VisitCreateSchema } from '~/shared/zod-schemas/visit';
-import { createAuditLog, createTRPCRouter, protectedProcedure } from '../trpc';
+import type { Prisma } from "generated/prisma";
+import { z } from "zod";
+import { columnMap } from "~/lib/column-map";
+import { VisitCreateSchema } from "~/shared/zod-schemas/visit";
+import {
+  adminProcedure,
+  createAuditLog,
+  createTRPCRouter,
+  protectedProcedure,
+} from "../trpc";
 
 const filterSchema = z.object({
   search: z.string().optional(),
-  via: z.enum(['phone', 'inPerson', 'email', 'sms', 'all']).default('all'),
-  searchScope: z.enum(['all', ...Object.keys(columnMap.visit)]).default('all'),
+  via: z.enum(["phone", "inPerson", "email", "sms", "all"]).default("all"),
+  searchScope: z.enum(["all", ...Object.keys(columnMap.visit)]).default("all"),
   customerCardId: z.string().optional(),
 });
 
@@ -17,18 +22,18 @@ const sortingSchema = z.object({
 });
 
 // Searchable text fields for "all" scope
-const searchableFields = ['note'] as const;
+const searchableFields = ["note"] as const;
 
 type SearchableField = (typeof searchableFields)[number];
 
 // Sortable fields
 const sortableFields = [
-  'date',
-  'time',
-  'via',
-  'note',
-  'createdAt',
-  'updatedAt',
+  "date",
+  "time",
+  "via",
+  "note",
+  "createdAt",
+  "updatedAt",
 ] as const;
 
 type SortableField = (typeof sortableFields)[number];
@@ -54,12 +59,12 @@ export const visitRouter = createTRPCRouter({
         const searchValue = input.filter.search;
         const scope = input.filter.searchScope;
 
-        if (scope === 'all') {
+        if (scope === "all") {
           // Search across all searchable fields
           whereClause.OR = searchableFields.map((field) => ({
             [field]: {
               contains: searchValue,
-              mode: 'insensitive' as const,
+              mode: "insensitive" as const,
             },
           })) as Prisma.VisitWhereInput[];
         } else if (searchableFields.includes(scope as SearchableField)) {
@@ -67,13 +72,13 @@ export const visitRouter = createTRPCRouter({
           const field = scope as SearchableField;
           whereClause[field] = {
             contains: searchValue,
-            mode: 'insensitive' as const,
+            mode: "insensitive" as const,
           };
         }
       }
 
       // Build via filter
-      if (input.filter?.via && input.filter.via !== 'all') {
+      if (input.filter?.via && input.filter.via !== "all") {
         whereClause.via = input.filter.via;
       }
 
@@ -89,7 +94,7 @@ export const visitRouter = createTRPCRouter({
         for (const sort of input.sorting) {
           if (sortableFields.includes(sort.id as SortableField)) {
             orderBy.push({
-              [sort.id]: sort.desc ? 'desc' : 'asc',
+              [sort.id]: sort.desc ? "desc" : "asc",
             });
           }
         }
@@ -97,7 +102,7 @@ export const visitRouter = createTRPCRouter({
 
       // Default sort if no sorting provided
       if (orderBy.length === 0) {
-        orderBy.push({ date: 'desc' }, { time: 'desc' });
+        orderBy.push({ date: "desc" }, { time: "desc" });
       }
 
       const totalItems = await ctx.db.visit.count({
@@ -154,12 +159,12 @@ export const visitRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'VISIT_CREATED',
-          'VISIT',
+          "VISIT_CREATED",
+          "VISIT",
           result.id,
-          'SUCCESS',
+          "SUCCESS",
           undefined,
-          `Ziyaret oluşturuldu: ${result.customerCard.name} - ${new Date(result.date).toLocaleDateString('tr-TR')}`,
+          `Ziyaret oluşturuldu: ${result.customerCard.name} - ${new Date(result.date).toLocaleDateString("tr-TR")}`,
         );
 
         return result;
@@ -167,11 +172,11 @@ export const visitRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'VISIT_CREATED',
-          'VISIT',
-          '',
-          'FAILURE',
-          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          "VISIT_CREATED",
+          "VISIT",
+          "",
+          "FAILURE",
+          error instanceof Error ? error.message : "Bilinmeyen hata",
           `Ziyaret oluşturulamadı`,
         );
         throw error;
@@ -201,12 +206,12 @@ export const visitRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'VISIT_UPDATED',
-          'VISIT',
+          "VISIT_UPDATED",
+          "VISIT",
           id,
-          'SUCCESS',
+          "SUCCESS",
           undefined,
-          `Ziyaret güncellendi: ${result.customerCard.name} - ${new Date(result.date).toLocaleDateString('tr-TR')}`,
+          `Ziyaret güncellendi: ${result.customerCard.name} - ${new Date(result.date).toLocaleDateString("tr-TR")}`,
         );
 
         return result;
@@ -214,17 +219,17 @@ export const visitRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'VISIT_UPDATED',
-          'VISIT',
+          "VISIT_UPDATED",
+          "VISIT",
           id,
-          'FAILURE',
-          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          "FAILURE",
+          error instanceof Error ? error.message : "Bilinmeyen hata",
           `Ziyaret güncellenemedi`,
         );
         throw error;
       }
     }),
-  delete: protectedProcedure
+  delete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -245,10 +250,10 @@ export const visitRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'VISIT_DELETED',
-          'VISIT',
+          "VISIT_DELETED",
+          "VISIT",
           input.id,
-          'SUCCESS',
+          "SUCCESS",
           undefined,
           `Ziyaret silindi: ${visit?.customerCard.name}`,
         );
@@ -258,11 +263,11 @@ export const visitRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          'VISIT_DELETED',
-          'VISIT',
+          "VISIT_DELETED",
+          "VISIT",
           input.id,
-          'FAILURE',
-          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          "FAILURE",
+          error instanceof Error ? error.message : "Bilinmeyen hata",
           `Ziyaret silinemedi`,
         );
         throw error;

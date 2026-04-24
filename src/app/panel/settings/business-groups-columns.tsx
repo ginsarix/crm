@@ -1,7 +1,7 @@
-import type { ColumnDef } from '@tanstack/react-table';
-import type { BusinessGroup } from 'generated/prisma';
-import { MoreHorizontal } from 'lucide-react';
-import { Button } from '~/components/ui/button';
+import type { ColumnDef } from "@tanstack/react-table";
+import type { BusinessGroup } from "generated/prisma";
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,13 +9,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
+} from "~/components/ui/dropdown-menu";
 
 export const createColumns = (
   onViewBusinessGroup: (businessGroup: BusinessGroup) => void,
 ): ColumnDef<BusinessGroup>[] => [
   {
-    id: 'actions',
+    id: "actions",
     cell: ({ row }) => {
       const businessGroup = row.original;
       return (
@@ -27,12 +27,9 @@ export const createColumns = (
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Eylemler</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(businessGroup.id)}
-            >
-              ID'yi Kopyala
-            </DropdownMenuItem>
+            <DropdownMenuLabel className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+              Eylemler
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => onViewBusinessGroup(businessGroup)}
@@ -45,26 +42,26 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: 'name',
-    header: 'Ad',
+    accessorKey: "name",
+    header: "Ad",
     enableSorting: true,
   },
   {
-    accessorKey: 'createdAt',
-    header: 'Oluşturulma Tarihi',
+    accessorKey: "createdAt",
+    header: "Oluşturulma Tarihi",
     enableSorting: true,
     cell: ({ row }) => {
-      const date = row.getValue('createdAt') as Date;
-      return new Date(date).toLocaleDateString('tr-TR');
+      const date = row.getValue("createdAt") as Date;
+      return new Date(date).toLocaleDateString("tr-TR");
     },
   },
   {
-    accessorKey: 'updatedAt',
-    header: 'Güncellenme Tarihi',
+    accessorKey: "updatedAt",
+    header: "Güncellenme Tarihi",
     enableSorting: true,
     cell: ({ row }) => {
-      const date = row.getValue('updatedAt') as Date;
-      return new Date(date).toLocaleDateString('tr-TR');
+      const date = row.getValue("updatedAt") as Date;
+      return new Date(date).toLocaleDateString("tr-TR");
     },
   },
 ];

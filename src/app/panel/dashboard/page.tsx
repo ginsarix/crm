@@ -113,6 +113,7 @@ export default async function DashboardPage() {
           negativeGroups={businessGroupStats.negativeGroups}
           positiveGroups={businessGroupStats.positiveGroups}
         />
+
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
           <ChartPie
             className="border-l-2 border-l-[oklch(0.70_0.15_145)]"

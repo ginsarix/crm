@@ -37,24 +37,32 @@ export const businessGroupRouter = createTRPCRouter({
       },
     });
 
-    const map = new Map<string, { total: number; positive: number; negative: number }>();
+    const map = new Map<string, { total: number; positive: number; negative: number; neutral: number }>();
 
     for (const row of rows) {
       const name = row.businessGroup ?? '';
       if (!name) continue;
-      if (!map.has(name)) map.set(name, { total: 0, positive: 0, negative: 0 });
+      if (!map.has(name)) map.set(name, { total: 0, positive: 0, negative: 0, neutral: 0 });
       const entry = map.get(name)!;
       entry.total += row._count;
       if (row.positive === 'positive') entry.positive += row._count;
       else if (row.positive === 'negative') entry.negative += row._count;
+      else entry.neutral += row._count;
     }
 
-    const all = Array.from(map.entries()).map(([name, counts]) => ({
-      name,
-      total: counts.total,
-      positivePercent: counts.total > 0 ? Math.round((counts.positive / counts.total) * 100) : 0,
-      negativePercent: counts.total > 0 ? Math.round((counts.negative / counts.total) * 100) : 0,
-    }));
+    const all = Array.from(map.entries()).map(([name, counts]) => {
+      const rated = counts.positive + counts.negative;
+      return {
+        name,
+        total: counts.total,
+        positiveCount: counts.positive,
+        negativeCount: counts.negative,
+        neutralCount: counts.neutral,
+        positivePercent: rated > 0 ? Math.round((counts.positive / rated) * 100) : 0,
+        negativePercent: rated > 0 ? Math.round((counts.negative / rated) * 100) : 0,
+        neutralPercent: counts.total > 0 ? Math.round((counts.neutral / counts.total) * 100) : 0,
+      };
+    });
 
     return {
       positiveGroups: all

@@ -4,8 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 interface GroupStat {
   name: string;
   total: number;
+  positiveCount: number;
+  negativeCount: number;
+  neutralCount: number;
   positivePercent: number;
   negativePercent: number;
+  neutralPercent: number;
 }
 
 interface Props {
@@ -14,102 +18,79 @@ interface Props {
 }
 
 function GroupRow({
-  name,
-  percent,
+  g,
   variant,
 }: {
-  name: string;
-  percent: number;
+  g: GroupStat;
   variant: "positive" | "negative";
 }) {
-  const href = `/panel/customer-cards?business_group=${encodeURIComponent(name)}`;
-  const barColor =
-    variant === "positive" ? "bg-[oklch(0.70_0.15_145)]" : "bg-destructive";
-  const textColor =
-    variant === "positive" ? "text-[oklch(0.70_0.15_145)]" : "text-destructive";
+  const href = `/panel/customer-cards?business_group=${encodeURIComponent(g.name)}`;
+
+  const posWidth = g.total > 0 ? (g.positiveCount / g.total) * 100 : 0;
+  const neuWidth = g.total > 0 ? (g.neutralCount / g.total) * 100 : 0;
+  const negWidth = g.total > 0 ? (g.negativeCount / g.total) * 100 : 0;
 
   return (
     <Link
       className="group block rounded px-2 py-2 transition-colors hover:bg-accent"
       href={href}
     >
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="truncate text-sm">{name}</span>
-        <span
-          className={`font-medium font-mono text-sm tabular-nums ${textColor}`}
-        >
-          {percent}%
-        </span>
+      <div className="flex min-w-0 items-baseline justify-between gap-2">
+        <span className="min-w-0 truncate text-sm">{g.name}</span>
+        <div className="flex shrink-0 items-baseline gap-2">
+          <span className="font-mono text-[oklch(0.70_0.15_145)] text-xs tabular-nums">
+            +{g.positivePercent}%
+          </span>
+          <span className="font-mono text-muted-foreground text-xs tabular-nums">
+            ~{g.neutralPercent}%
+          </span>
+          <span className="font-mono text-destructive text-xs tabular-nums">
+            -{g.negativePercent}%
+          </span>
+        </div>
       </div>
-      <div className="mt-1.5 h-[3px] w-full overflow-hidden rounded-full bg-border">
+      <div className="mt-1.5 flex h-[3px] w-full overflow-hidden rounded-full bg-border">
         <div
-          className={`h-full rounded-full transition-all ${barColor}`}
-          style={{ width: `${percent}%` }}
+          className="h-full bg-[oklch(0.70_0.15_145)] transition-all"
+          style={{ width: `${posWidth}%` }}
+        />
+        <div
+          className="h-full bg-[oklch(0.75_0.12_95)] transition-all"
+          style={{ width: `${neuWidth}%` }}
+        />
+        <div
+          className="h-full bg-destructive transition-all"
+          style={{ width: `${negWidth}%` }}
         />
       </div>
     </Link>
   );
 }
 
-function AlertCard({
-  title,
-  groups,
-  percentKey,
-  variant,
-  borderClass,
-}: {
-  title: string;
-  groups: GroupStat[];
-  percentKey: "positivePercent" | "negativePercent";
-  variant: "positive" | "negative";
-  borderClass: string;
-}) {
-  return (
-    <Card className={`${borderClass} border-l-2`}>
-      <CardHeader className="pt-4 pb-2">
-        <CardTitle className="font-mono text-[11px] text-muted-foreground uppercase tracking-[0.15em]">
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pb-3">
-        {groups.length === 0 ? (
-          <p className="font-mono text-muted-foreground text-sm">—</p>
-        ) : (
-          <div className="space-y-1">
-            {groups.map((g) => (
-              <GroupRow
-                key={g.name}
-                name={g.name}
-                percent={g[percentKey]}
-                variant={variant}
-              />
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 export function BusinessGroupAlerts({ positiveGroups, negativeGroups }: Props) {
   if (positiveGroups.length === 0 && negativeGroups.length === 0) return null;
 
+  const allGroups = [
+    ...positiveGroups.map((g) => ({ g, variant: "positive" as const })),
+    ...negativeGroups
+      .filter((g) => !positiveGroups.some((p) => p.name === g.name))
+      .map((g) => ({ g, variant: "negative" as const })),
+  ];
+
   return (
-    <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-      <AlertCard
-        borderClass="border-l-[oklch(0.70_0.15_145)]"
-        groups={positiveGroups}
-        percentKey="positivePercent"
-        title="Yüksek Pozitif — Meslek Grupları"
-        variant="positive"
-      />
-      <AlertCard
-        borderClass="border-l-destructive"
-        groups={negativeGroups}
-        percentKey="negativePercent"
-        title="Yüksek Negatif — Meslek Grupları"
-        variant="negative"
-      />
-    </div>
+    <Card className="mt-4 border-l-2 border-l-primary/40">
+      <CardHeader className="pt-4 pb-2">
+        <CardTitle className="font-mono text-[11px] text-muted-foreground uppercase tracking-[0.15em]">
+          Pozitiflik — Meslek Grupları
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pb-3">
+        <div className="space-y-1">
+          {allGroups.map(({ g, variant }) => (
+            <GroupRow g={g} key={g.name} variant={variant} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

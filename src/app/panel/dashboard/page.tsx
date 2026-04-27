@@ -12,8 +12,6 @@ export default async function DashboardPage() {
     negativesCount,
     visitTotal,
     latestAudit,
-    customerCardPositives,
-    customerCardNegatives,
     businessGroupStats,
   ] = await Promise.all([
     api.customerCard.getTotal(),
@@ -21,8 +19,6 @@ export default async function DashboardPage() {
     api.customerCard.getNegativesCount(),
     api.visit.getTotal(),
     api.auditLog.getLatest(),
-    api.salesRepresentative.customerCardPositives(),
-    api.salesRepresentative.customerCardNegatives(),
     api.businessGroup.getStats(),
   ]);
 
@@ -94,6 +90,10 @@ export default async function DashboardPage() {
             </Card>
           </Link>
         </div>
+        <BusinessGroupAlerts
+          negativeGroups={businessGroupStats.negativeGroups}
+          positiveGroups={businessGroupStats.positiveGroups}
+        />
         <Card className="mt-4 border-l-2 border-l-primary/40">
           <CardHeader className="pt-4 pb-2">
             <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
@@ -109,29 +109,6 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        <BusinessGroupAlerts
-          negativeGroups={businessGroupStats.negativeGroups}
-          positiveGroups={businessGroupStats.positiveGroups}
-        />
-
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <ChartPie
-            className="border-l-2 border-l-[oklch(0.70_0.15_145)]"
-            data={customerCardPositives}
-            dataKey="customerCardCount"
-            description="Pozitif bazlı satış temsilcileri grafiği"
-            nameKey="salesRepresentative"
-            title="Pozitif Bazlı Satış Temsilcileri"
-          />
-          <ChartPie
-            className="border-l-2 border-l-destructive"
-            data={customerCardNegatives}
-            dataKey="customerCardCount"
-            description="Negatif bazlı satış temsilcileri grafiği"
-            nameKey="salesRepresentative"
-            title="Negatif Bazlı Satış Temsilcileri"
-          />
-        </div>
       </div>
     </div>
   );

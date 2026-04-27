@@ -1,7 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { SalesRepresentative } from "generated/prisma";
 import { MoreHorizontal } from "lucide-react";
-import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,

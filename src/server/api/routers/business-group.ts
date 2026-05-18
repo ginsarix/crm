@@ -28,7 +28,7 @@ export const businessGroupRouter = createTRPCRouter({
     }
 
     const rows = await ctx.db.customerCard.groupBy({
-      by: ['businessGroup', 'positive'],
+      by: ['businessGroup', 'color'],
       _count: true,
       where: {
         businessGroup: allowedGroups
@@ -37,40 +37,38 @@ export const businessGroupRouter = createTRPCRouter({
       },
     });
 
-    const map = new Map<string, { total: number; positive: number; negative: number; neutral: number }>();
+    const map = new Map<string, { total: number; green: number; blue: number; orange: number; gray: number }>();
 
     for (const row of rows) {
       const name = row.businessGroup ?? '';
       if (!name) continue;
-      if (!map.has(name)) map.set(name, { total: 0, positive: 0, negative: 0, neutral: 0 });
+      if (!map.has(name)) map.set(name, { total: 0, green: 0, blue: 0, orange: 0, gray: 0 });
       const entry = map.get(name)!;
       entry.total += row._count;
-      if (row.positive === 'positive') entry.positive += row._count;
-      else if (row.positive === 'negative') entry.negative += row._count;
-      else entry.neutral += row._count;
+      if (row.color === 'green') entry.green += row._count;
+      else if (row.color === 'blue') entry.blue += row._count;
+      else if (row.color === 'orange') entry.orange += row._count;
+      else entry.gray += row._count;
     }
 
     const all = Array.from(map.entries()).map(([name, counts]) => {
-      const rated = counts.positive + counts.negative;
+      const { total } = counts;
       return {
         name,
-        total: counts.total,
-        positiveCount: counts.positive,
-        negativeCount: counts.negative,
-        neutralCount: counts.neutral,
-        positivePercent: rated > 0 ? Math.round((counts.positive / rated) * 100) : 0,
-        negativePercent: rated > 0 ? Math.round((counts.negative / rated) * 100) : 0,
-        neutralPercent: counts.total > 0 ? Math.round((counts.neutral / counts.total) * 100) : 0,
+        total,
+        greenCount: counts.green,
+        blueCount: counts.blue,
+        orangeCount: counts.orange,
+        grayCount: counts.gray,
+        greenPercent: total > 0 ? Math.round((counts.green / total) * 100) : 0,
+        bluePercent: total > 0 ? Math.round((counts.blue / total) * 100) : 0,
+        orangePercent: total > 0 ? Math.round((counts.orange / total) * 100) : 0,
+        grayPercent: total > 0 ? Math.round((counts.gray / total) * 100) : 0,
       };
     });
 
     return {
-      positiveGroups: all
-        .filter((g) => g.positivePercent >= 40)
-        .sort((a, b) => b.positivePercent - a.positivePercent),
-      negativeGroups: all
-        .filter((g) => g.negativePercent >= 40)
-        .sort((a, b) => b.negativePercent - a.negativePercent),
+      groups: all.sort((a, b) => b.total - a.total),
     };
   }),
 

@@ -14,7 +14,7 @@ import {
 
 const filterSchema = z.object({
   search: z.string().optional(),
-  positive: z.enum(["negative", "neutral", "positive", "all"]).default("all"),
+  color: z.enum(["green", "blue", "orange", "gray", "all"]).default("all"),
   searchScope: z
     .enum(["all", ...Object.keys(columnMap.customerCard)])
     .default("all"),
@@ -74,7 +74,7 @@ const sortableFields = [
   "gsm3",
   "contact3",
   "businessGroup",
-  "positive",
+  "color",
   "salesRepresentative",
   "createdAt",
   "updatedAt",
@@ -122,9 +122,9 @@ export const customerCardRouter = createTRPCRouter({
         }
       }
 
-      // Build positive filter
-      if (input.filter?.positive && input.filter.positive !== "all") {
-        whereClause.positive = input.filter.positive;
+      // Build color filter
+      if (input.filter?.color && input.filter.color !== "all") {
+        whereClause.color = input.filter.color;
       }
 
       // Build businessGroup filter
@@ -308,19 +308,13 @@ export const customerCardRouter = createTRPCRouter({
       }
     }),
 
-  getPositivesCount: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.customerCard.count({
-      where: { positive: "positive" },
-    });
-  }),
-  getNegativesCount: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.customerCard.count({
-      where: { positive: "negative" },
-    });
-  }),
-  getNeutralsCount: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.customerCard.count({
-      where: { positive: "neutral" },
-    });
+  getColorCounts: protectedProcedure.query(async ({ ctx }) => {
+    const [green, blue, orange, gray] = await Promise.all([
+      ctx.db.customerCard.count({ where: { color: "green" } }),
+      ctx.db.customerCard.count({ where: { color: "blue" } }),
+      ctx.db.customerCard.count({ where: { color: "orange" } }),
+      ctx.db.customerCard.count({ where: { color: "gray" } }),
+    ]);
+    return { green, blue, orange, gray };
   }),
 });

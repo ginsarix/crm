@@ -138,11 +138,11 @@ export const salesRepresentativeRouter = createTRPCRouter({
         throw error;
       }
     }),
-  customerCardPositives: protectedProcedure.query(async ({ ctx }) => {
+  customerCardGreens: protectedProcedure.query(async ({ ctx }) => {
     const counts = await ctx.db.customerCard.groupBy({
       by: ["salesRepresentative"],
       where: {
-        positive: "positive",
+        color: "green",
       },
       _count: true,
     });
@@ -154,11 +154,11 @@ export const salesRepresentativeRouter = createTRPCRouter({
         customerCardCount: c._count,
       }));
   }),
-  customerCardNegatives: protectedProcedure.query(async ({ ctx }) => {
+  customerCardOranges: protectedProcedure.query(async ({ ctx }) => {
     const counts = await ctx.db.customerCard.groupBy({
       by: ["salesRepresentative"],
       where: {
-        positive: "negative",
+        color: "orange",
       },
       _count: true,
     });

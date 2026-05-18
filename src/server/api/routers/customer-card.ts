@@ -86,7 +86,15 @@ type SortableField = (typeof sortableFields)[number];
 
 export const customerCardRouter = createTRPCRouter({
   getTotal: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.customerCard.count();
+    const isAdmin = ctx.session.user.role === 'admin';
+    if (isAdmin) return ctx.db.customerCard.count();
+    const assignedGroups = await ctx.db.businessGroup.findMany({
+      where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+      select: { name: true },
+    });
+    return ctx.db.customerCard.count({
+      where: { businessGroup: { in: assignedGroups.map((g) => g.name) } },
+    });
   }),
   get: protectedProcedure
     .input(
@@ -320,9 +328,19 @@ export const customerCardRouter = createTRPCRouter({
     }),
 
   getColorCounts: protectedProcedure.query(async ({ ctx }) => {
+    const isAdmin = ctx.session.user.role === 'admin';
+    let where: Prisma.CustomerCardWhereInput = {};
+    if (!isAdmin) {
+      const assignedGroups = await ctx.db.businessGroup.findMany({
+        where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+        select: { name: true },
+      });
+      where = { businessGroup: { in: assignedGroups.map((g) => g.name) } };
+    }
     const rows = await ctx.db.customerCard.groupBy({
       by: ['color'],
       _count: true,
+      where,
     });
     const counts = { green: 0, blue: 0, orange: 0, gray: 0 };
     for (const row of rows) counts[row.color] += row._count;

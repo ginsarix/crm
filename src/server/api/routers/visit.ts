@@ -40,7 +40,19 @@ type SortableField = (typeof sortableFields)[number];
 
 export const visitRouter = createTRPCRouter({
   getTotal: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.visit.count();
+    const isAdmin = ctx.session.user.role === 'admin';
+    if (isAdmin) return ctx.db.visit.count();
+    const assignedGroups = await ctx.db.businessGroup.findMany({
+      where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+      select: { name: true },
+    });
+    return ctx.db.visit.count({
+      where: {
+        customerCard: {
+          businessGroup: { in: assignedGroups.map((g) => g.name) },
+        },
+      },
+    });
   }),
   get: protectedProcedure
     .input(
@@ -52,6 +64,15 @@ export const visitRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const isAdmin = ctx.session.user.role === 'admin';
+
+      const assignedGroupsPromise = isAdmin
+        ? null
+        : ctx.db.businessGroup.findMany({
+            where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+            select: { name: true },
+          });
+
       // Build search conditions based on searchScope
       const whereClause: Prisma.VisitWhereInput = {};
 
@@ -103,6 +124,13 @@ export const visitRouter = createTRPCRouter({
       // Default sort if no sorting provided
       if (orderBy.length === 0) {
         orderBy.push({ date: 'desc' }, { time: 'desc' });
+      }
+
+      if (assignedGroupsPromise) {
+        const assignedGroups = await assignedGroupsPromise;
+        whereClause.customerCard = {
+          businessGroup: { in: assignedGroups.map((g) => g.name) },
+        };
       }
 
       const [totalItems, data] = await Promise.all([

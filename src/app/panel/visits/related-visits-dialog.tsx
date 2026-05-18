@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { Calendar } from "lucide-react";
-import { useState } from "react";
-import { Button } from "~/components/ui/button";
+import { Calendar } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '~/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog";
-import type { RouterOutputs } from "~/trpc/types";
-import { ViewVisitDialog } from "./view-dialog";
+} from '~/components/ui/dialog';
+import type { RouterOutputs } from '~/trpc/types';
+import { ViewVisitDialog } from './view-dialog';
 
-type VisitWithCustomerCard = RouterOutputs["visit"]["get"]["data"][number];
+type VisitWithCustomerCard = RouterOutputs['visit']['get']['data'][number];
 
 export default function RelatedVisitsDialog({
   visits,
@@ -48,7 +48,7 @@ export default function RelatedVisitsDialog({
               type="button"
               variant="outline"
             >
-              <Calendar /> {visit.date.toLocaleDateString("tr-TR")}
+              <Calendar /> {visit.date.toLocaleDateString('tr-TR')}
             </Button>
           ))}
         </DialogContent>

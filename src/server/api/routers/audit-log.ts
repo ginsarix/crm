@@ -107,27 +107,26 @@ export const auditLogRouter = createTRPCRouter({
         orderBy.push({ createdAt: 'desc' });
       }
 
-      const totalItems = await ctx.db.auditLog.count({
-        where: whereClause,
-      });
-      const totalPages = Math.ceil(totalItems / input.itemsPerPage);
-
-      const data = await ctx.db.auditLog.findMany({
-        where: whereClause,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
+      const [totalItems, data] = await Promise.all([
+        ctx.db.auditLog.count({ where: whereClause }),
+        ctx.db.auditLog.findMany({
+          where: whereClause,
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              },
             },
           },
-        },
-        skip: (input.page - 1) * input.itemsPerPage,
-        take: input.itemsPerPage,
-        orderBy,
-      });
+          skip: (input.page - 1) * input.itemsPerPage,
+          take: input.itemsPerPage,
+          orderBy,
+        }),
+      ]);
+      const totalPages = Math.ceil(totalItems / input.itemsPerPage);
 
       return {
         data,

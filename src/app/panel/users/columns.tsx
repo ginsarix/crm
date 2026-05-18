@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import type { ColumnDef } from "@tanstack/react-table";
-import type { User } from "generated/prisma";
-import { Check, MoreHorizontal, X } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
+import type { ColumnDef } from '@tanstack/react-table';
+import type { User } from 'generated/prisma';
+import { Check, MoreHorizontal, X } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
+import { Badge } from '~/components/ui/badge';
+import { Button } from '~/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,13 +13,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from '~/components/ui/dropdown-menu';
 
 export const createColumns = (
   onViewUser: (user: User) => void,
 ): ColumnDef<User>[] => [
   {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => {
       const user = row.original;
 
@@ -50,15 +50,15 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: "image",
-    header: "",
+    accessorKey: 'image',
+    header: '',
     enableSorting: false,
     cell: ({ row }) => {
       const user = row.original;
       const initials = user.name
-        .split(" ")
+        .split(' ')
         .map((n) => n[0])
-        .join("")
+        .join('')
         .toUpperCase()
         .slice(0, 2);
 
@@ -71,34 +71,34 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: "name",
-    header: "Ad",
+    accessorKey: 'name',
+    header: 'Ad',
     enableSorting: true,
   },
   {
-    accessorKey: "email",
-    header: "E-posta",
+    accessorKey: 'email',
+    header: 'E-posta',
     enableSorting: true,
   },
   {
-    accessorKey: "role",
-    header: "Rol",
+    accessorKey: 'role',
+    header: 'Rol',
     enableSorting: false,
     cell: ({ row }) => {
-      const r = row.getValue("role") as string | null;
+      const r = row.getValue('role') as string | null;
       return (
-        <Badge variant={r === "admin" ? "default" : "secondary"}>
-          {r === "admin" ? "Yönetici" : "Kullanıcı"}
+        <Badge variant={r === 'admin' ? 'default' : 'secondary'}>
+          {r === 'admin' ? 'Yönetici' : 'Kullanıcı'}
         </Badge>
       );
     },
   },
   {
-    accessorKey: "emailVerified",
-    header: "E-posta Doğrulandı",
+    accessorKey: 'emailVerified',
+    header: 'E-posta Doğrulandı',
     enableSorting: true,
     cell: ({ row }) => {
-      const verified = row.getValue("emailVerified") as boolean;
+      const verified = row.getValue('emailVerified') as boolean;
       return verified ? (
         <div className="flex items-center gap-1 text-green-500">
           <Check className="h-4 w-4" />
@@ -113,21 +113,21 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: "createdAt",
-    header: "Kayıt Tarihi",
+    accessorKey: 'createdAt',
+    header: 'Kayıt Tarihi',
     enableSorting: true,
     cell: ({ row }) => {
-      const date = row.getValue("createdAt") as Date;
-      return new Date(date).toLocaleDateString("tr-TR");
+      const date = row.getValue('createdAt') as Date;
+      return new Date(date).toLocaleDateString('tr-TR');
     },
   },
   {
-    accessorKey: "updatedAt",
-    header: "Son Güncelleme",
+    accessorKey: 'updatedAt',
+    header: 'Son Güncelleme',
     enableSorting: true,
     cell: ({ row }) => {
-      const date = row.getValue("updatedAt") as Date;
-      return new Date(date).toLocaleDateString("tr-TR");
+      const date = row.getValue('updatedAt') as Date;
+      return new Date(date).toLocaleDateString('tr-TR');
     },
   },
 ];

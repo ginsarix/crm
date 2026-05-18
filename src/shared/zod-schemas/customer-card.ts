@@ -1,10 +1,10 @@
-import { z } from "zod";
-import { DistrictValidation } from "./district";
-import { StatusValidation } from "./status";
+import { z } from 'zod';
+import { DistrictValidation } from './district';
+import { StatusValidation } from './status';
 
 export const CustomerCardCreateSchema = z.object({
   sira: z.string().optional(),
-  name: z.string().min(1, "Müşteri adı zorunludur"),
+  name: z.string().min(1, 'Müşteri adı zorunludur'),
   sicil: z.string().optional(),
   address: z.string().optional(),
   district: DistrictValidation.optional(),
@@ -16,8 +16,8 @@ export const CustomerCardCreateSchema = z.object({
   gsm3: z.string().optional(),
   contact3: z.string().optional(),
   businessGroup: z.string().optional(),
-  color: z.enum(["green", "blue", "orange", "gray"]).default("gray"),
-  status: StatusValidation.default("gelmedi"),
+  color: z.enum(['green', 'blue', 'orange', 'gray']).default('gray'),
+  status: StatusValidation.default('gelmedi'),
   salesRepresentative: z.string().optional(),
 });
 

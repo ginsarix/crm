@@ -1,8 +1,8 @@
-import { PlusIcon } from "lucide-react";
-import * as React from "react";
+import { PlusIcon } from 'lucide-react';
+import * as React from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
+import { Button } from '~/components/ui/button';
 import {
   Item,
   ItemActions,
@@ -12,23 +12,23 @@ import {
   ItemMedia,
   ItemSeparator,
   ItemTitle,
-} from "~/components/ui/item";
+} from '~/components/ui/item';
 
 const people = [
   {
-    username: "shadcn",
-    avatar: "https://github.com/shadcn.png",
-    email: "shadcn@vercel.com",
+    username: 'shadcn',
+    avatar: 'https://github.com/shadcn.png',
+    email: 'shadcn@vercel.com',
   },
   {
-    username: "maxleiter",
-    avatar: "https://github.com/maxleiter.png",
-    email: "maxleiter@vercel.com",
+    username: 'maxleiter',
+    avatar: 'https://github.com/maxleiter.png',
+    email: 'maxleiter@vercel.com',
   },
   {
-    username: "evilrabbit",
-    avatar: "https://github.com/evilrabbit.png",
-    email: "evilrabbit@vercel.com",
+    username: 'evilrabbit',
+    avatar: 'https://github.com/evilrabbit.png',
+    email: 'evilrabbit@vercel.com',
   },
 ];
 

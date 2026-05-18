@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import type { PaginationState, SortingState } from "@tanstack/react-table";
-import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
-import { Card, CardHeader, CardTitle } from "~/components/ui/card";
-import { Spinner } from "~/components/ui/spinner";
-import type { columnMap } from "~/lib/column-map";
-import { cn } from "~/lib/utils";
-import { api } from "~/trpc/react";
-import type { RouterOutputs } from "~/trpc/types";
+import type { PaginationState, SortingState } from '@tanstack/react-table';
+import { useParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { Card, CardHeader, CardTitle } from '~/components/ui/card';
+import { Spinner } from '~/components/ui/spinner';
+import type { columnMap } from '~/lib/column-map';
+import { cn } from '~/lib/utils';
+import { api } from '~/trpc/react';
+import type { RouterOutputs } from '~/trpc/types';
 
-type VisitWithCustomerCard = RouterOutputs["visit"]["get"]["data"][number];
-type VisitSearchScope = "all" | keyof typeof columnMap.visit;
+type VisitWithCustomerCard = RouterOutputs['visit']['get']['data'][number];
+type VisitSearchScope = 'all' | keyof typeof columnMap.visit;
 
-import { DataTable } from "../../_components/data-table";
-import { createColumns } from "./columns";
-import { CreateVisitDialog } from "./create-dialog";
-import { FilterControls } from "./filter-controls";
-import RelatedVisitsDialog from "./related-visits-dialog";
-import { ViewVisitDialog } from "./view-dialog";
+import { DataTable } from '../../_components/data-table';
+import { createColumns } from './columns';
+import { CreateVisitDialog } from './create-dialog';
+import { FilterControls } from './filter-controls';
+import RelatedVisitsDialog from './related-visits-dialog';
+import { ViewVisitDialog } from './view-dialog';
 
 export function VisitsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -30,11 +30,11 @@ export function VisitsPageClient() {
     useState<VisitWithCustomerCard | null>(null);
 
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [via, setVia] = useState<
-    "phone" | "inPerson" | "email" | "sms" | "all"
-  >("all");
-  const [searchScope, setSearchScope] = useState<VisitSearchScope>("all");
+    'phone' | 'inPerson' | 'email' | 'sms' | 'all'
+  >('all');
+  const [searchScope, setSearchScope] = useState<VisitSearchScope>('all');
 
   const { data, isLoading } = api.visit.get.useQuery({
     page: pagination.pageIndex + 1, // Convert 0-based to 1-based for API
@@ -60,7 +60,7 @@ export function VisitsPageClient() {
       customerCardId && data?.data
         ? data.data.filter((visit) => visit.customerCardId === customerCardId)
         : [],
-    [data?.data, customerCardId]
+    [data?.data, customerCardId],
   );
 
   const columns = createColumns(handleViewVisit);
@@ -78,7 +78,7 @@ export function VisitsPageClient() {
             via={via}
           />
         </div>
-        <Card className={cn(!isLoading && "rounded-b-none border-b-0")}>
+        <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
             <CardTitle className="mr-auto">Ziyaretler</CardTitle>
             <div className="ml-auto">

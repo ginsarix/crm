@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { auditAction } from "~/lib/enum-map";
-import { api } from "~/trpc/server";
-import { BusinessGroupAlerts } from "../_components/business-group-alerts";
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { auditAction } from '~/lib/enum-map';
+import { api } from '~/trpc/server';
+import { BusinessGroupAlerts } from '../_components/business-group-alerts';
 
 export default async function DashboardPage() {
   const [
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        <div className="mt-3 grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Link href="/panel/customer-cards?color=green">
             <Card className="group cursor-pointer border-l-2 border-l-green-500 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
               {latestAudit
                 ? (latestAudit.details ??
                   auditAction[latestAudit.action as keyof typeof auditAction])
-                : "—"}
+                : '—'}
             </div>
           </CardContent>
         </Card>

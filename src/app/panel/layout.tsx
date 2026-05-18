@@ -21,7 +21,7 @@ export default async function PanelLayout({
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <Separator className="h-4" orientation="vertical" />
             <div className="flex-1" />
-            <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase select-none">
+            <span className="select-none font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
               Nesbir CRM
             </span>
           </header>

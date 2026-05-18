@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon } from "lucide-react";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type { z } from "zod";
-import { DatePicker } from "~/app/_components/date-picker";
-import { Button } from "~/components/ui/button";
-import { Combobox } from "~/components/ui/combobox";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { PlusIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import type { z } from 'zod';
+import { DatePicker } from '~/app/_components/date-picker';
+import { Button } from '~/components/ui/button';
+import { Combobox } from '~/components/ui/combobox';
 import {
   Dialog,
   DialogClose,
@@ -18,32 +18,32 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+} from '~/components/ui/dialog';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/select";
-import { Textarea } from "~/components/ui/textarea";
-import { cn } from "~/lib/utils";
-import { VisitCreateSchema } from "~/shared/zod-schemas/visit";
-import { api } from "~/trpc/react";
+} from '~/components/ui/select';
+import { Textarea } from '~/components/ui/textarea';
+import { cn } from '~/lib/utils';
+import { VisitCreateSchema } from '~/shared/zod-schemas/visit';
+import { api } from '~/trpc/react';
 
 const VIA_OPTIONS = [
-  { value: "phone", label: "Telefon" },
-  { value: "inPerson", label: "Yüzyüze" },
-  { value: "email", label: "E-Posta" },
-  { value: "sms", label: "SMS" },
+  { value: 'phone', label: 'Telefon' },
+  { value: 'inPerson', label: 'Yüzyüze' },
+  { value: 'email', label: 'E-Posta' },
+  { value: 'sms', label: 'SMS' },
 ] as const;
 
 export function CreateVisitDialog() {
   const [open, setOpen] = useState(false);
   const utils = api.useUtils();
-  const [customerCardSearch, setCustomerCardSearch] = useState("");
+  const [customerCardSearch, setCustomerCardSearch] = useState('');
 
   // Fetch all customer cards for the dropdown
   const {
@@ -64,7 +64,7 @@ export function CreateVisitDialog() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(VisitCreateSchema),
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues: {
       via: undefined,
     },
@@ -80,12 +80,12 @@ export function CreateVisitDialog() {
   const onSubmit = async (data: z.infer<typeof VisitCreateSchema>) => {
     try {
       await createMutation.mutateAsync(data);
-      toast.success("Ziyaret başarıyla eklendi");
+      toast.success('Ziyaret başarıyla eklendi');
       reset();
       setOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error("Ziyaret eklenirken bir hata oluştu");
+      toast.error('Ziyaret eklenirken bir hata oluştu');
     }
   };
 
@@ -115,8 +115,8 @@ export function CreateVisitDialog() {
               render={({ field }) => (
                 <Combobox
                   className={cn(
-                    errors.customerCardId && "border-red-500",
-                    "w-full"
+                    errors.customerCardId && 'border-red-500',
+                    'w-full',
                   )}
                   id="customerCardId"
                   label="Müşteri seçin"
@@ -129,7 +129,7 @@ export function CreateVisitDialog() {
                   options={
                     customerCardsData?.data.map((c) => ({
                       key: c.id,
-                      label: c.name ?? "",
+                      label: c.name ?? '',
                     })) || []
                   }
                   selectedKey={field.value}
@@ -152,7 +152,7 @@ export function CreateVisitDialog() {
                 name="date"
                 render={({ field }) => (
                   <DatePicker
-                    className={errors.date ? "border-red-500" : ""}
+                    className={errors.date ? 'border-red-500' : ''}
                     id="date"
                     onChange={(date) => {
                       field.onChange(date);
@@ -173,19 +173,19 @@ export function CreateVisitDialog() {
                 name="time"
                 render={({ field }) => (
                   <Input
-                    className={errors.time ? "border-red-500" : ""}
+                    className={errors.time ? 'border-red-500' : ''}
                     id="time"
                     onChange={(e) => {
                       const timeValue = e.target.value;
                       if (timeValue) {
                         // Create a UTC date with the selected time to avoid timezone conversion
-                        const [hours, minutes] = timeValue.split(":");
+                        const [hours, minutes] = timeValue.split(':');
                         const date = new Date();
                         date.setUTCHours(
-                          parseInt(hours ?? "0", 10),
-                          parseInt(minutes ?? "0", 10),
+                          parseInt(hours ?? '0', 10),
+                          parseInt(minutes ?? '0', 10),
                           0,
-                          0
+                          0,
                         );
                         field.onChange(date);
                       }
@@ -194,11 +194,11 @@ export function CreateVisitDialog() {
                     value={
                       field.value
                         ? `${String(
-                            new Date(field.value).getUTCHours()
-                          ).padStart(2, "0")}:${String(
-                            new Date(field.value).getUTCMinutes()
-                          ).padStart(2, "0")}`
-                        : ""
+                            new Date(field.value).getUTCHours(),
+                          ).padStart(2, '0')}:${String(
+                            new Date(field.value).getUTCMinutes(),
+                          ).padStart(2, '0')}`
+                        : ''
                     }
                   />
                 )}
@@ -239,7 +239,7 @@ export function CreateVisitDialog() {
           <div className="space-y-2">
             <Label htmlFor="note">Not</Label>
             <Textarea
-              {...register("note")}
+              {...register('note')}
               id="note"
               placeholder="Ziyaret hakkında notlar..."
               rows={3}
@@ -261,7 +261,7 @@ export function CreateVisitDialog() {
               disabled={createMutation.isPending}
               type="submit"
             >
-              {createMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+              {createMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
             </Button>
           </DialogFooter>
         </form>

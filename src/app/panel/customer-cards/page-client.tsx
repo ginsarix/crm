@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import type { PaginationState, SortingState } from "@tanstack/react-table";
-import type { $Enums, CustomerCard } from "generated/prisma";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { z } from "zod";
-import { Card, CardHeader, CardTitle } from "~/components/ui/card";
-import { Spinner } from "~/components/ui/spinner";
-import { cn } from "~/lib/utils";
-import { DistrictValidation } from "~/shared/zod-schemas/district";
-import { StatusValidation } from "~/shared/zod-schemas/status";
-import { api } from "~/trpc/react";
-import { DataTable } from "../../_components/data-table";
-import { createColumns } from "./columns";
-import { CreateCustomerCardDialog } from "./create-dialog";
-import { FilterControls } from "./filter-controls";
-import { ViewCustomerCardDialog } from "./view-dialog";
+import type { PaginationState, SortingState } from '@tanstack/react-table';
+import type { $Enums, CustomerCard } from 'generated/prisma';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { z } from 'zod';
+import { Card, CardHeader, CardTitle } from '~/components/ui/card';
+import { Spinner } from '~/components/ui/spinner';
+import { cn } from '~/lib/utils';
+import { DistrictValidation } from '~/shared/zod-schemas/district';
+import { StatusValidation } from '~/shared/zod-schemas/status';
+import { api } from '~/trpc/react';
+import { DataTable } from '../../_components/data-table';
+import { createColumns } from './columns';
+import { CreateCustomerCardDialog } from './create-dialog';
+import { FilterControls } from './filter-controls';
+import { ViewCustomerCardDialog } from './view-dialog';
 
-const ColorValidation = z.enum(["green", "blue", "orange", "gray", "all"]);
+const ColorValidation = z.enum(['green', 'blue', 'orange', 'gray', 'all']);
 
 export function CustomerCardsPageClient() {
   const router = useRouter();
@@ -33,7 +33,7 @@ export function CustomerCardsPageClient() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
   // Local state for the search input — avoids sluggish typing caused by URL-roundtrip on every keystroke
-  const urlSearch = searchParams.get("search") ?? "";
+  const urlSearch = searchParams.get('search') ?? '';
   const lastWrittenSearch = useRef(urlSearch);
   const [search, setSearch] = useState(urlSearch);
 
@@ -47,16 +47,16 @@ export function CustomerCardsPageClient() {
 
   // Derive remaining filter values directly from URL
   const color =
-    ColorValidation.safeParse(searchParams.get("color")).data ??
-    "all";
-  const searchScope = (searchParams.get("search_scope") ??
-    "all") as "all" | keyof CustomerCard;
-  const businessGroup = searchParams.get("business_group") ?? "";
-  const salesRepresentative = searchParams.get("sales_representative") ?? "";
-  const district = (DistrictValidation.safeParse(searchParams.get("district"))
-    .data ?? "") as "" | $Enums.District;
-  const status = (StatusValidation.safeParse(searchParams.get("status"))
-    .data ?? "") as "" | $Enums.Status;
+    ColorValidation.safeParse(searchParams.get('color')).data ?? 'all';
+  const searchScope = (searchParams.get('search_scope') ?? 'all') as
+    | 'all'
+    | keyof CustomerCard;
+  const businessGroup = searchParams.get('business_group') ?? '';
+  const salesRepresentative = searchParams.get('sales_representative') ?? '';
+  const district = (DistrictValidation.safeParse(searchParams.get('district'))
+    .data ?? '') as '' | $Enums.District;
+  const status = (StatusValidation.safeParse(searchParams.get('status')).data ??
+    '') as '' | $Enums.Status;
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -81,7 +81,7 @@ export function CustomerCardsPageClient() {
   useEffect(() => {
     const timer = setTimeout(() => {
       lastWrittenSearch.current = search;
-      updateParamRef.current("search", search);
+      updateParamRef.current('search', search);
     }, 400);
     return () => clearTimeout(timer);
   }, [search]);
@@ -123,20 +123,19 @@ export function CustomerCardsPageClient() {
                 (businessGroup) => businessGroup.name,
               ) ?? []
             }
+            color={color}
             district={district}
-            status={status}
-            onBusinessGroup={(v) => updateParam("business_group", v)}
-            onDistrict={(v) => updateParam("district", v)}
-            onStatus={(v) => updateParam("status", v)}
-            onColor={(v) => updateParam("color", v === "all" ? "" : v)}
+            onBusinessGroup={(v) => updateParam('business_group', v)}
+            onColor={(v) => updateParam('color', v === 'all' ? '' : v)}
+            onDistrict={(v) => updateParam('district', v)}
             onSalesRepresentative={(v) =>
-              updateParam("sales_representative", v)
+              updateParam('sales_representative', v)
             }
             onSearch={setSearch}
             onSearchScope={(v) =>
-              updateParam("search_scope", v === "all" ? "" : v)
+              updateParam('search_scope', v === 'all' ? '' : v)
             }
-            color={color}
+            onStatus={(v) => updateParam('status', v)}
             salesRepresentative={salesRepresentative}
             salesRepresentativeOptions={
               salesRepresentativeOptions?.map(
@@ -145,9 +144,10 @@ export function CustomerCardsPageClient() {
             }
             search={search}
             searchScope={searchScope}
+            status={status}
           />
         </div>
-        <Card className={cn(!isLoading && "rounded-b-none border-b-0")}>
+        <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
             <CardTitle className="mr-auto">Cari Kartlar</CardTitle>
             <div className="ml-auto">

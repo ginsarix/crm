@@ -23,7 +23,9 @@ export default async function SettingsPage() {
         </div>
 
         <HydrateClient>
-          <div className={isAdmin ? 'grid grid-cols-1 gap-4 lg:grid-cols-2' : ''}>
+          <div
+            className={isAdmin ? 'grid grid-cols-1 gap-4 lg:grid-cols-2' : ''}
+          >
             <SaleRepresentativesTable />
             {isAdmin && <BusinessGroupsTable />}
           </div>

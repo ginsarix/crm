@@ -236,8 +236,7 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const color = (row.original as Record<string, unknown>)
-                  .color as
+                const color = (row.original as Record<string, unknown>).color as
                   | 'green'
                   | 'blue'
                   | 'orange'
@@ -249,10 +248,10 @@ export function DataTable<TData, TValue>({
                     className={cn(
                       color === 'green' &&
                         'bg-green-900/80 hover:bg-green-900/90',
-                      color === 'blue' &&
-                        'bg-blue-900/80 hover:bg-blue-900/90',
+                      color === 'blue' && 'bg-blue-900/80 hover:bg-blue-900/90',
                       color === 'orange' &&
                         'bg-orange-900/80 hover:bg-orange-900/90',
+                      color === 'gray' && 'bg-gray-500/80 hover:bg-gray-500/90',
                     )}
                     data-state={row.getIsSelected() && 'selected'}
                     key={row.id}

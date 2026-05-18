@@ -349,7 +349,9 @@ export function ViewUserDialog({
             <div className="text-center">
               <div className="flex items-center justify-center gap-2">
                 <h3 className="font-semibold text-lg">{user.name}</h3>
-                <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                <Badge
+                  variant={user.role === 'admin' ? 'default' : 'secondary'}
+                >
                   {user.role === 'admin' ? 'Yönetici' : 'Kullanıcı'}
                 </Badge>
               </div>

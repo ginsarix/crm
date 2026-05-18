@@ -1,3 +1,3 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const StatusValidation = z.enum(["geldi", "gelmedi"]);
+export const StatusValidation = z.enum(['geldi', 'gelmedi']);

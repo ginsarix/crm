@@ -121,9 +121,9 @@ export function FilterControls({
       <CardContent>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <ColorControl
+            color={color}
             id="color"
             includeAll
-            color={color}
             setColor={onColor}
           />
           <Combobox

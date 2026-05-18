@@ -33,6 +33,8 @@ model AuditLog {
 
   @@index([userId])
   @@index([createdAt])
+  @@index([action])
+  @@index([resourceType])
 }
 
 enum AuditResult {
@@ -66,6 +68,14 @@ model CustomerCard {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([color])
+  @@index([businessGroup])
+  @@index([salesRepresentative])
+  @@index([district])
+  @@index([status])
+  @@index([createdById])
+  @@index([businessGroup, color])
 }
 
 model BusinessGroup {
@@ -122,6 +132,9 @@ model Visit {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([customerCardId])
+  @@index([date])
 }
 
 enum Via {

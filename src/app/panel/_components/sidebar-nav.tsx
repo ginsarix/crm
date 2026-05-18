@@ -104,12 +104,16 @@ export function SidebarNav() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
               <Link href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded bg-sidebar-primary font-mono font-bold text-sidebar-primary-foreground text-sm tracking-tighter">
+                <div className="flex aspect-square size-8 items-center justify-center rounded bg-sidebar-primary font-bold font-mono text-sidebar-primary-foreground text-sm tracking-tighter">
                   N
                 </div>
                 <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate font-semibold text-sm tracking-wide">NesbirCRM</span>
-                  <span className="truncate font-mono text-[10px] text-muted-foreground uppercase tracking-[0.15em]">Yönetim Paneli</span>
+                  <span className="truncate font-semibold text-sm tracking-wide">
+                    NesbirCRM
+                  </span>
+                  <span className="truncate font-mono text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
+                    Yönetim Paneli
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -119,7 +123,9 @@ export function SidebarNav() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="font-mono text-[10px] tracking-[0.15em] uppercase">Navigasyon</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.15em]">
+            Navigasyon
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => (
@@ -141,7 +147,9 @@ export function SidebarNav() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="font-mono text-[10px] tracking-[0.15em] uppercase">Sistem</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.15em]">
+            Sistem
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {isAdmin &&

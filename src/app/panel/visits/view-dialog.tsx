@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Edit, Trash2 } from "lucide-react";
-import type { RouterOutputs } from "~/trpc/types";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Edit, Trash2 } from 'lucide-react';
+import type { RouterOutputs } from '~/trpc/types';
 
-type VisitWithCustomerCard = RouterOutputs["visit"]["get"]["data"][number];
+type VisitWithCustomerCard = RouterOutputs['visit']['get']['data'][number];
 
-import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type { z } from "zod";
-import { DatePicker } from "~/app/_components/date-picker";
-import { Button } from "~/components/ui/button";
-import { Combobox } from "~/components/ui/combobox";
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import type { z } from 'zod';
+import { DatePicker } from '~/app/_components/date-picker';
+import { Button } from '~/components/ui/button';
+import { Combobox } from '~/components/ui/combobox';
 import {
   Dialog,
   DialogClose,
@@ -21,27 +21,27 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+} from '~/components/ui/dialog';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/select";
-import { Textarea } from "~/components/ui/textarea";
-import { cn } from "~/lib/utils";
-import { VisitCreateSchema } from "~/shared/zod-schemas/visit";
-import { authClient } from "~/server/better-auth/client";
-import { api } from "~/trpc/react";
+} from '~/components/ui/select';
+import { Textarea } from '~/components/ui/textarea';
+import { cn } from '~/lib/utils';
+import { authClient } from '~/server/better-auth/client';
+import { VisitCreateSchema } from '~/shared/zod-schemas/visit';
+import { api } from '~/trpc/react';
 
 const VIA_OPTIONS = [
-  { value: "phone", label: "Telefon" },
-  { value: "inPerson", label: "Yüzyüze" },
-  { value: "email", label: "E-Posta" },
-  { value: "sms", label: "SMS" },
+  { value: 'phone', label: 'Telefon' },
+  { value: 'inPerson', label: 'Yüzyüze' },
+  { value: 'email', label: 'E-Posta' },
+  { value: 'sms', label: 'SMS' },
 ] as const;
 
 interface ViewVisitDialogProps {
@@ -60,9 +60,9 @@ export function ViewVisitDialog({
   const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const utils = api.useUtils();
-  const [customerCardSearch, setCustomerCardSearch] = useState("");
+  const [customerCardSearch, setCustomerCardSearch] = useState('');
   const { data: session } = authClient.useSession();
-  const isAdmin = session?.user?.role === "admin";
+  const isAdmin = session?.user?.role === 'admin';
 
   // Fetch all customer cards for the dropdown
   const {
@@ -89,7 +89,7 @@ export function ViewVisitDialog({
       date: visit.date,
       time: visit.time ?? undefined,
       via: visit.via ?? undefined,
-      note: visit.note ?? "",
+      note: visit.note ?? '',
       customerCardId: visit.customerCardId,
     };
   };
@@ -103,7 +103,7 @@ export function ViewVisitDialog({
   } = useForm({
     resolver: zodResolver(VisitCreateSchema),
     defaultValues: constructDefaultValues(visit),
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: constructDefaultValues is a pure function
@@ -114,26 +114,26 @@ export function ViewVisitDialog({
   const updateMutation = api.visit.update.useMutation({
     onSuccess: (updatedVisit) => {
       utils.visit.get.invalidate();
-      toast.success("Ziyaret başarıyla güncellendi");
+      toast.success('Ziyaret başarıyla güncellendi');
 
       onUpdate?.(updatedVisit);
       setIsEditMode(false);
     },
     onError: (error) => {
       console.error(error);
-      toast.error("Ziyaret güncellenirken bir hata oluştu");
+      toast.error('Ziyaret güncellenirken bir hata oluştu');
     },
   });
 
   const deleteMutation = api.visit.delete.useMutation({
     onSuccess: () => {
       utils.visit.get.invalidate();
-      toast.success("Ziyaret başarıyla silindi");
+      toast.success('Ziyaret başarıyla silindi');
       handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);
-      toast.error("Ziyaret silinirken bir hata oluştu");
+      toast.error('Ziyaret silinirken bir hata oluştu');
     },
   });
 
@@ -161,7 +161,7 @@ export function ViewVisitDialog({
   };
 
   // Get customer card name
-  const customerCardName = visit.customerCard?.name || "Bilinmiyor";
+  const customerCardName = visit.customerCard?.name || 'Bilinmiyor';
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
@@ -171,7 +171,7 @@ export function ViewVisitDialog({
       >
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{isEditMode ? "Ziyareti Düzenle" : "Ziyaret Detayı"}</span>
+            <span>{isEditMode ? 'Ziyareti Düzenle' : 'Ziyaret Detayı'}</span>
             <div className="flex gap-2">
               {!isEditMode && !showDeleteConfirm && (
                 <>
@@ -230,7 +230,7 @@ export function ViewVisitDialog({
                 onClick={handleDelete}
                 variant="destructive"
               >
-                {deleteMutation.isPending ? "Siliniyor..." : "Evet, Sil"}
+                {deleteMutation.isPending ? 'Siliniyor...' : 'Evet, Sil'}
               </Button>
             </div>
           </div>
@@ -245,8 +245,8 @@ export function ViewVisitDialog({
                 render={({ field }) => (
                   <Combobox
                     className={cn(
-                      errors.customerCardId && "border-red-500",
-                      "w-full"
+                      errors.customerCardId && 'border-red-500',
+                      'w-full',
                     )}
                     id="customerCardId"
                     label="Müşteri seçin"
@@ -261,11 +261,11 @@ export function ViewVisitDialog({
                         .filter((c) => c.id !== visit.customerCardId) // avoid current duplicate
                         .map((c) => ({
                           key: c.id,
-                          label: c.name ?? "",
+                          label: c.name ?? '',
                         })) || []),
                       {
                         key: visit.customerCardId,
-                        label: visit.customerCard.name ?? "",
+                        label: visit.customerCard.name ?? '',
                       },
                     ]}
                     selectedKey={field.value}
@@ -288,7 +288,7 @@ export function ViewVisitDialog({
                   name="date"
                   render={({ field }) => (
                     <DatePicker
-                      className={errors.date ? "border-red-500" : ""}
+                      className={errors.date ? 'border-red-500' : ''}
                       id="date"
                       onChange={(date) => {
                         field.onChange(date);
@@ -309,19 +309,19 @@ export function ViewVisitDialog({
                   name="time"
                   render={({ field }) => (
                     <Input
-                      className={errors.time ? "border-red-500" : ""}
+                      className={errors.time ? 'border-red-500' : ''}
                       id="time"
                       onChange={(e) => {
                         const timeValue = e.target.value;
                         if (timeValue) {
                           // Create a UTC date with the selected time to avoid timezone conversion
-                          const [hours, minutes] = timeValue.split(":");
+                          const [hours, minutes] = timeValue.split(':');
                           const date = new Date();
                           date.setUTCHours(
-                            parseInt(hours ?? "0", 10),
-                            parseInt(minutes ?? "0", 10),
+                            parseInt(hours ?? '0', 10),
+                            parseInt(minutes ?? '0', 10),
                             0,
-                            0
+                            0,
                           );
                           field.onChange(date);
                         }
@@ -330,11 +330,11 @@ export function ViewVisitDialog({
                       value={
                         field.value
                           ? `${String(
-                              new Date(field.value).getUTCHours()
-                            ).padStart(2, "0")}:${String(
-                              new Date(field.value).getUTCMinutes()
-                            ).padStart(2, "0")}`
-                          : ""
+                              new Date(field.value).getUTCHours(),
+                            ).padStart(2, '0')}:${String(
+                              new Date(field.value).getUTCMinutes(),
+                            ).padStart(2, '0')}`
+                          : ''
                       }
                     />
                   )}
@@ -375,7 +375,7 @@ export function ViewVisitDialog({
             <div className="space-y-2">
               <Label htmlFor="note">Not</Label>
               <Textarea
-                {...register("note")}
+                {...register('note')}
                 id="note"
                 placeholder="Ziyaret hakkında notlar..."
                 rows={3}
@@ -396,7 +396,7 @@ export function ViewVisitDialog({
                 disabled={updateMutation.isPending}
                 type="submit"
               >
-                {updateMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+                {updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
               </Button>
             </DialogFooter>
           </form>
@@ -414,9 +414,9 @@ export function ViewVisitDialog({
                 <p className="text-sm">
                   {(() => {
                     const d = new Date(visit.date);
-                    return `${String(d.getUTCDate()).padStart(2, "0")}.${String(
-                      d.getUTCMonth() + 1
-                    ).padStart(2, "0")}.${d.getUTCFullYear()}`;
+                    return `${String(d.getUTCDate()).padStart(2, '0')}.${String(
+                      d.getUTCMonth() + 1,
+                    ).padStart(2, '0')}.${d.getUTCFullYear()}`;
                   })()}
                 </p>
               </div>
@@ -426,10 +426,10 @@ export function ViewVisitDialog({
                   <p className="text-sm">
                     {`${String(new Date(visit.time).getUTCHours()).padStart(
                       2,
-                      "0"
+                      '0',
                     )}:${String(new Date(visit.time).getUTCMinutes()).padStart(
                       2,
-                      "0"
+                      '0',
                     )}`}
                   </p>
                 </div>
@@ -441,13 +441,13 @@ export function ViewVisitDialog({
               <p className="text-sm">
                 {visit.via
                   ? VIA_OPTIONS.find((opt) => opt.value === visit.via)?.label
-                  : "-"}
+                  : '-'}
               </p>
             </div>
 
             <div>
               <Label className="text-muted-foreground">Not</Label>
-              <p className="text-sm">{visit.note || "-"}</p>
+              <p className="text-sm">{visit.note || '-'}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -456,7 +456,7 @@ export function ViewVisitDialog({
                   Oluşturulma Tarihi
                 </Label>
                 <p className="text-sm">
-                  {visit.createdAt.toLocaleString("tr-TR")}
+                  {visit.createdAt.toLocaleString('tr-TR')}
                 </p>
               </div>
               <div>
@@ -464,7 +464,7 @@ export function ViewVisitDialog({
                   Güncellenme Tarihi
                 </Label>
                 <p className="text-sm">
-                  {visit.updatedAt.toLocaleString("tr-TR")}
+                  {visit.updatedAt.toLocaleString('tr-TR')}
                 </p>
               </div>
             </div>

@@ -27,8 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { authClient } from '~/server/better-auth/client';
+import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { api } from '~/trpc/react';
 import ColorControl from './color-control';
 
@@ -192,17 +192,17 @@ export function ViewCustomerCardDialog({
                     Düzenle
                   </Button>
                   {isAdmin && (
-                  <Button
-                    className="me-4 cursor-pointer"
-                    onClick={() => {
-                      setIsEditMode(false);
-                      setShowDeleteConfirm(true);
-                    }}
-                    size="icon"
-                    variant="destructive"
-                  >
-                    <Trash2 />
-                  </Button>
+                    <Button
+                      className="me-4 cursor-pointer"
+                      onClick={() => {
+                        setIsEditMode(false);
+                        setShowDeleteConfirm(true);
+                      }}
+                      size="icon"
+                      variant="destructive"
+                    >
+                      <Trash2 />
+                    </Button>
                   )}
                 </>
               )}
@@ -415,7 +415,10 @@ export function ViewCustomerCardDialog({
                 control={control}
                 name="status"
                 render={({ field }) => (
-                  <Select defaultValue={field.value ?? 'gelmedi'} onValueChange={field.onChange}>
+                  <Select
+                    defaultValue={field.value ?? 'gelmedi'}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger className="w-full" id="status">
                       <SelectValue placeholder="Durum seçin" />
                     </SelectTrigger>
@@ -437,8 +440,8 @@ export function ViewCustomerCardDialog({
                 name="color"
                 render={({ field }) => (
                   <ColorControl
-                    id="color"
                     color={field.value ?? 'gray'}
+                    id="color"
                     setColor={field.onChange}
                   />
                 )}
@@ -564,28 +567,38 @@ export function ViewCustomerCardDialog({
 
             <div>
               <Label className="mb-2 text-muted-foreground">Renk</Label>
-              {{
-                green: (
-                  <div className="flex items-center gap-2 text-green-600">
-                    <span className="h-3 w-3 rounded-full bg-green-500" /> Yeşil
-                  </div>
-                ),
-                blue: (
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <span className="h-3 w-3 rounded-full bg-blue-500" /> Mavi
-                  </div>
-                ),
-                orange: (
-                  <div className="flex items-center gap-2 text-orange-500">
-                    <span className="h-3 w-3 rounded-full bg-orange-500" /> Turuncu
-                  </div>
-                ),
-                gray: (
-                  <div className="flex items-center gap-2 text-gray-500">
-                    <span className="h-3 w-3 rounded-full bg-gray-400" /> Gri
-                  </div>
-                ),
-              }[(customerCard.color ?? 'gray') as 'green' | 'blue' | 'orange' | 'gray']}
+              {
+                {
+                  green: (
+                    <div className="flex items-center gap-2 text-green-600">
+                      <span className="h-3 w-3 rounded-full bg-green-500" />{' '}
+                      Yeşil
+                    </div>
+                  ),
+                  blue: (
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <span className="h-3 w-3 rounded-full bg-blue-500" /> Mavi
+                    </div>
+                  ),
+                  orange: (
+                    <div className="flex items-center gap-2 text-orange-500">
+                      <span className="h-3 w-3 rounded-full bg-orange-500" />{' '}
+                      Turuncu
+                    </div>
+                  ),
+                  gray: (
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <span className="h-3 w-3 rounded-full bg-gray-400" /> Gri
+                    </div>
+                  ),
+                }[
+                  (customerCard.color ?? 'gray') as
+                    | 'green'
+                    | 'blue'
+                    | 'orange'
+                    | 'gray'
+                ]
+              }
             </div>
 
             <div className="grid grid-cols-2 gap-4">

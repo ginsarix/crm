@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
-import { useState } from "react";
-import { cn } from "~/lib/utils";
-import { Button } from "./button";
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '~/lib/utils';
+import { Button } from './button';
 import {
   Command,
   CommandEmpty,
@@ -11,9 +11,9 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "./command";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import { Spinner } from "./spinner";
+} from './command';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { Spinner } from './spinner';
 
 export function Combobox({
   id,
@@ -41,7 +41,7 @@ export function Combobox({
       <PopoverTrigger asChild>
         <Button
           aria-expanded={open}
-          className={cn("w-[200px] justify-between", className)}
+          className={cn('w-[200px] justify-between', className)}
           id={id}
           role="combobox"
           variant="outline"
@@ -49,8 +49,8 @@ export function Combobox({
           {selectedKey
             ? options.find((option) => option.key === selectedKey)?.label
             : label
-            ? label
-            : "Seçiniz"}
+              ? label
+              : 'Seçiniz'}
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -65,7 +65,7 @@ export function Combobox({
               {loading ? (
                 <Spinner className="mx-auto flex size-6" />
               ) : (
-                "Hiçbir seçenek bulunamadı."
+                'Hiçbir seçenek bulunamadı.'
               )}
             </CommandEmpty>
             <CommandGroup>
@@ -80,8 +80,8 @@ export function Combobox({
                 >
                   <CheckIcon
                     className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedKey === option.key ? "opacity-100" : "opacity-0"
+                      'mr-2 h-4 w-4',
+                      selectedKey === option.key ? 'opacity-100' : 'opacity-0',
                     )}
                   />
                   {option.label}

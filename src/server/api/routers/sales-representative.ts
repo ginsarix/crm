@@ -1,10 +1,10 @@
-import { z } from "zod";
+import { z } from 'zod';
 import {
   adminProcedure,
   createAuditLog,
   createTRPCRouter,
   protectedProcedure,
-} from "../trpc";
+} from '../trpc';
 
 export const salesRepresentativeRouter = createTRPCRouter({
   getTotal: protectedProcedure.query(async ({ ctx }) => {
@@ -28,10 +28,10 @@ export const salesRepresentativeRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "SALES_REPRESENTATIVE_CREATED",
-          "SALES_REPRESENTATIVE",
+          'SALES_REPRESENTATIVE_CREATED',
+          'SALES_REPRESENTATIVE',
           result.id,
-          "SUCCESS",
+          'SUCCESS',
           undefined,
           `Satış temsilcisi oluşturuldu: ${result.name}`,
         );
@@ -41,11 +41,11 @@ export const salesRepresentativeRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "SALES_REPRESENTATIVE_CREATED",
-          "SALES_REPRESENTATIVE",
-          "",
-          "FAILURE",
-          error instanceof Error ? error.message : "Bilinmeyen Hata",
+          'SALES_REPRESENTATIVE_CREATED',
+          'SALES_REPRESENTATIVE',
+          '',
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen Hata',
           `Satış temsilcisi oluşturulamadı: ${input.name}`,
         );
 
@@ -69,10 +69,10 @@ export const salesRepresentativeRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "SALES_REPRESENTATIVE_UPDATED",
-          "SALES_REPRESENTATIVE",
+          'SALES_REPRESENTATIVE_UPDATED',
+          'SALES_REPRESENTATIVE',
           input.id,
-          "SUCCESS",
+          'SUCCESS',
           undefined,
           `Satış temsilcisi güncellendi: ${result.name}`,
         );
@@ -82,11 +82,11 @@ export const salesRepresentativeRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "SALES_REPRESENTATIVE_UPDATED",
-          "SALES_REPRESENTATIVE",
+          'SALES_REPRESENTATIVE_UPDATED',
+          'SALES_REPRESENTATIVE',
           input.id,
-          "FAILURE",
-          error instanceof Error ? error.message : "Bilinmeyen hata",
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
           `Satış temsilcisi güncellenemedi: ${input.name}`,
         );
         throw error;
@@ -114,10 +114,10 @@ export const salesRepresentativeRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "SALES_REPRESENTATIVE_DELETED",
-          "SALES_REPRESENTATIVE",
+          'SALES_REPRESENTATIVE_DELETED',
+          'SALES_REPRESENTATIVE',
           input.id,
-          "SUCCESS",
+          'SUCCESS',
           undefined,
           `Satış temsilcisi silindi: ${salesRepresentative?.name}`,
         );
@@ -127,11 +127,11 @@ export const salesRepresentativeRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "SALES_REPRESENTATIVE_DELETED",
-          "SALES_REPRESENTATIVE",
+          'SALES_REPRESENTATIVE_DELETED',
+          'SALES_REPRESENTATIVE',
           input.id,
-          "FAILURE",
-          error instanceof Error ? error.message : "Bilinmeyen hata",
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
           `Satış temsilcisi silinemedi`,
         );
 
@@ -140,9 +140,9 @@ export const salesRepresentativeRouter = createTRPCRouter({
     }),
   customerCardGreens: protectedProcedure.query(async ({ ctx }) => {
     const counts = await ctx.db.customerCard.groupBy({
-      by: ["salesRepresentative"],
+      by: ['salesRepresentative'],
       where: {
-        color: "green",
+        color: 'green',
       },
       _count: true,
     });
@@ -156,9 +156,9 @@ export const salesRepresentativeRouter = createTRPCRouter({
   }),
   customerCardOranges: protectedProcedure.query(async ({ ctx }) => {
     const counts = await ctx.db.customerCard.groupBy({
-      by: ["salesRepresentative"],
+      by: ['salesRepresentative'],
       where: {
-        color: "orange",
+        color: 'orange',
       },
       _count: true,
     });

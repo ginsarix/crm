@@ -1,39 +1,39 @@
-import type { Prisma } from "generated/prisma";
-import { z } from "zod";
-import { columnMap } from "~/lib/column-map";
+import type { Prisma } from 'generated/prisma';
+import { z } from 'zod';
+import { columnMap } from '~/lib/column-map';
 import {
   CustomerCardCreateSchema,
   CustomerCardFindManySelectSchema,
-} from "~/shared/zod-schemas/customer-card";
+} from '~/shared/zod-schemas/customer-card';
 import {
   adminProcedure,
   createAuditLog,
   createTRPCRouter,
   protectedProcedure,
-} from "../trpc";
+} from '../trpc';
 
 const filterSchema = z.object({
   search: z.string().optional(),
-  color: z.enum(["green", "blue", "orange", "gray", "all"]).default("all"),
+  color: z.enum(['green', 'blue', 'orange', 'gray', 'all']).default('all'),
   searchScope: z
-    .enum(["all", ...Object.keys(columnMap.customerCard)])
-    .default("all"),
+    .enum(['all', ...Object.keys(columnMap.customerCard)])
+    .default('all'),
   businessGroup: z.string().optional(),
   salesRepresentative: z.string().optional(),
   district: z
     .enum([
-      "",
-      "merkez",
-      "avanos",
-      "urgup",
-      "hacibektas",
-      "kozakli",
-      "acigol",
-      "derinkuyu",
-      "gulsehir",
+      '',
+      'merkez',
+      'avanos',
+      'urgup',
+      'hacibektas',
+      'kozakli',
+      'acigol',
+      'derinkuyu',
+      'gulsehir',
     ])
-    .default(""),
-  status: z.enum(["", "geldi", "gelmedi"]).default(""),
+    .default(''),
+  status: z.enum(['', 'geldi', 'gelmedi']).default(''),
 });
 
 const sortingSchema = z.object({
@@ -43,43 +43,43 @@ const sortingSchema = z.object({
 
 // Searchable text fields for "all" scope
 const searchableFields = [
-  "name",
-  "sira",
-  "sicil",
-  "address",
-  "region",
-  "gsm1",
-  "contact1",
-  "gsm2",
-  "contact2",
-  "gsm3",
-  "contact3",
-  "businessGroup",
-  "salesRepresentative",
+  'name',
+  'sira',
+  'sicil',
+  'address',
+  'region',
+  'gsm1',
+  'contact1',
+  'gsm2',
+  'contact2',
+  'gsm3',
+  'contact3',
+  'businessGroup',
+  'salesRepresentative',
 ] as const;
 
 type SearchableField = (typeof searchableFields)[number];
 
 // Sortable fields
 const sortableFields = [
-  "name",
-  "sira",
-  "sicil",
-  "address",
-  "district",
-  "region",
-  "gsm1",
-  "contact1",
-  "gsm2",
-  "contact2",
-  "gsm3",
-  "contact3",
-  "businessGroup",
-  "color",
-  "status",
-  "salesRepresentative",
-  "createdAt",
-  "updatedAt",
+  'name',
+  'sira',
+  'sicil',
+  'address',
+  'district',
+  'region',
+  'gsm1',
+  'contact1',
+  'gsm2',
+  'contact2',
+  'gsm3',
+  'contact3',
+  'businessGroup',
+  'color',
+  'status',
+  'salesRepresentative',
+  'createdAt',
+  'updatedAt',
 ] as const;
 
 type SortableField = (typeof sortableFields)[number];
@@ -99,6 +99,16 @@ export const customerCardRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const isAdmin = ctx.session.user.role === 'admin';
+
+      // Fire group lookup immediately so it overlaps with whereClause construction
+      const assignedGroupsPromise = isAdmin
+        ? null
+        : ctx.db.businessGroup.findMany({
+            where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+            select: { name: true },
+          });
+
       // Build search conditions based on searchScope
       const whereClause: Prisma.CustomerCardWhereInput = {};
 
@@ -106,12 +116,12 @@ export const customerCardRouter = createTRPCRouter({
         const searchValue = input.filter.search;
         const scope = input.filter.searchScope;
 
-        if (scope === "all") {
+        if (scope === 'all') {
           // Search across all searchable fields
           whereClause.OR = searchableFields.map((field) => ({
             [field]: {
               contains: searchValue,
-              mode: "insensitive" as const,
+              mode: 'insensitive' as const,
             },
           })) as Prisma.CustomerCardWhereInput[];
         } else if (searchableFields.includes(scope as SearchableField)) {
@@ -119,25 +129,25 @@ export const customerCardRouter = createTRPCRouter({
           const field = scope as SearchableField;
           whereClause[field] = {
             contains: searchValue,
-            mode: "insensitive" as const,
+            mode: 'insensitive' as const,
           };
         }
       }
 
       // Build color filter
-      if (input.filter?.color && input.filter.color !== "all") {
+      if (input.filter?.color && input.filter.color !== 'all') {
         whereClause.color = input.filter.color;
       }
 
       // Build businessGroup filter
-      if (input.filter?.businessGroup && input.filter.businessGroup !== "") {
+      if (input.filter?.businessGroup && input.filter.businessGroup !== '') {
         whereClause.businessGroup = input.filter.businessGroup;
       }
 
       // Build salesRepresentative filter
       if (
         input.filter?.salesRepresentative &&
-        input.filter.salesRepresentative !== ""
+        input.filter.salesRepresentative !== ''
       ) {
         whereClause.salesRepresentative = input.filter.salesRepresentative;
       }
@@ -152,17 +162,6 @@ export const customerCardRouter = createTRPCRouter({
         whereClause.status = input.filter.status;
       }
 
-      // Non-admins can only see cards belonging to their assigned business groups
-      const isAdmin = ctx.session.user.role === "admin";
-      if (!isAdmin) {
-        const assignedGroups = await ctx.db.businessGroup.findMany({
-          where: { assignedUsers: { some: { id: ctx.session.user.id } } },
-          select: { name: true },
-        });
-        const names = assignedGroups.map((g) => g.name);
-        whereClause.businessGroup = { in: names };
-      }
-
       // Build orderBy clause
       const orderBy: Prisma.CustomerCardOrderByWithRelationInput[] = [];
 
@@ -170,7 +169,7 @@ export const customerCardRouter = createTRPCRouter({
         for (const sort of input.sorting) {
           if (sortableFields.includes(sort.id as SortableField)) {
             orderBy.push({
-              [sort.id]: sort.desc ? "desc" : "asc",
+              [sort.id]: sort.desc ? 'desc' : 'asc',
             });
           }
         }
@@ -178,21 +177,26 @@ export const customerCardRouter = createTRPCRouter({
 
       // Default sort if no sorting provided
       if (orderBy.length === 0) {
-        orderBy.push({ createdAt: "desc" });
+        orderBy.push({ createdAt: 'desc' });
       }
 
-      const totalItems = await ctx.db.customerCard.count({
-        where: whereClause,
-      });
-      const totalPages = Math.ceil(totalItems / input.itemsPerPage);
+      // Apply non-admin group restriction (await the in-flight query)
+      if (assignedGroupsPromise) {
+        const assignedGroups = await assignedGroupsPromise;
+        whereClause.businessGroup = { in: assignedGroups.map((g) => g.name) };
+      }
 
-      const data = await ctx.db.customerCard.findMany({
-        select: input.select,
-        where: whereClause,
-        skip: (input.page - 1) * input.itemsPerPage,
-        take: input.itemsPerPage,
-        orderBy,
-      });
+      const [totalItems, data] = await Promise.all([
+        ctx.db.customerCard.count({ where: whereClause }),
+        ctx.db.customerCard.findMany({
+          select: input.select,
+          where: whereClause,
+          skip: (input.page - 1) * input.itemsPerPage,
+          take: input.itemsPerPage,
+          orderBy,
+        }),
+      ]);
+      const totalPages = Math.ceil(totalItems / input.itemsPerPage);
 
       return {
         data,
@@ -216,10 +220,10 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "CUSTOMER_CARD_CREATED",
-          "CUSTOMER_CARD",
+          'CUSTOMER_CARD_CREATED',
+          'CUSTOMER_CARD',
           result.id,
-          "SUCCESS",
+          'SUCCESS',
           undefined,
           `Cari kart oluşturuldu: ${result.name}`,
         );
@@ -229,11 +233,11 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "CUSTOMER_CARD_CREATED",
-          "CUSTOMER_CARD",
-          "",
-          "FAILURE",
-          error instanceof Error ? error.message : "Bilinmeyen hata",
+          'CUSTOMER_CARD_CREATED',
+          'CUSTOMER_CARD',
+          '',
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
           `Cari kart oluşturulamadı: ${input.name}`,
         );
         throw error;
@@ -251,10 +255,10 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "CUSTOMER_CARD_UPDATED",
-          "CUSTOMER_CARD",
+          'CUSTOMER_CARD_UPDATED',
+          'CUSTOMER_CARD',
           input.id,
-          "SUCCESS",
+          'SUCCESS',
           undefined,
           `Cari kart güncellendi: ${result.name}`,
         );
@@ -264,11 +268,11 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "CUSTOMER_CARD_UPDATED",
-          "CUSTOMER_CARD",
+          'CUSTOMER_CARD_UPDATED',
+          'CUSTOMER_CARD',
           input.id,
-          "FAILURE",
-          error instanceof Error ? error.message : "Bilinmeyen hata",
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
           `Cari kart güncellenemedi: ${input.name}`,
         );
         throw error;
@@ -291,10 +295,10 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "CUSTOMER_CARD_DELETED",
-          "CUSTOMER_CARD",
+          'CUSTOMER_CARD_DELETED',
+          'CUSTOMER_CARD',
           input.id,
-          "SUCCESS",
+          'SUCCESS',
           undefined,
           `Cari kart silindi: ${customerCard?.name}`,
         );
@@ -304,11 +308,11 @@ export const customerCardRouter = createTRPCRouter({
         await createAuditLog(
           ctx.db,
           ctx.session.user.id,
-          "CUSTOMER_CARD_DELETED",
-          "CUSTOMER_CARD",
+          'CUSTOMER_CARD_DELETED',
+          'CUSTOMER_CARD',
           input.id,
-          "FAILURE",
-          error instanceof Error ? error.message : "Bilinmeyen hata",
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
           `Cari kart silinemedi`,
         );
         throw error;
@@ -316,12 +320,12 @@ export const customerCardRouter = createTRPCRouter({
     }),
 
   getColorCounts: protectedProcedure.query(async ({ ctx }) => {
-    const [green, blue, orange, gray] = await Promise.all([
-      ctx.db.customerCard.count({ where: { color: "green" } }),
-      ctx.db.customerCard.count({ where: { color: "blue" } }),
-      ctx.db.customerCard.count({ where: { color: "orange" } }),
-      ctx.db.customerCard.count({ where: { color: "gray" } }),
-    ]);
-    return { green, blue, orange, gray };
+    const rows = await ctx.db.customerCard.groupBy({
+      by: ['color'],
+      _count: true,
+    });
+    const counts = { green: 0, blue: 0, orange: 0, gray: 0 };
+    for (const row of rows) counts[row.color] += row._count;
+    return counts;
   }),
 });

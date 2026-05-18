@@ -1,5 +1,5 @@
 {
-  "code_actions_on_format": {
-    "source.fixAll.biome": true,
-  },
+	"code_actions_on_format": {
+		"source.fixAll.biome": true
+	}
 }

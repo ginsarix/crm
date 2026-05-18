@@ -253,7 +253,10 @@ export function CreateCustomerCardDialog() {
               control={control}
               name="status"
               render={({ field }) => (
-                <Select defaultValue={field.value} onValueChange={field.onChange}>
+                <Select
+                  defaultValue={field.value}
+                  onValueChange={field.onChange}
+                >
                   <SelectTrigger className="w-full" id="status">
                     <SelectValue placeholder="Durum seçin" />
                   </SelectTrigger>
@@ -275,8 +278,8 @@ export function CreateCustomerCardDialog() {
               name="color"
               render={({ field }) => (
                 <ColorControl
-                  id="color"
                   color={field.value ?? 'gray'}
+                  id="color"
                   setColor={field.onChange}
                 />
               )}

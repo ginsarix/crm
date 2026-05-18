@@ -3,6 +3,7 @@
 import {
   BookUser,
   Calendar,
+  ChevronUp,
   ClipboardList,
   Home,
   LogOut,
@@ -12,6 +13,18 @@ import {
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import {
+  Avatar,
+  AvatarFallback,
+} from '~/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -189,17 +202,72 @@ export function SidebarNav() {
       <SidebarFooter className="border-sidebar-border border-t">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="cursor-pointer"
-              onClick={signOut}
-              tooltip="Çıkış Yap"
-            >
-              <div>
-                <LogOut />
-                <span>Çıkış Yap</span>
-              </div>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  className="cursor-pointer"
+                  size="lg"
+                  tooltip={session?.user?.name ?? 'Profil'}
+                >
+                  <Avatar className="size-8 rounded-md">
+                    <AvatarFallback className="rounded-md bg-sidebar-primary font-mono font-semibold text-sidebar-primary-foreground text-xs">
+                      {session?.user?.name
+                        ?.split(' ')
+                        .map((n) => n[0])
+                        .slice(0, 2)
+                        .join('')
+                        .toUpperCase() ?? '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left leading-tight">
+                    <span className="truncate font-semibold text-sm">
+                      {session?.user?.name ?? '—'}
+                    </span>
+                    <span className="truncate font-mono text-[10px] text-muted-foreground">
+                      {isAdmin ? 'Yönetici' : 'Kullanıcı'}
+                    </span>
+                  </div>
+                  <ChevronUp className="ml-auto size-4 text-muted-foreground" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-64"
+                side="top"
+                sideOffset={8}
+              >
+                <DropdownMenuLabel className="p-0">
+                  <div className="flex items-center gap-3 px-2 py-2">
+                    <Avatar className="size-9 rounded-md">
+                      <AvatarFallback className="rounded-md bg-sidebar-primary font-mono font-semibold text-sidebar-primary-foreground text-xs">
+                        {session?.user?.name
+                          ?.split(' ')
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join('')
+                          .toUpperCase() ?? '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid leading-tight">
+                      <span className="truncate font-semibold text-sm">
+                        {session?.user?.name ?? '—'}
+                      </span>
+                      <span className="truncate text-muted-foreground text-xs">
+                        {session?.user?.email ?? ''}
+                      </span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                  onClick={signOut}
+                >
+                  <LogOut className="size-4" />
+                  Çıkış Yap
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

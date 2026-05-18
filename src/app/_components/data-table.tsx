@@ -236,22 +236,23 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const positive = (row.original as Record<string, unknown>)
-                  .positive as
-                  | 'negative'
-                  | 'neutral'
-                  | 'positive'
+                const color = (row.original as Record<string, unknown>)
+                  .color as
+                  | 'green'
+                  | 'blue'
+                  | 'orange'
+                  | 'gray'
                   | null
                   | undefined;
                 return (
                   <TableRow
                     className={cn(
-                      positive === 'positive' &&
+                      color === 'green' &&
                         'bg-green-900/80 hover:bg-green-900/90',
-                      positive === 'negative' &&
-                        'bg-red-900/80 hover:bg-red-900/90',
-                      positive === 'neutral' &&
-                        'bg-yellow-900/80 hover:bg-yellow-900/90',
+                      color === 'blue' &&
+                        'bg-blue-900/80 hover:bg-blue-900/90',
+                      color === 'orange' &&
+                        'bg-orange-900/80 hover:bg-orange-900/90',
                     )}
                     data-state={row.getIsSelected() && 'selected'}
                     key={row.id}

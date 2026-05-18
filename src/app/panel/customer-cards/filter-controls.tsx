@@ -10,7 +10,7 @@ import {
   InputGroupInput,
 } from '~/components/ui/input-group';
 import { columnMap } from '~/lib/column-map';
-import { DISTRICTS } from '~/shared/constants';
+import { DISTRICTS, STATUSES } from '~/shared/constants';
 import ColorControl from './color-control';
 
 export function FilterControls({
@@ -28,6 +28,8 @@ export function FilterControls({
   onSalesRepresentative,
   onDistrict,
   district,
+  status,
+  onStatus,
 }: {
   search: string;
   onSearch: (search: string) => void;
@@ -43,6 +45,8 @@ export function FilterControls({
   onSalesRepresentative: (salesRepresentative: string) => void;
   onDistrict: (district: '' | $Enums.District) => void;
   district: '' | $Enums.District;
+  status: '' | $Enums.Status;
+  onStatus: (status: '' | $Enums.Status) => void;
 }) {
   const searchScopeComboboxOptions = [
     { key: 'all', label: 'Tümü' },
@@ -50,6 +54,7 @@ export function FilterControls({
       .filter(
         ([key]) =>
           key !== 'color' &&
+          key !== 'status' &&
           key !== 'createdAt' &&
           key !== 'updatedAt' &&
           key !== 'id' &&
@@ -81,6 +86,11 @@ export function FilterControls({
   ].map(({ value, label }) => {
     return { key: value, label: label };
   });
+
+  const statusComboboxOptions = [
+    { key: '', label: 'Tümü' },
+    ...STATUSES.map(({ value, label }) => ({ key: value, label })),
+  ];
 
   return (
     <Card className="mb-4">
@@ -133,6 +143,12 @@ export function FilterControls({
             onChange={(v) => onSalesRepresentative(v as string)}
             options={salesRepresentativeComboboxOptions}
             selectedKey={salesRepresentative}
+          />
+          <Combobox
+            label="Durum"
+            onChange={(v) => onStatus(v as '' | $Enums.Status)}
+            options={statusComboboxOptions}
+            selectedKey={status}
           />
         </div>
       </CardContent>

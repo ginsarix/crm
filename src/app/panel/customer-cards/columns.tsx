@@ -121,6 +121,15 @@ export const createColumns = (
     enableSorting: true,
   },
   {
+    accessorKey: "status",
+    header: "Durum",
+    enableSorting: true,
+    cell: ({ row }) => {
+      const s = row.getValue("status") as $Enums.Status;
+      return s === "geldi" ? "Geldi" : "Gelmedi";
+    },
+  },
+  {
     accessorKey: "salesRepresentative",
     header: "Satış Temsilcisi",
     enableSorting: true,

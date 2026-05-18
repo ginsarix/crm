@@ -95,6 +95,7 @@ export function ViewCustomerCardDialog({
       contact3: customerCard.contact3 ?? '',
       businessGroup: customerCard.businessGroup ?? '',
       color: customerCard.color ?? 'gray',
+      status: customerCard.status ?? 'gelmedi',
       salesRepresentative: customerCard.salesRepresentative ?? '',
     };
   };
@@ -409,6 +410,25 @@ export function ViewCustomerCardDialog({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="status">Durum</Label>
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Select defaultValue={field.value ?? 'gelmedi'} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full" id="status">
+                      <SelectValue placeholder="Durum seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="geldi">Geldi</SelectItem>
+                      <SelectItem value="gelmedi">Gelmedi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label className="cursor-pointer" htmlFor="color">
                 Renk
               </Label>
@@ -532,6 +552,13 @@ export function ViewCustomerCardDialog({
               <Label className="text-muted-foreground">Satış Temsilcisi</Label>
               <p className="text-sm">
                 {customerCard.salesRepresentative || '-'}
+              </p>
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground">Durum</Label>
+              <p className="text-sm">
+                {customerCard.status === 'geldi' ? 'Geldi' : 'Gelmedi'}
               </p>
             </div>
 

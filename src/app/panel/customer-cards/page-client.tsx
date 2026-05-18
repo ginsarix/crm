@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle } from "~/components/ui/card";
 import { Spinner } from "~/components/ui/spinner";
 import { cn } from "~/lib/utils";
 import { DistrictValidation } from "~/shared/zod-schemas/district";
+import { StatusValidation } from "~/shared/zod-schemas/status";
 import { api } from "~/trpc/react";
 import { DataTable } from "../../_components/data-table";
 import { createColumns } from "./columns";
@@ -54,6 +55,8 @@ export function CustomerCardsPageClient() {
   const salesRepresentative = searchParams.get("sales_representative") ?? "";
   const district = (DistrictValidation.safeParse(searchParams.get("district"))
     .data ?? "") as "" | $Enums.District;
+  const status = (StatusValidation.safeParse(searchParams.get("status"))
+    .data ?? "") as "" | $Enums.Status;
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -97,6 +100,7 @@ export function CustomerCardsPageClient() {
       businessGroup,
       salesRepresentative,
       district,
+      status,
     },
     sorting,
   });
@@ -120,8 +124,10 @@ export function CustomerCardsPageClient() {
               ) ?? []
             }
             district={district}
+            status={status}
             onBusinessGroup={(v) => updateParam("business_group", v)}
             onDistrict={(v) => updateParam("district", v)}
+            onStatus={(v) => updateParam("status", v)}
             onColor={(v) => updateParam("color", v === "all" ? "" : v)}
             onSalesRepresentative={(v) =>
               updateParam("sales_representative", v)

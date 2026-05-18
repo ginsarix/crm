@@ -46,6 +46,7 @@ export function CreateCustomerCardDialog() {
     mode: 'onChange',
     defaultValues: {
       color: 'gray',
+      status: 'gelmedi',
     },
     shouldFocusError: false,
   });
@@ -242,6 +243,25 @@ export function CreateCustomerCardDialog() {
                   options={salesRepresentativeOptions}
                   selectedKey={field.value ?? ''}
                 />
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="status">Durum</Label>
+            <Controller
+              control={control}
+              name="status"
+              render={({ field }) => (
+                <Select defaultValue={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full" id="status">
+                    <SelectValue placeholder="Durum seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="geldi">Geldi</SelectItem>
+                    <SelectItem value="gelmedi">Gelmedi</SelectItem>
+                  </SelectContent>
+                </Select>
               )}
             />
           </div>

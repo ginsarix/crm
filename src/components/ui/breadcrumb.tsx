@@ -51,6 +51,8 @@ function BreadcrumbLink({
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
   return (
+    // biome-ignore lint/a11y/useFocusableInteractive: shadcn upstream
+    // biome-ignore lint/a11y/useSemanticElements: shadcn upstream
     <span
       aria-current="page"
       aria-disabled="true"
@@ -100,10 +102,10 @@ function BreadcrumbEllipsis({
 
 export {
   Breadcrumb,
-  BreadcrumbList,
+  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
+  BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  BreadcrumbEllipsis,
 };

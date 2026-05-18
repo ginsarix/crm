@@ -12,6 +12,16 @@
 			"linter": {
 				"enabled": false
 			}
+		},
+		{
+			"includes": ["src/components/ui/chart.tsx"],
+			"linter": {
+				"rules": {
+					"security": {
+						"noDangerouslySetInnerHtml": "off"
+					}
+				}
+			}
 		}
 	],
 	"assist": {

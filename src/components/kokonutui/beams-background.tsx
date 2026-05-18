@@ -52,6 +52,12 @@ function createBeam(width: number, height: number, isDarkMode: boolean): Beam {
   };
 }
 
+const opacityMap = {
+  subtle: 0.7,
+  medium: 0.85,
+  strong: 1,
+};
+
 export default function BeamsBackground({
   className,
   children,
@@ -62,12 +68,6 @@ export default function BeamsBackground({
   const animationFrameRef = useRef<number>(0);
   const MINIMUM_BEAMS = 20;
   const isDarkModeRef = useRef<boolean>(false);
-
-  const opacityMap = {
-    subtle: 0.7,
-    medium: 0.85,
-    strong: 1,
-  };
 
   useEffect(() => {
     const canvas = canvasRef.current;

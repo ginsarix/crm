@@ -1,3 +1,8 @@
+export const STATUSES = [
+  { value: 'geldi', label: 'Geldi' },
+  { value: 'gelmedi', label: 'Gelmedi' },
+] as const;
+
 export const DISTRICTS = [
   { value: 'merkez', label: 'MERKEZ' },
   { value: 'avanos', label: 'AVANOS' },

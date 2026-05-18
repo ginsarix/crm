@@ -1,3 +1,8 @@
+export const status = {
+  geldi: 'Geldi',
+  gelmedi: 'Gelmedi',
+} as const;
+
 export const auditResult = {
   SUCCESS: 'Başarılı',
   FAILURE: 'Başarısız',

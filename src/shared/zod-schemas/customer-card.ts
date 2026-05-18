@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { DistrictValidation } from "./district";
+import { StatusValidation } from "./status";
 
 export const CustomerCardCreateSchema = z.object({
   sira: z.string().optional(),
@@ -16,6 +17,7 @@ export const CustomerCardCreateSchema = z.object({
   contact3: z.string().optional(),
   businessGroup: z.string().optional(),
   color: z.enum(["green", "blue", "orange", "gray"]).default("gray"),
+  status: StatusValidation.default("gelmedi"),
   salesRepresentative: z.string().optional(),
 });
 
@@ -35,6 +37,7 @@ export const CustomerCardFindManySelectSchema = z.object({
   contact3: z.boolean().default(true),
   businessGroup: z.boolean().default(true),
   positive: z.boolean().default(true),
+  status: z.boolean().default(true),
   salesRepresentative: z.boolean().default(true),
   createdById: z.boolean().default(true),
   createdAt: z.boolean().default(true),

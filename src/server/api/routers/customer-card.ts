@@ -33,6 +33,7 @@ const filterSchema = z.object({
       "gulsehir",
     ])
     .default(""),
+  status: z.enum(["", "geldi", "gelmedi"]).default(""),
 });
 
 const sortingSchema = z.object({
@@ -75,6 +76,7 @@ const sortableFields = [
   "contact3",
   "businessGroup",
   "color",
+  "status",
   "salesRepresentative",
   "createdAt",
   "updatedAt",
@@ -143,6 +145,11 @@ export const customerCardRouter = createTRPCRouter({
       // Build district filter
       if (input.filter?.district) {
         whereClause.district = input.filter.district;
+      }
+
+      // Build status filter
+      if (input.filter?.status) {
+        whereClause.status = input.filter.status;
       }
 
       // Non-admins can only see cards belonging to their assigned business groups

@@ -3,6 +3,7 @@ import '~/styles/globals.css';
 import type { Metadata } from 'next';
 import { Barlow, IBM_Plex_Mono } from 'next/font/google';
 import { ViewTransition } from 'react';
+import { ThemeProvider } from '~/components/theme-provider';
 import { TRPCReactProvider } from '~/trpc/react';
 
 export const metadata: Metadata = {
@@ -27,11 +28,22 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html className={`${barlow.variable} ${ibmPlexMono.variable}`} lang="tr">
+    <html
+      className={`${barlow.variable} ${ibmPlexMono.variable}`}
+      lang="tr"
+      suppressHydrationWarning
+    >
       <body>
-        <TRPCReactProvider>
-          <ViewTransition>{children}</ViewTransition>
-        </TRPCReactProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          disableTransitionOnChange
+          enableSystem
+        >
+          <TRPCReactProvider>
+            <ViewTransition>{children}</ViewTransition>
+          </TRPCReactProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

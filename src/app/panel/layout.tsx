@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { ThemeToggle } from '~/components/theme-toggle';
 import { Separator } from '~/components/ui/separator';
 import { SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
@@ -21,6 +22,7 @@ export default async function PanelLayout({
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <Separator className="h-4" orientation="vertical" />
             <div className="flex-1" />
+            <ThemeToggle />
             <span className="select-none font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
               Nesbir CRM
             </span>

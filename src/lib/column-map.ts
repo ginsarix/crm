@@ -25,7 +25,7 @@ export const columnMap = {
     gsm3: 'GSM 3',
     contact3: 'İletişim 3',
     businessGroup: 'İş Grubu',
-    positive: 'Pozitif',
+    color: 'Renk',
     salesRepresentative: 'Satış Temsilcisi',
     createdAt: 'Oluşturulma Tarihi',
     updatedAt: 'Güncellenme Tarihi',

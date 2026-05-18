@@ -55,7 +55,7 @@ model CustomerCard {
   gsm3                String?
   contact3            String?
   businessGroup       String?
-  positive            Positive  @default(neutral)
+  color               Color     @default(gray)
   salesRepresentative String?
 
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
@@ -83,10 +83,11 @@ model SalesRepresentative {
   updatedAt DateTime @updatedAt
 }
 
-enum Positive {
-  negative @map("Negatif")
-  neutral  @map("Nötr")
-  positive @map("Pozitif")
+enum Color {
+  green
+  blue
+  orange
+  gray
 }
 
 enum District {

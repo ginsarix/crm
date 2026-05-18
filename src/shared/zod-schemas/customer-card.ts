@@ -15,7 +15,7 @@ export const CustomerCardCreateSchema = z.object({
   gsm3: z.string().optional(),
   contact3: z.string().optional(),
   businessGroup: z.string().optional(),
-  positive: z.enum(["negative", "neutral", "positive"]).default("neutral"),
+  color: z.enum(["green", "blue", "orange", "gray"]).default("gray"),
   salesRepresentative: z.string().optional(),
 });
 

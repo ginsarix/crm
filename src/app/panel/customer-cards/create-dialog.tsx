@@ -30,7 +30,7 @@ import {
 import { DISTRICTS } from '~/shared/constants';
 import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { api } from '~/trpc/react';
-import PositiveControl from './positive-control';
+import ColorControl from './color-control';
 
 export function CreateCustomerCardDialog() {
   const [open, setOpen] = useState(false);
@@ -45,7 +45,7 @@ export function CreateCustomerCardDialog() {
     resolver: zodResolver(CustomerCardCreateSchema),
     mode: 'onChange',
     defaultValues: {
-      positive: 'neutral',
+      color: 'gray',
     },
     shouldFocusError: false,
   });
@@ -247,17 +247,17 @@ export function CreateCustomerCardDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label className="cursor-pointer" htmlFor="positive">
-              Pozitif
+            <Label className="cursor-pointer" htmlFor="color">
+              Renk
             </Label>
             <Controller
               control={control}
-              name="positive"
+              name="color"
               render={({ field }) => (
-                <PositiveControl
-                  id="positive"
-                  positive={field.value ?? 'neutral'}
-                  setPositive={field.onChange}
+                <ColorControl
+                  id="color"
+                  color={field.value ?? 'gray'}
+                  setColor={field.onChange}
                 />
               )}
             />

@@ -11,14 +11,14 @@ import {
 } from '~/components/ui/input-group';
 import { columnMap } from '~/lib/column-map';
 import { DISTRICTS } from '~/shared/constants';
-import PositiveControl from './positive-control';
+import ColorControl from './color-control';
 
 export function FilterControls({
   search,
-  positive,
+  color,
   searchScope,
   onSearch,
-  onPositive,
+  onColor,
   onSearchScope,
   businessGroupOptions,
   businessGroup,
@@ -31,8 +31,8 @@ export function FilterControls({
 }: {
   search: string;
   onSearch: (search: string) => void;
-  positive: 'positive' | 'negative' | 'neutral' | 'all';
-  onPositive: (positive: 'positive' | 'negative' | 'neutral' | 'all') => void;
+  color: 'green' | 'blue' | 'orange' | 'gray' | 'all';
+  onColor: (color: 'green' | 'blue' | 'orange' | 'gray' | 'all') => void;
   searchScope: 'all' | keyof CustomerCard;
   onSearchScope: (searchScope: 'all' | keyof CustomerCard) => void;
   businessGroupOptions: string[];
@@ -49,7 +49,7 @@ export function FilterControls({
     ...Object.entries(columnMap.customerCard)
       .filter(
         ([key]) =>
-          key !== 'positive' &&
+          key !== 'color' &&
           key !== 'createdAt' &&
           key !== 'updatedAt' &&
           key !== 'id' &&
@@ -110,11 +110,11 @@ export function FilterControls({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <PositiveControl
-            id="positive"
+          <ColorControl
+            id="color"
             includeAll
-            positive={positive}
-            setPositive={onPositive}
+            color={color}
+            setColor={onColor}
           />
           <Combobox
             label="İlçe"

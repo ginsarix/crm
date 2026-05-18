@@ -16,7 +16,7 @@ import { CreateCustomerCardDialog } from "./create-dialog";
 import { FilterControls } from "./filter-controls";
 import { ViewCustomerCardDialog } from "./view-dialog";
 
-const PositivityValidation = z.enum(["positive", "negative", "neutral", "all"]);
+const ColorValidation = z.enum(["green", "blue", "orange", "gray", "all"]);
 
 export function CustomerCardsPageClient() {
   const router = useRouter();
@@ -45,8 +45,8 @@ export function CustomerCardsPageClient() {
   }, [urlSearch]);
 
   // Derive remaining filter values directly from URL
-  const positive =
-    PositivityValidation.safeParse(searchParams.get("positivity")).data ??
+  const color =
+    ColorValidation.safeParse(searchParams.get("color")).data ??
     "all";
   const searchScope = (searchParams.get("search_scope") ??
     "all") as "all" | keyof CustomerCard;
@@ -92,7 +92,7 @@ export function CustomerCardsPageClient() {
     itemsPerPage: pagination.pageSize,
     filter: {
       search: urlSearch,
-      positive,
+      color,
       searchScope,
       businessGroup,
       salesRepresentative,
@@ -122,7 +122,7 @@ export function CustomerCardsPageClient() {
             district={district}
             onBusinessGroup={(v) => updateParam("business_group", v)}
             onDistrict={(v) => updateParam("district", v)}
-            onPositive={(v) => updateParam("positivity", v === "all" ? "" : v)}
+            onColor={(v) => updateParam("color", v === "all" ? "" : v)}
             onSalesRepresentative={(v) =>
               updateParam("sales_representative", v)
             }
@@ -130,7 +130,7 @@ export function CustomerCardsPageClient() {
             onSearchScope={(v) =>
               updateParam("search_scope", v === "all" ? "" : v)
             }
-            positive={positive}
+            color={color}
             salesRepresentative={salesRepresentative}
             salesRepresentativeOptions={
               salesRepresentativeOptions?.map(

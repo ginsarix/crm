@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { CustomerCard } from 'generated/prisma';
-import { Edit, Meh, ThumbsDown, ThumbsUp, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -30,7 +30,7 @@ import {
 import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { authClient } from '~/server/better-auth/client';
 import { api } from '~/trpc/react';
-import PositiveControl from './positive-control';
+import ColorControl from './color-control';
 
 const DISTRICTS = [
   { value: 'merkez', label: 'MERKEZ' },
@@ -94,7 +94,7 @@ export function ViewCustomerCardDialog({
       gsm3: customerCard.gsm3 ?? '',
       contact3: customerCard.contact3 ?? '',
       businessGroup: customerCard.businessGroup ?? '',
-      positive: customerCard.positive ?? 'neutral',
+      color: customerCard.color ?? 'gray',
       salesRepresentative: customerCard.salesRepresentative ?? '',
     };
   };
@@ -409,17 +409,17 @@ export function ViewCustomerCardDialog({
             </div>
 
             <div className="space-y-2">
-              <Label className="cursor-pointer" htmlFor="positive">
-                Pozitif
+              <Label className="cursor-pointer" htmlFor="color">
+                Renk
               </Label>
               <Controller
                 control={control}
-                name="positive"
+                name="color"
                 render={({ field }) => (
-                  <PositiveControl
-                    id="positive"
-                    positive={field.value ?? 'neutral'}
-                    setPositive={field.onChange}
+                  <ColorControl
+                    id="color"
+                    color={field.value ?? 'gray'}
+                    setColor={field.onChange}
                   />
                 )}
               />
@@ -536,26 +536,29 @@ export function ViewCustomerCardDialog({
             </div>
 
             <div>
-              <Label className="mb-2 text-muted-foreground">Pozitif</Label>
-              {customerCard.positive === 'positive' ? (
-                <div className="rounded-lg text-green-500">
-                  <div className="flex gap-2">
-                    <ThumbsUp size={20} /> Pozitif
+              <Label className="mb-2 text-muted-foreground">Renk</Label>
+              {{
+                green: (
+                  <div className="flex items-center gap-2 text-green-600">
+                    <span className="h-3 w-3 rounded-full bg-green-500" /> Yeşil
                   </div>
-                </div>
-              ) : customerCard.positive === 'negative' ? (
-                <div className="rounded-lg text-red-500">
-                  <div className="flex gap-2">
-                    <ThumbsDown size={20} /> Negatif
+                ),
+                blue: (
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <span className="h-3 w-3 rounded-full bg-blue-500" /> Mavi
                   </div>
-                </div>
-              ) : (
-                <div className="rounded-lg text-yellow-500">
-                  <div className="flex gap-2">
-                    <Meh size={20} /> Nötr
+                ),
+                orange: (
+                  <div className="flex items-center gap-2 text-orange-500">
+                    <span className="h-3 w-3 rounded-full bg-orange-500" /> Turuncu
                   </div>
-                </div>
-              )}
+                ),
+                gray: (
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <span className="h-3 w-3 rounded-full bg-gray-400" /> Gri
+                  </div>
+                ),
+              }[(customerCard.color ?? 'gray') as 'green' | 'blue' | 'orange' | 'gray']}
             </div>
 
             <div className="grid grid-cols-2 gap-4">

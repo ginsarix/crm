@@ -58,7 +58,7 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
           <Link href="/panel/customer-cards?color=green">
             <Card className="group cursor-pointer border-l-2 border-l-green-500 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
@@ -99,6 +99,21 @@ export default async function DashboardPage() {
               <CardContent className="pb-4">
                 <div className="font-mono font-semibold text-3xl text-orange-500 tabular-nums">
                   {colorCounts.orange}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/panel/customer-cards?color=yellow">
+            <Card className="group cursor-pointer border-l-2 border-l-yellow-400 transition-colors hover:bg-accent">
+              <CardHeader className="pt-4 pb-1">
+                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                  Sarı
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <div className="font-mono font-semibold text-3xl text-yellow-600 tabular-nums">
+                  {colorCounts.yellow}
                 </div>
               </CardContent>
             </Card>

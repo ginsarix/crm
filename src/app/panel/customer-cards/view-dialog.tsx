@@ -601,6 +601,12 @@ export function ViewCustomerCardDialog({
                       Turuncu
                     </div>
                   ),
+                  yellow: (
+                    <div className="flex items-center gap-2 text-yellow-600">
+                      <span className="h-3 w-3 rounded-full bg-yellow-400" />{' '}
+                      Sarı
+                    </div>
+                  ),
                   gray: (
                     <div className="flex items-center gap-2 text-gray-500">
                       <span className="h-3 w-3 rounded-full bg-gray-400" /> Gri
@@ -611,6 +617,7 @@ export function ViewCustomerCardDialog({
                     | 'green'
                     | 'blue'
                     | 'orange'
+                    | 'yellow'
                     | 'gray'
                 ]
               }

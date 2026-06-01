@@ -16,7 +16,7 @@ export const CustomerCardCreateSchema = z.object({
   gsm3: z.string().optional(),
   contact3: z.string().optional(),
   businessGroup: z.string().optional(),
-  color: z.enum(['green', 'blue', 'orange', 'gray']).default('gray'),
+  color: z.enum(['green', 'blue', 'orange', 'yellow', 'gray']).default('gray'),
   status: StatusValidation.default('gelmedi'),
   authorities: z.string().optional(),
   salesRepresentative: z.string().optional(),

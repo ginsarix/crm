@@ -5,29 +5,40 @@ import { Button } from '~/components/ui/button';
 import { ButtonGroup } from '~/components/ui/button-group';
 import { cn } from '~/lib/utils';
 
-type ColorValue = 'green' | 'blue' | 'orange' | 'gray' | 'all';
+type ColorValue = 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'all';
 
 const colorConfig = {
   green: {
     label: 'Yeşil',
+    hint: '(Biz)',
     dot: 'bg-green-500',
     active: 'bg-green-500/10 text-green-600',
     hover: 'hover:bg-green-500/20 hover:text-green-600',
   },
   blue: {
     label: 'Mavi',
+    hint: '(M.A.Ö)',
     dot: 'bg-blue-500',
     active: 'bg-blue-500/10 text-blue-600',
     hover: 'hover:bg-blue-500/20 hover:text-blue-600',
   },
   orange: {
     label: 'Turuncu',
+    hint: '(Y.B)',
     dot: 'bg-orange-500',
     active: 'bg-orange-500/10 text-orange-600',
     hover: 'hover:bg-orange-500/20 hover:text-orange-600',
   },
+  yellow: {
+    label: 'Sarı',
+    hint: '(Gelmeyecek)',
+    dot: 'bg-yellow-400',
+    active: 'bg-yellow-400/10 text-yellow-600',
+    hover: 'hover:bg-yellow-400/20 hover:text-yellow-600',
+  },
   gray: {
     label: 'Gri',
+    hint: '(Boş)',
     dot: 'bg-gray-400',
     active: 'bg-gray-400/10 text-gray-500',
     hover: 'hover:bg-gray-400/20 hover:text-gray-500',
@@ -66,7 +77,10 @@ export default function ColorControl({
                 isActive ? 'max-w-24' : 'max-w-0',
               )}
             >
-              {cfg.label}
+              <span className="flex flex-col items-start leading-tight">
+                <span className="text-[10px] opacity-60">{cfg.hint}</span>
+                <span>{cfg.label}</span>
+              </span>
             </span>
           </Button>
         );

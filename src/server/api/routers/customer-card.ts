@@ -14,7 +14,7 @@ import {
 
 const filterSchema = z.object({
   search: z.string().optional(),
-  color: z.enum(['green', 'blue', 'orange', 'gray', 'all']).default('all'),
+  color: z.enum(['green', 'blue', 'orange', 'yellow', 'gray', 'all']).default('all'),
   searchScope: z
     .enum(['all', ...Object.keys(columnMap.customerCard)])
     .default('all'),
@@ -343,7 +343,7 @@ export const customerCardRouter = createTRPCRouter({
       _count: true,
       where,
     });
-    const counts = { green: 0, blue: 0, orange: 0, gray: 0 };
+    const counts = { green: 0, blue: 0, orange: 0, yellow: 0, gray: 0 };
     for (const row of rows) counts[row.color] += row._count;
     return counts;
   }),

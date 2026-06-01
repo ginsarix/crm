@@ -33,8 +33,8 @@ export function FilterControls({
 }: {
   search: string;
   onSearch: (search: string) => void;
-  color: 'green' | 'blue' | 'orange' | 'gray' | 'all';
-  onColor: (color: 'green' | 'blue' | 'orange' | 'gray' | 'all') => void;
+  color: 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'all';
+  onColor: (color: 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'all') => void;
   searchScope: 'all' | keyof CustomerCard;
   onSearchScope: (searchScope: 'all' | keyof CustomerCard) => void;
   businessGroupOptions: string[];

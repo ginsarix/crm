@@ -17,7 +17,7 @@ import { CreateCustomerCardDialog } from './create-dialog';
 import { FilterControls } from './filter-controls';
 import { ViewCustomerCardDialog } from './view-dialog';
 
-const ColorValidation = z.enum(['green', 'blue', 'orange', 'gray', 'all']);
+const ColorValidation = z.enum(['green', 'blue', 'orange', 'yellow', 'gray', 'all']);
 
 export function CustomerCardsPageClient() {
   const router = useRouter();

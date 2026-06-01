@@ -99,6 +99,7 @@ enum Color {
   green
   blue
   orange
+  yellow
   gray
 }
 

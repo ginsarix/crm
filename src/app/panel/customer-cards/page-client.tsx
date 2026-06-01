@@ -106,6 +106,12 @@ export function CustomerCardsPageClient() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  const handleReset = useCallback(() => {
+    setSearch('');
+    lastWrittenSearch.current = '';
+    router.replace('?');
+  }, [router]);
+
   const { data: businessGroupOptions } = api.businessGroup.get.useQuery();
   const { data: salesRepresentativeOptions } =
     api.salesRepresentative.get.useQuery();
@@ -158,6 +164,7 @@ export function CustomerCardsPageClient() {
               updateParam('search_scope', v === 'all' ? '' : v)
             }
             onStatus={(v) => updateParam('status', v)}
+            onReset={handleReset}
             authorizationDocument={authorizationDocument}
             onAuthorizationDocument={(v) =>
               updateParam('authorization_document', v)
@@ -192,7 +199,17 @@ export function CustomerCardsPageClient() {
             <DataTable
               columns={columns}
               data={data?.data ?? []}
-              defaultColumnVisibility={{ authorities: false }}
+              defaultColumnVisibility={{
+                sira: false,
+                sicil: false,
+                region: false,
+                gsm2: false,
+                gsm3: false,
+                contact2: false,
+                contact3: false,
+                status: false,
+                authorities: false,
+              }}
               pageCount={data?.pagination?.totalPages ?? -1}
               pagination={pagination}
               setPagination={setPagination}

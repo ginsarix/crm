@@ -2,6 +2,7 @@
 
 import type { $Enums, CustomerCard } from 'generated/prisma';
 import { SearchIcon } from 'lucide-react';
+import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Combobox } from '~/components/ui/combobox';
 import {
@@ -34,6 +35,7 @@ export function FilterControls({
   onAuthorizationDocument,
   vote,
   onVote,
+  onReset,
 }: {
   search: string;
   onSearch: (search: string) => void;
@@ -55,6 +57,7 @@ export function FilterControls({
   onAuthorizationDocument: (authorizationDocument: '' | '__null__' | $Enums.AuthorizationDocument) => void;
   vote: '' | '__null__' | $Enums.Vote;
   onVote: (vote: '' | '__null__' | $Enums.Vote) => void;
+  onReset: () => void;
 }) {
   const searchScopeComboboxOptions = [
     { key: 'all', label: 'Tümü' },
@@ -63,6 +66,8 @@ export function FilterControls({
         ([key]) =>
           key !== 'color' &&
           key !== 'status' &&
+          key !== 'authorizationDocument' &&
+          key !== 'vote' &&
           key !== 'createdAt' &&
           key !== 'updatedAt' &&
           key !== 'id' &&
@@ -183,6 +188,15 @@ export function FilterControls({
             options={voteComboboxOptions}
             selectedKey={vote}
           />
+          <Button
+            className="self-end"
+            onClick={onReset}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            Filtreleri Sıfırla
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -49,12 +49,12 @@ export function FilterControls({
   onSalesRepresentative: (salesRepresentative: string) => void;
   onDistrict: (district: '' | $Enums.District) => void;
   district: '' | $Enums.District;
-  status: '' | $Enums.Status;
-  onStatus: (status: '' | $Enums.Status) => void;
-  authorizationDocument: '' | $Enums.AuthorizationDocument;
-  onAuthorizationDocument: (authorizationDocument: '' | $Enums.AuthorizationDocument) => void;
-  vote: '' | $Enums.Vote;
-  onVote: (vote: '' | $Enums.Vote) => void;
+  status: '' | '__null__' | $Enums.Status;
+  onStatus: (status: '' | '__null__' | $Enums.Status) => void;
+  authorizationDocument: '' | '__null__' | $Enums.AuthorizationDocument;
+  onAuthorizationDocument: (authorizationDocument: '' | '__null__' | $Enums.AuthorizationDocument) => void;
+  vote: '' | '__null__' | $Enums.Vote;
+  onVote: (vote: '' | '__null__' | $Enums.Vote) => void;
 }) {
   const searchScopeComboboxOptions = [
     { key: 'all', label: 'Tümü' },
@@ -97,16 +97,19 @@ export function FilterControls({
 
   const statusComboboxOptions = [
     { key: '', label: 'Tümü' },
+    { key: '__null__', label: 'Boş' },
     ...STATUSES.map(({ value, label }) => ({ key: value, label })),
   ];
 
   const authorizationDocumentComboboxOptions = [
     { key: '', label: 'Tümü' },
+    { key: '__null__', label: 'Boş' },
     ...AUTHORIZATION_DOCUMENTS.map(({ value, label }) => ({ key: value, label })),
   ];
 
   const voteComboboxOptions = [
     { key: '', label: 'Tümü' },
+    { key: '__null__', label: 'Boş' },
     ...VOTES.map(({ value, label }) => ({ key: value, label })),
   ];
 

@@ -33,9 +33,9 @@ const filterSchema = z.object({
       'gulsehir',
     ])
     .default(''),
-  status: z.enum(['', 'geldi', 'gelmedi']).default(''),
-  authorizationDocument: z.enum(['', 'aldi', 'almadi']).default(''),
-  vote: z.enum(['', 'geldi', 'gelmedi']).default(''),
+  status: z.enum(['', 'geldi', 'gelmedi', '__null__']).default(''),
+  authorizationDocument: z.enum(['', 'aldi', 'almadi', '__null__']).default(''),
+  vote: z.enum(['', 'geldi', 'gelmedi', '__null__']).default(''),
 });
 
 const sortingSchema = z.object({
@@ -172,17 +172,20 @@ export const customerCardRouter = createTRPCRouter({
 
       // Build status filter
       if (input.filter?.status) {
-        whereClause.status = input.filter.status;
+        whereClause.status = input.filter.status === '__null__' ? null : input.filter.status;
       }
 
       // Build authorizationDocument filter
       if (input.filter?.authorizationDocument) {
-        whereClause.authorizationDocument = input.filter.authorizationDocument;
+        whereClause.authorizationDocument =
+          input.filter.authorizationDocument === '__null__'
+            ? null
+            : input.filter.authorizationDocument;
       }
 
       // Build vote filter
       if (input.filter?.vote) {
-        whereClause.vote = input.filter.vote;
+        whereClause.vote = input.filter.vote === '__null__' ? null : input.filter.vote;
       }
 
       // Build orderBy clause

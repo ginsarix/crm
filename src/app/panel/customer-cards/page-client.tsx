@@ -57,13 +57,26 @@ export function CustomerCardsPageClient() {
   const salesRepresentative = searchParams.get('sales_representative') ?? '';
   const district = (DistrictValidation.safeParse(searchParams.get('district'))
     .data ?? '') as '' | $Enums.District;
-  const status = (StatusValidation.safeParse(searchParams.get('status')).data ??
-    '') as '' | $Enums.Status;
-  const authorizationDocument = (AuthorizationDocumentValidation.safeParse(
-    searchParams.get('authorization_document'),
-  ).data ?? '') as '' | $Enums.AuthorizationDocument;
-  const vote = (VoteValidation.safeParse(searchParams.get('vote')).data ??
-    '') as '' | $Enums.Vote;
+  const rawStatus = searchParams.get('status') ?? '';
+  const status = (rawStatus === '__null__'
+    ? '__null__'
+    : (StatusValidation.safeParse(rawStatus).data ?? '')) as
+    | ''
+    | '__null__'
+    | $Enums.Status;
+  const rawAuthorizationDocument =
+    searchParams.get('authorization_document') ?? '';
+  const authorizationDocument = (rawAuthorizationDocument === '__null__'
+    ? '__null__'
+    : (AuthorizationDocumentValidation.safeParse(rawAuthorizationDocument)
+        .data ?? '')) as '' | '__null__' | $Enums.AuthorizationDocument;
+  const rawVote = searchParams.get('vote') ?? '';
+  const vote = (rawVote === '__null__'
+    ? '__null__'
+    : (VoteValidation.safeParse(rawVote).data ?? '')) as
+    | ''
+    | '__null__'
+    | $Enums.Vote;
 
   const updateParam = useCallback(
     (key: string, value: string) => {

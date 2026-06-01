@@ -46,7 +46,6 @@ export function CreateCustomerCardDialog() {
     mode: 'onChange',
     defaultValues: {
       color: 'gray',
-      status: 'gelmedi',
     },
     shouldFocusError: false,
   });
@@ -263,13 +262,66 @@ export function CreateCustomerCardDialog() {
               name="status"
               render={({ field }) => (
                 <Select
-                  defaultValue={field.value}
-                  onValueChange={field.onChange}
+                  value={field.value ?? undefined}
+                  onValueChange={(v) =>
+                    field.onChange(v === '__null__' ? null : v)
+                  }
                 >
                   <SelectTrigger className="w-full" id="status">
-                    <SelectValue placeholder="Durum seçin" />
+                    <SelectValue placeholder="Durum Seçiniz" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="__null__">Boş</SelectItem>
+                    <SelectItem value="geldi">Geldi</SelectItem>
+                    <SelectItem value="gelmedi">Gelmedi</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="authorizationDocument">Yetki Belge</Label>
+            <Controller
+              control={control}
+              name="authorizationDocument"
+              render={({ field }) => (
+                <Select
+                  value={field.value ?? undefined}
+                  onValueChange={(v) =>
+                    field.onChange(v === '__null__' ? null : v)
+                  }
+                >
+                  <SelectTrigger className="w-full" id="authorizationDocument">
+                    <SelectValue placeholder="Durum Seçiniz" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__null__">Boş</SelectItem>
+                    <SelectItem value="aldi">Aldı</SelectItem>
+                    <SelectItem value="almadi">Almadı</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="vote">Oy</Label>
+            <Controller
+              control={control}
+              name="vote"
+              render={({ field }) => (
+                <Select
+                  value={field.value ?? undefined}
+                  onValueChange={(v) =>
+                    field.onChange(v === '__null__' ? null : v)
+                  }
+                >
+                  <SelectTrigger className="w-full" id="vote">
+                    <SelectValue placeholder="Durum Seçiniz" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__null__">Boş</SelectItem>
                     <SelectItem value="geldi">Geldi</SelectItem>
                     <SelectItem value="gelmedi">Gelmedi</SelectItem>
                   </SelectContent>

@@ -10,7 +10,7 @@ import {
   InputGroupInput,
 } from '~/components/ui/input-group';
 import { columnMap } from '~/lib/column-map';
-import { DISTRICTS, STATUSES } from '~/shared/constants';
+import { AUTHORIZATION_DOCUMENTS, DISTRICTS, STATUSES, VOTES } from '~/shared/constants';
 import ColorControl from './color-control';
 
 export function FilterControls({
@@ -30,6 +30,10 @@ export function FilterControls({
   district,
   status,
   onStatus,
+  authorizationDocument,
+  onAuthorizationDocument,
+  vote,
+  onVote,
 }: {
   search: string;
   onSearch: (search: string) => void;
@@ -47,6 +51,10 @@ export function FilterControls({
   district: '' | $Enums.District;
   status: '' | $Enums.Status;
   onStatus: (status: '' | $Enums.Status) => void;
+  authorizationDocument: '' | $Enums.AuthorizationDocument;
+  onAuthorizationDocument: (authorizationDocument: '' | $Enums.AuthorizationDocument) => void;
+  vote: '' | $Enums.Vote;
+  onVote: (vote: '' | $Enums.Vote) => void;
 }) {
   const searchScopeComboboxOptions = [
     { key: 'all', label: 'Tümü' },
@@ -90,6 +98,16 @@ export function FilterControls({
   const statusComboboxOptions = [
     { key: '', label: 'Tümü' },
     ...STATUSES.map(({ value, label }) => ({ key: value, label })),
+  ];
+
+  const authorizationDocumentComboboxOptions = [
+    { key: '', label: 'Tümü' },
+    ...AUTHORIZATION_DOCUMENTS.map(({ value, label }) => ({ key: value, label })),
+  ];
+
+  const voteComboboxOptions = [
+    { key: '', label: 'Tümü' },
+    ...VOTES.map(({ value, label }) => ({ key: value, label })),
   ];
 
   return (
@@ -149,6 +167,18 @@ export function FilterControls({
             onChange={(v) => onStatus(v as '' | $Enums.Status)}
             options={statusComboboxOptions}
             selectedKey={status}
+          />
+          <Combobox
+            label="Yetki Belge"
+            onChange={(v) => onAuthorizationDocument(v as '' | $Enums.AuthorizationDocument)}
+            options={authorizationDocumentComboboxOptions}
+            selectedKey={authorizationDocument}
+          />
+          <Combobox
+            label="Oy"
+            onChange={(v) => onVote(v as '' | $Enums.Vote)}
+            options={voteComboboxOptions}
+            selectedKey={vote}
           />
         </div>
       </CardContent>

@@ -34,6 +34,8 @@ const filterSchema = z.object({
     ])
     .default(''),
   status: z.enum(['', 'geldi', 'gelmedi']).default(''),
+  authorizationDocument: z.enum(['', 'aldi', 'almadi']).default(''),
+  vote: z.enum(['', 'geldi', 'gelmedi']).default(''),
 });
 
 const sortingSchema = z.object({
@@ -78,6 +80,8 @@ const sortableFields = [
   'businessGroup',
   'color',
   'status',
+  'authorizationDocument',
+  'vote',
   'salesRepresentative',
   'createdAt',
   'updatedAt',
@@ -169,6 +173,16 @@ export const customerCardRouter = createTRPCRouter({
       // Build status filter
       if (input.filter?.status) {
         whereClause.status = input.filter.status;
+      }
+
+      // Build authorizationDocument filter
+      if (input.filter?.authorizationDocument) {
+        whereClause.authorizationDocument = input.filter.authorizationDocument;
+      }
+
+      // Build vote filter
+      if (input.filter?.vote) {
+        whereClause.vote = input.filter.vote;
       }
 
       // Build orderBy clause

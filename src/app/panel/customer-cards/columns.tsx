@@ -126,7 +126,25 @@ export const createColumns = (
     enableSorting: true,
     cell: ({ row }) => {
       const s = row.getValue('status') as $Enums.Status;
-      return s === 'geldi' ? 'Geldi' : 'Gelmedi';
+      return s === 'geldi' ? 'Geldi' : s === 'gelmedi' ? 'Gelmedi' : '-';
+    },
+  },
+  {
+    accessorKey: 'authorizationDocument',
+    header: 'Yetki Belge',
+    enableSorting: true,
+    cell: ({ row }) => {
+      const v = row.getValue('authorizationDocument') as $Enums.AuthorizationDocument;
+      return v === 'aldi' ? 'Aldı' : v === 'almadi' ? 'Almadı' : '-';
+    },
+  },
+  {
+    accessorKey: 'vote',
+    header: 'Oy',
+    enableSorting: true,
+    cell: ({ row }) => {
+      const v = row.getValue('vote') as $Enums.Vote;
+      return v === 'geldi' ? 'Geldi' : v === 'gelmedi' ? 'Gelmedi' : '-';
     },
   },
   {

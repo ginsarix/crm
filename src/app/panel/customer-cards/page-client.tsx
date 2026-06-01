@@ -8,8 +8,10 @@ import { z } from 'zod';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
 import { cn } from '~/lib/utils';
+import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
 import { DistrictValidation } from '~/shared/zod-schemas/district';
 import { StatusValidation } from '~/shared/zod-schemas/status';
+import { VoteValidation } from '~/shared/zod-schemas/vote';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { createColumns } from './columns';
@@ -57,6 +59,11 @@ export function CustomerCardsPageClient() {
     .data ?? '') as '' | $Enums.District;
   const status = (StatusValidation.safeParse(searchParams.get('status')).data ??
     '') as '' | $Enums.Status;
+  const authorizationDocument = (AuthorizationDocumentValidation.safeParse(
+    searchParams.get('authorization_document'),
+  ).data ?? '') as '' | $Enums.AuthorizationDocument;
+  const vote = (VoteValidation.safeParse(searchParams.get('vote')).data ??
+    '') as '' | $Enums.Vote;
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -101,6 +108,8 @@ export function CustomerCardsPageClient() {
       salesRepresentative,
       district,
       status,
+      authorizationDocument,
+      vote,
     },
     sorting,
   });
@@ -136,6 +145,12 @@ export function CustomerCardsPageClient() {
               updateParam('search_scope', v === 'all' ? '' : v)
             }
             onStatus={(v) => updateParam('status', v)}
+            authorizationDocument={authorizationDocument}
+            onAuthorizationDocument={(v) =>
+              updateParam('authorization_document', v)
+            }
+            vote={vote}
+            onVote={(v) => updateParam('vote', v)}
             salesRepresentative={salesRepresentative}
             salesRepresentativeOptions={
               salesRepresentativeOptions?.map(

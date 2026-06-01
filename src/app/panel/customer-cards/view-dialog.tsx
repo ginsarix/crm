@@ -95,7 +95,9 @@ export function ViewCustomerCardDialog({
       contact3: customerCard.contact3 ?? '',
       businessGroup: customerCard.businessGroup ?? '',
       color: customerCard.color ?? 'gray',
-      status: customerCard.status ?? 'gelmedi',
+      status: customerCard.status,
+      authorizationDocument: customerCard.authorizationDocument,
+      vote: customerCard.vote,
       authorities: customerCard.authorities ?? '',
       salesRepresentative: customerCard.salesRepresentative ?? '',
     };
@@ -426,13 +428,66 @@ export function ViewCustomerCardDialog({
                 name="status"
                 render={({ field }) => (
                   <Select
-                    defaultValue={field.value ?? 'gelmedi'}
-                    onValueChange={field.onChange}
+                    value={field.value ?? undefined}
+                    onValueChange={(v) =>
+                      field.onChange(v === '__null__' ? null : v)
+                    }
                   >
                     <SelectTrigger className="w-full" id="status">
-                      <SelectValue placeholder="Durum seçin" />
+                      <SelectValue placeholder="Durum Seçiniz" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="__null__">Boş</SelectItem>
+                      <SelectItem value="geldi">Geldi</SelectItem>
+                      <SelectItem value="gelmedi">Gelmedi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="authorizationDocument">Yetki Belge</Label>
+              <Controller
+                control={control}
+                name="authorizationDocument"
+                render={({ field }) => (
+                  <Select
+                    value={field.value ?? undefined}
+                    onValueChange={(v) =>
+                      field.onChange(v === '__null__' ? null : v)
+                    }
+                  >
+                    <SelectTrigger className="w-full" id="authorizationDocument">
+                      <SelectValue placeholder="Durum Seçiniz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__null__">Boş</SelectItem>
+                      <SelectItem value="aldi">Aldı</SelectItem>
+                      <SelectItem value="almadi">Almadı</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="vote">Oy</Label>
+              <Controller
+                control={control}
+                name="vote"
+                render={({ field }) => (
+                  <Select
+                    value={field.value ?? undefined}
+                    onValueChange={(v) =>
+                      field.onChange(v === '__null__' ? null : v)
+                    }
+                  >
+                    <SelectTrigger className="w-full" id="vote">
+                      <SelectValue placeholder="Durum Seçiniz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__null__">Boş</SelectItem>
                       <SelectItem value="geldi">Geldi</SelectItem>
                       <SelectItem value="gelmedi">Gelmedi</SelectItem>
                     </SelectContent>
@@ -576,7 +631,33 @@ export function ViewCustomerCardDialog({
             <div>
               <Label className="text-muted-foreground">Durum</Label>
               <p className="text-sm">
-                {customerCard.status === 'geldi' ? 'Geldi' : 'Gelmedi'}
+                {customerCard.status === 'geldi'
+                  ? 'Geldi'
+                  : customerCard.status === 'gelmedi'
+                    ? 'Gelmedi'
+                    : '-'}
+              </p>
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground">Yetki Belge</Label>
+              <p className="text-sm">
+                {customerCard.authorizationDocument === 'aldi'
+                  ? 'Aldı'
+                  : customerCard.authorizationDocument === 'almadi'
+                    ? 'Almadı'
+                    : '-'}
+              </p>
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground">Oy</Label>
+              <p className="text-sm">
+                {customerCard.vote === 'geldi'
+                  ? 'Geldi'
+                  : customerCard.vote === 'gelmedi'
+                    ? 'Gelmedi'
+                    : '-'}
               </p>
             </div>
 

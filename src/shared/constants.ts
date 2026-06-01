@@ -3,6 +3,16 @@ export const STATUSES = [
   { value: 'gelmedi', label: 'Gelmedi' },
 ] as const;
 
+export const AUTHORIZATION_DOCUMENTS = [
+  { value: 'aldi', label: 'Aldı' },
+  { value: 'almadi', label: 'Almadı' },
+] as const;
+
+export const VOTES = [
+  { value: 'geldi', label: 'Geldi' },
+  { value: 'gelmedi', label: 'Gelmedi' },
+] as const;
+
 export const DISTRICTS = [
   { value: 'merkez', label: 'MERKEZ' },
   { value: 'avanos', label: 'AVANOS' },

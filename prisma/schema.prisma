@@ -58,8 +58,10 @@ model CustomerCard {
   contact3            String?
   businessGroup       String?
   color               Color     @default(gray)
-  status              Status    @default(gelmedi)
-  authorities         String?
+  status                Status?
+  authorizationDocument AuthorizationDocument?
+  vote                  Vote?
+  authorities           String?
   salesRepresentative String?
 
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
@@ -75,6 +77,8 @@ model CustomerCard {
   @@index([salesRepresentative])
   @@index([district])
   @@index([status])
+  @@index([authorizationDocument])
+  @@index([vote])
   @@index([createdById])
   @@index([businessGroup, color])
 }
@@ -104,6 +108,16 @@ enum Color {
 }
 
 enum Status {
+  geldi
+  gelmedi
+}
+
+enum AuthorizationDocument {
+  aldi
+  almadi
+}
+
+enum Vote {
   geldi
   gelmedi
 }

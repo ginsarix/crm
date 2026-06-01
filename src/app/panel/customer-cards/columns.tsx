@@ -130,6 +130,11 @@ export const createColumns = (
     },
   },
   {
+    accessorKey: 'authorities',
+    header: 'Yetkililer',
+    enableSorting: true,
+  },
+  {
     accessorKey: 'salesRepresentative',
     header: 'Satış Temsilcisi',
     enableSorting: true,

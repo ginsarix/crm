@@ -18,6 +18,7 @@ export const CustomerCardCreateSchema = z.object({
   businessGroup: z.string().optional(),
   color: z.enum(['green', 'blue', 'orange', 'gray']).default('gray'),
   status: StatusValidation.default('gelmedi'),
+  authorities: z.string().optional(),
   salesRepresentative: z.string().optional(),
 });
 
@@ -38,6 +39,7 @@ export const CustomerCardFindManySelectSchema = z.object({
   businessGroup: z.boolean().default(true),
   positive: z.boolean().default(true),
   status: z.boolean().default(true),
+  authorities: z.boolean().default(true),
   salesRepresentative: z.boolean().default(true),
   createdById: z.boolean().default(true),
   createdAt: z.boolean().default(true),

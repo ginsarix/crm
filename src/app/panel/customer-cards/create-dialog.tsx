@@ -231,6 +231,15 @@ export function CreateCustomerCardDialog() {
 
           {/* Additional Information */}
           <div className="space-y-2">
+            <Label htmlFor="authorities">Yetkililer</Label>
+            <Input
+              {...register('authorities')}
+              id="authorities"
+              placeholder="Yetkililer"
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
             <Controller
               control={control}

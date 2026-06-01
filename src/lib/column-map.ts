@@ -27,6 +27,7 @@ export const columnMap = {
     businessGroup: 'İş Grubu',
     color: 'Renk',
     status: 'Durum',
+    authorities: 'Yetkililer',
     salesRepresentative: 'Satış Temsilcisi',
     createdAt: 'Oluşturulma Tarihi',
     updatedAt: 'Güncellenme Tarihi',

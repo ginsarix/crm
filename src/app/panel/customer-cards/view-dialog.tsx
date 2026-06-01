@@ -96,6 +96,7 @@ export function ViewCustomerCardDialog({
       businessGroup: customerCard.businessGroup ?? '',
       color: customerCard.color ?? 'gray',
       status: customerCard.status ?? 'gelmedi',
+      authorities: customerCard.authorities ?? '',
       salesRepresentative: customerCard.salesRepresentative ?? '',
     };
   };
@@ -393,6 +394,15 @@ export function ViewCustomerCardDialog({
 
             {/* Additional Information */}
             <div className="space-y-2">
+              <Label htmlFor="authorities">Yetkililer</Label>
+              <Input
+                {...register('authorities')}
+                id="authorities"
+                placeholder="Yetkililer"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
               <Controller
                 control={control}
@@ -549,6 +559,11 @@ export function ViewCustomerCardDialog({
                   <p className="text-sm">{customerCard.contact3 || '-'}</p>
                 </div>
               </div>
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground">Yetkililer</Label>
+              <p className="text-sm">{customerCard.authorities || '-'}</p>
             </div>
 
             <div>

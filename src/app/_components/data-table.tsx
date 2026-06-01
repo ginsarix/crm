@@ -50,23 +50,27 @@ interface DataTableProps<TData, TValue> {
   className?: string;
   pageCount?: number;
   tableId?: string; // Unique ID for localStorage persistence
+  defaultColumnVisibility?: VisibilityState;
 }
 
 function getStorageKey(tableId: string) {
   return `table-columns-${tableId}`;
 }
 
-function loadColumnVisibility(tableId: string): VisibilityState {
-  if (typeof window === "undefined") return {};
+function loadColumnVisibility(
+  tableId: string,
+  defaults: VisibilityState = {},
+): VisibilityState {
+  if (typeof window === "undefined") return { ...defaults };
   try {
     const stored = localStorage.getItem(getStorageKey(tableId));
     if (stored) {
-      return JSON.parse(stored) as VisibilityState;
+      return { ...defaults, ...(JSON.parse(stored) as VisibilityState) };
     }
   } catch {
     // Ignore parse errors
   }
-  return {};
+  return { ...defaults };
 }
 
 function saveColumnVisibility(tableId: string, visibility: VisibilityState) {
@@ -88,9 +92,10 @@ export function DataTable<TData, TValue>({
   className,
   pageCount = -1,
   tableId = "default",
+  defaultColumnVisibility = {},
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-    () => loadColumnVisibility(tableId),
+    () => loadColumnVisibility(tableId, defaultColumnVisibility),
   );
 
   // Persist column visibility changes to localStorage

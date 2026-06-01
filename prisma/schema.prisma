@@ -59,6 +59,7 @@ model CustomerCard {
   businessGroup       String?
   color               Color     @default(gray)
   status              Status    @default(gelmedi)
+  authorities         String?
   salesRepresentative String?
 
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)

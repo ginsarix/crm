@@ -55,6 +55,7 @@ const searchableFields = [
   'gsm3',
   'contact3',
   'businessGroup',
+  'authorities',
   'salesRepresentative',
 ] as const;
 

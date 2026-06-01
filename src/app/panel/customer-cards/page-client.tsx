@@ -164,6 +164,7 @@ export function CustomerCardsPageClient() {
             <DataTable
               columns={columns}
               data={data?.data ?? []}
+              defaultColumnVisibility={{ authorities: false }}
               pageCount={data?.pagination?.totalPages ?? -1}
               pagination={pagination}
               setPagination={setPagination}

@@ -262,10 +262,10 @@ export function CreateCustomerCardDialog() {
               name="status"
               render={({ field }) => (
                 <Select
-                  value={field.value ?? undefined}
                   onValueChange={(v) =>
                     field.onChange(v === '__null__' ? null : v)
                   }
+                  value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full" id="status">
                     <SelectValue placeholder="Durum Seçiniz" />
@@ -287,10 +287,10 @@ export function CreateCustomerCardDialog() {
               name="authorizationDocument"
               render={({ field }) => (
                 <Select
-                  value={field.value ?? undefined}
                   onValueChange={(v) =>
                     field.onChange(v === '__null__' ? null : v)
                   }
+                  value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full" id="authorizationDocument">
                     <SelectValue placeholder="Durum Seçiniz" />
@@ -312,10 +312,10 @@ export function CreateCustomerCardDialog() {
               name="vote"
               render={({ field }) => (
                 <Select
-                  value={field.value ?? undefined}
                   onValueChange={(v) =>
                     field.onChange(v === '__null__' ? null : v)
                   }
+                  value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full" id="vote">
                     <SelectValue placeholder="Durum Seçiniz" />

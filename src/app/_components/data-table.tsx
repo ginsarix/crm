@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   type ColumnDef,
@@ -9,7 +9,7 @@ import {
   type SortingState,
   useReactTable,
   type VisibilityState,
-} from "@tanstack/react-table";
+} from '@tanstack/react-table';
 import {
   ArrowDown,
   ArrowUp,
@@ -17,19 +17,19 @@ import {
   ChevronLeft,
   ChevronRight,
   Columns3,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
+import { Button } from '~/components/ui/button';
+import { Checkbox } from '~/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { Label } from "~/components/ui/label";
+} from '~/components/ui/dropdown-menu';
+import { Label } from '~/components/ui/label';
 import {
   Table,
   TableBody,
@@ -37,8 +37,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "~/components/ui/table";
-import { cn } from "~/lib/utils";
+} from '~/components/ui/table';
+import { cn } from '~/lib/utils';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -61,7 +61,7 @@ function loadColumnVisibility(
   tableId: string,
   defaults: VisibilityState = {},
 ): VisibilityState {
-  if (typeof window === "undefined") return { ...defaults };
+  if (typeof window === 'undefined') return { ...defaults };
   try {
     const stored = localStorage.getItem(getStorageKey(tableId));
     if (stored) {
@@ -74,7 +74,7 @@ function loadColumnVisibility(
 }
 
 function saveColumnVisibility(tableId: string, visibility: VisibilityState) {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(getStorageKey(tableId), JSON.stringify(visibility));
   } catch {
@@ -91,7 +91,7 @@ export function DataTable<TData, TValue>({
   setPagination,
   className,
   pageCount = -1,
-  tableId = "default",
+  tableId = 'default',
   defaultColumnVisibility = {},
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
@@ -125,7 +125,7 @@ export function DataTable<TData, TValue>({
     .getAllColumns()
     .filter(
       (column) =>
-        typeof column.accessorFn !== "undefined" && column.getCanHide(),
+        typeof column.accessorFn !== 'undefined' && column.getCanHide(),
     );
 
   return (
@@ -149,7 +149,7 @@ export function DataTable<TData, TValue>({
               {toggleableColumns.map((column) => {
                 const header = column.columnDef.header;
                 const columnName =
-                  typeof header === "string"
+                  typeof header === 'string'
                     ? header
                     : column.id.charAt(0).toUpperCase() + column.id.slice(1);
 
@@ -192,9 +192,9 @@ export function DataTable<TData, TValue>({
       {/* Table */}
       <div
         className={cn(
-          "overflow-hidden rounded-lg rounded-t-none border bg-card",
+          'overflow-hidden rounded-lg rounded-t-none border bg-card',
           className,
-          pagination && setPagination && "rounded-b-none",
+          pagination && setPagination && 'rounded-b-none',
         )}
       >
         <Table>
@@ -207,7 +207,7 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
                         <button
                           className={cn(
-                            "flex w-full cursor-pointer select-none items-center gap-2",
+                            'flex w-full cursor-pointer select-none items-center gap-2',
                           )}
                           onClick={header.column.getToggleSortingHandler()}
                           type="button"
@@ -217,9 +217,9 @@ export function DataTable<TData, TValue>({
                             header.getContext(),
                           )}
                           <span className="ml-auto">
-                            {header.column.getIsSorted() === "asc" ? (
+                            {header.column.getIsSorted() === 'asc' ? (
                               <ArrowUp className="h-4 w-4" />
-                            ) : header.column.getIsSorted() === "desc" ? (
+                            ) : header.column.getIsSorted() === 'desc' ? (
                               <ArrowDown className="h-4 w-4" />
                             ) : (
                               <ArrowUpDown className="h-4 w-4 opacity-50" />
@@ -241,27 +241,26 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const color = (row.original as Record<string, unknown>)
-                  .color as
-                  | "green"
-                  | "blue"
-                  | "orange"
-                  | "gray"
+                const color = (row.original as Record<string, unknown>).color as
+                  | 'green'
+                  | 'blue'
+                  | 'orange'
+                  | 'gray'
                   | null
                   | undefined;
                 return (
                   <TableRow
                     className={cn(
-                      color === "green" &&
-                        "bg-green-200 hover:bg-green-300 dark:bg-green-900/80 dark:hover:bg-green-900/90",
-                      color === "blue" &&
-                        "bg-blue-200 hover:bg-blue-300 dark:bg-blue-900/80 dark:hover:bg-blue-900/90",
-                      color === "orange" &&
-                        "bg-orange-200 hover:bg-orange-300 dark:bg-orange-900/80 dark:hover:bg-orange-900/90",
-                      color === "gray" &&
-                        "bg-gray-200 hover:bg-gray-300 dark:bg-gray-500/80 dark:hover:bg-gray-500/90",
+                      color === 'green' &&
+                        'bg-green-200 hover:bg-green-300 dark:bg-green-900/80 dark:hover:bg-green-900/90',
+                      color === 'blue' &&
+                        'bg-blue-200 hover:bg-blue-300 dark:bg-blue-900/80 dark:hover:bg-blue-900/90',
+                      color === 'orange' &&
+                        'bg-orange-200 hover:bg-orange-300 dark:bg-orange-900/80 dark:hover:bg-orange-900/90',
+                      color === 'gray' &&
+                        'bg-gray-200 hover:bg-gray-300 dark:bg-gray-500/80 dark:hover:bg-gray-500/90',
                     )}
-                    data-state={row.getIsSelected() && "selected"}
+                    data-state={row.getIsSelected() && 'selected'}
                     key={row.id}
                   >
                     {row.getVisibleCells().map((cell) => (

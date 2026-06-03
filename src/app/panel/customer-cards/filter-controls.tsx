@@ -11,7 +11,12 @@ import {
   InputGroupInput,
 } from '~/components/ui/input-group';
 import { columnMap } from '~/lib/column-map';
-import { AUTHORIZATION_DOCUMENTS, DISTRICTS, STATUSES, VOTES } from '~/shared/constants';
+import {
+  AUTHORIZATION_DOCUMENTS,
+  DISTRICTS,
+  STATUSES,
+  VOTES,
+} from '~/shared/constants';
 import ColorControl from './color-control';
 
 export function FilterControls({
@@ -40,7 +45,9 @@ export function FilterControls({
   search: string;
   onSearch: (search: string) => void;
   color: 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'all';
-  onColor: (color: 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'all') => void;
+  onColor: (
+    color: 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'all',
+  ) => void;
   searchScope: 'all' | keyof CustomerCard;
   onSearchScope: (searchScope: 'all' | keyof CustomerCard) => void;
   businessGroupOptions: string[];
@@ -54,7 +61,9 @@ export function FilterControls({
   status: '' | '__null__' | $Enums.Status;
   onStatus: (status: '' | '__null__' | $Enums.Status) => void;
   authorizationDocument: '' | '__null__' | $Enums.AuthorizationDocument;
-  onAuthorizationDocument: (authorizationDocument: '' | '__null__' | $Enums.AuthorizationDocument) => void;
+  onAuthorizationDocument: (
+    authorizationDocument: '' | '__null__' | $Enums.AuthorizationDocument,
+  ) => void;
   vote: '' | '__null__' | $Enums.Vote;
   onVote: (vote: '' | '__null__' | $Enums.Vote) => void;
   onReset: () => void;
@@ -109,7 +118,10 @@ export function FilterControls({
   const authorizationDocumentComboboxOptions = [
     { key: '', label: 'Tümü' },
     { key: '__null__', label: 'Boş' },
-    ...AUTHORIZATION_DOCUMENTS.map(({ value, label }) => ({ key: value, label })),
+    ...AUTHORIZATION_DOCUMENTS.map(({ value, label }) => ({
+      key: value,
+      label,
+    })),
   ];
 
   const voteComboboxOptions = [
@@ -178,7 +190,9 @@ export function FilterControls({
           />
           <Combobox
             label="Yetki Belge"
-            onChange={(v) => onAuthorizationDocument(v as '' | $Enums.AuthorizationDocument)}
+            onChange={(v) =>
+              onAuthorizationDocument(v as '' | $Enums.AuthorizationDocument)
+            }
             options={authorizationDocumentComboboxOptions}
             selectedKey={authorizationDocument}
           />

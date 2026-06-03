@@ -19,7 +19,14 @@ import { CreateCustomerCardDialog } from './create-dialog';
 import { FilterControls } from './filter-controls';
 import { ViewCustomerCardDialog } from './view-dialog';
 
-const ColorValidation = z.enum(['green', 'blue', 'orange', 'yellow', 'gray', 'all']);
+const ColorValidation = z.enum([
+  'green',
+  'blue',
+  'orange',
+  'yellow',
+  'gray',
+  'all',
+]);
 
 export function CustomerCardsPageClient() {
   const router = useRouter();
@@ -58,25 +65,25 @@ export function CustomerCardsPageClient() {
   const district = (DistrictValidation.safeParse(searchParams.get('district'))
     .data ?? '') as '' | $Enums.District;
   const rawStatus = searchParams.get('status') ?? '';
-  const status = (rawStatus === '__null__'
-    ? '__null__'
-    : (StatusValidation.safeParse(rawStatus).data ?? '')) as
-    | ''
-    | '__null__'
-    | $Enums.Status;
+  const status = (
+    rawStatus === '__null__'
+      ? '__null__'
+      : (StatusValidation.safeParse(rawStatus).data ?? '')
+  ) as '' | '__null__' | $Enums.Status;
   const rawAuthorizationDocument =
     searchParams.get('authorization_document') ?? '';
-  const authorizationDocument = (rawAuthorizationDocument === '__null__'
-    ? '__null__'
-    : (AuthorizationDocumentValidation.safeParse(rawAuthorizationDocument)
-        .data ?? '')) as '' | '__null__' | $Enums.AuthorizationDocument;
+  const authorizationDocument = (
+    rawAuthorizationDocument === '__null__'
+      ? '__null__'
+      : (AuthorizationDocumentValidation.safeParse(rawAuthorizationDocument)
+          .data ?? '')
+  ) as '' | '__null__' | $Enums.AuthorizationDocument;
   const rawVote = searchParams.get('vote') ?? '';
-  const vote = (rawVote === '__null__'
-    ? '__null__'
-    : (VoteValidation.safeParse(rawVote).data ?? '')) as
-    | ''
-    | '__null__'
-    | $Enums.Vote;
+  const vote = (
+    rawVote === '__null__'
+      ? '__null__'
+      : (VoteValidation.safeParse(rawVote).data ?? '')
+  ) as '' | '__null__' | $Enums.Vote;
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -145,6 +152,7 @@ export function CustomerCardsPageClient() {
       <div className="mx-auto w-full max-w-[1600px]">
         <div className="mb-4">
           <FilterControls
+            authorizationDocument={authorizationDocument}
             businessGroup={businessGroup}
             businessGroupOptions={
               businessGroupOptions?.map(
@@ -153,9 +161,13 @@ export function CustomerCardsPageClient() {
             }
             color={color}
             district={district}
+            onAuthorizationDocument={(v) =>
+              updateParam('authorization_document', v)
+            }
             onBusinessGroup={(v) => updateParam('business_group', v)}
             onColor={(v) => updateParam('color', v === 'all' ? '' : v)}
             onDistrict={(v) => updateParam('district', v)}
+            onReset={handleReset}
             onSalesRepresentative={(v) =>
               updateParam('sales_representative', v)
             }
@@ -164,12 +176,6 @@ export function CustomerCardsPageClient() {
               updateParam('search_scope', v === 'all' ? '' : v)
             }
             onStatus={(v) => updateParam('status', v)}
-            onReset={handleReset}
-            authorizationDocument={authorizationDocument}
-            onAuthorizationDocument={(v) =>
-              updateParam('authorization_document', v)
-            }
-            vote={vote}
             onVote={(v) => updateParam('vote', v)}
             salesRepresentative={salesRepresentative}
             salesRepresentativeOptions={
@@ -180,6 +186,7 @@ export function CustomerCardsPageClient() {
             search={search}
             searchScope={searchScope}
             status={status}
+            vote={vote}
           />
         </div>
         <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>

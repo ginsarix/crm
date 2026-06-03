@@ -14,7 +14,9 @@ import {
 
 const filterSchema = z.object({
   search: z.string().optional(),
-  color: z.enum(['green', 'blue', 'orange', 'yellow', 'gray', 'all']).default('all'),
+  color: z
+    .enum(['green', 'blue', 'orange', 'yellow', 'gray', 'all'])
+    .default('all'),
   searchScope: z
     .enum(['all', ...Object.keys(columnMap.customerCard)])
     .default('all'),
@@ -172,7 +174,8 @@ export const customerCardRouter = createTRPCRouter({
 
       // Build status filter
       if (input.filter?.status) {
-        whereClause.status = input.filter.status === '__null__' ? null : input.filter.status;
+        whereClause.status =
+          input.filter.status === '__null__' ? null : input.filter.status;
       }
 
       // Build authorizationDocument filter
@@ -185,7 +188,8 @@ export const customerCardRouter = createTRPCRouter({
 
       // Build vote filter
       if (input.filter?.vote) {
-        whereClause.vote = input.filter.vote === '__null__' ? null : input.filter.vote;
+        whereClause.vote =
+          input.filter.vote === '__null__' ? null : input.filter.vote;
       }
 
       // Build orderBy clause

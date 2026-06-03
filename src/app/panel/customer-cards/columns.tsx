@@ -134,7 +134,9 @@ export const createColumns = (
     header: 'Yetki Belge',
     enableSorting: true,
     cell: ({ row }) => {
-      const v = row.getValue('authorizationDocument') as $Enums.AuthorizationDocument;
+      const v = row.getValue(
+        'authorizationDocument',
+      ) as $Enums.AuthorizationDocument;
       return v === 'aldi' ? 'Aldı' : v === 'almadi' ? 'Almadı' : '-';
     },
   },

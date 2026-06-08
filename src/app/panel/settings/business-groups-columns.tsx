@@ -16,6 +16,8 @@ export const createColumns = (
 ): ColumnDef<BusinessGroup>[] => [
   {
     id: 'actions',
+    size: 60,
+    enableResizing: false,
     cell: ({ row }) => {
       const businessGroup = row.original;
       return (

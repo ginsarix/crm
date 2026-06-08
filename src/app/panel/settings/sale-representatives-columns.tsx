@@ -16,6 +16,8 @@ export const createColumns = (
 ): ColumnDef<SalesRepresentative>[] => [
   {
     id: 'actions',
+    size: 60,
+    enableResizing: false,
     cell: ({ row }) => {
       const salesRepresentative = row.original;
       return (

@@ -20,6 +20,8 @@ export const createColumns = (
 ): ColumnDef<CustomerCard>[] => [
   {
     id: 'actions',
+    size: 60,
+    enableResizing: false,
     cell: ({ row }) => {
       const customerCard = row.original;
 

@@ -91,9 +91,16 @@ export function FilterControls({
 
   const businessGroupComboboxOptions = [
     { key: '', label: 'Tümü' },
-    ...businessGroupOptions.map((businessGroup) => {
-      return { key: businessGroup, label: businessGroup };
-    }),
+    ...businessGroupOptions
+      .map((businessGroup) => {
+        return { key: businessGroup, label: businessGroup };
+      })
+      .sort((a, b) =>
+        a.label.localeCompare(b.label, 'tr', {
+          numeric: true,
+          sensitivity: 'base',
+        }),
+      ),
   ];
   const salesRepresentativeComboboxOptions = [
     { key: '', label: 'Tümü' },

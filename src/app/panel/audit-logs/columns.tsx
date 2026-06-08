@@ -34,6 +34,8 @@ export const createColumns = (
 ): ColumnDef<AuditLogWithUser>[] => [
   {
     id: 'actions',
+    size: 60,
+    enableResizing: false,
     cell: ({ row }) => {
       const auditLog = row.original;
 

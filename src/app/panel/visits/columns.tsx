@@ -27,6 +27,8 @@ export const createColumns = (
 ): ColumnDef<VisitWithCustomerCard>[] => [
   {
     id: 'actions',
+    size: 60,
+    enableResizing: false,
     cell: ({ row }) => {
       const visit = row.original;
 

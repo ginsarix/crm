@@ -20,6 +20,8 @@ export const createColumns = (
 ): ColumnDef<User>[] => [
   {
     id: 'actions',
+    size: 60,
+    enableResizing: false,
     cell: ({ row }) => {
       const user = row.original;
 
@@ -52,6 +54,8 @@ export const createColumns = (
   {
     accessorKey: 'image',
     header: '',
+    size: 60,
+    enableResizing: false,
     enableSorting: false,
     cell: ({ row }) => {
       const user = row.original;

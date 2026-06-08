@@ -214,7 +214,15 @@ export const customerCardRouter = createTRPCRouter({
       // Apply non-admin group restriction (await the in-flight query)
       if (assignedGroupsPromise) {
         const assignedGroups = await assignedGroupsPromise;
-        whereClause.businessGroup = { in: assignedGroups.map((g) => g.name) };
+        const allowedNames = assignedGroups.map((g) => g.name);
+        const requestedGroup = input.filter?.businessGroup;
+        if (requestedGroup && requestedGroup !== '') {
+          whereClause.businessGroup = allowedNames.includes(requestedGroup)
+            ? requestedGroup
+            : { in: [] };
+        } else {
+          whereClause.businessGroup = { in: allowedNames };
+        }
       }
 
       const fetchAll = input.itemsPerPage === 0;
@@ -366,6 +374,7 @@ export const customerCardRouter = createTRPCRouter({
       _count: true,
       where,
     });
+
     const counts = { green: 0, blue: 0, orange: 0, yellow: 0, gray: 0 };
     for (const row of rows) counts[row.color] += row._count;
     return counts;

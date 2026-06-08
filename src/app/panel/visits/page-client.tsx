@@ -24,7 +24,7 @@ export function VisitsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 20,
+    pageSize: 25,
   });
   const [selectedVisit, setSelectedVisit] =
     useState<VisitWithCustomerCard | null>(null);

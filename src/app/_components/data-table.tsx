@@ -24,6 +24,13 @@ import { useEffect, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
@@ -364,10 +371,33 @@ export function DataTable<TData, TValue>({
       {/* Pagination */}
       {pagination && setPagination && (
         <div className="flex items-center justify-between rounded-b-lg border-x border-b bg-card px-4 py-3">
-          <span className="text-muted-foreground text-sm">
-            Sayfa {pagination.pageIndex + 1}
-            {pageCount > 0 && ` / ${pageCount}`}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-sm">
+              Sayfa Başı Satır Sayısı
+            </span>
+            <Select
+              onValueChange={(value) => {
+                setPagination?.({ pageIndex: 0, pageSize: Number(value) });
+              }}
+              value={String(pagination.pageSize)}
+            >
+              <SelectTrigger className="h-8 w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[25, 50, 100].map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+                <SelectItem value="0">Tümü</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-muted-foreground text-sm">
+              Sayfa {pagination.pageIndex + 1}
+              {pageCount > 0 && ` / ${pageCount}`}
+            </span>
+          </div>
           <div className="flex gap-2">
             <Button
               className="cursor-pointer"

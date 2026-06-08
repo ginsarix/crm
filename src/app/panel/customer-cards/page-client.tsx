@@ -35,7 +35,7 @@ export function CustomerCardsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 20,
+    pageSize: 25,
   });
   const [selectedCustomerCard, setSelectedCustomerCard] =
     useState<CustomerCard | null>(null);

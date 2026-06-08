@@ -110,7 +110,7 @@ export const customerCardRouter = createTRPCRouter({
         filter: filterSchema.optional(),
         sorting: z.array(sortingSchema).optional(),
         page: z.number().min(1).default(1),
-        itemsPerPage: z.number().min(1).default(20),
+        itemsPerPage: z.number().min(0).default(25),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -216,17 +216,18 @@ export const customerCardRouter = createTRPCRouter({
         whereClause.businessGroup = { in: assignedGroups.map((g) => g.name) };
       }
 
+      const fetchAll = input.itemsPerPage === 0;
       const [totalItems, data] = await Promise.all([
         ctx.db.customerCard.count({ where: whereClause }),
         ctx.db.customerCard.findMany({
           select: input.select,
           where: whereClause,
-          skip: (input.page - 1) * input.itemsPerPage,
-          take: input.itemsPerPage,
+          skip: fetchAll ? 0 : (input.page - 1) * input.itemsPerPage,
+          ...(fetchAll ? {} : { take: input.itemsPerPage }),
           orderBy,
         }),
       ]);
-      const totalPages = Math.ceil(totalItems / input.itemsPerPage);
+      const totalPages = fetchAll ? 1 : Math.ceil(totalItems / input.itemsPerPage);
 
       return {
         data,

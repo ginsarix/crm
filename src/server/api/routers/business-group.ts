@@ -90,7 +90,12 @@ export const businessGroupRouter = createTRPCRouter({
     });
 
     return {
-      groups: all.sort((a, b) => b.total - a.total),
+      groups: all.sort((a, b) =>
+        a.name.localeCompare(b.name, 'tr', {
+          numeric: true,
+          sensitivity: 'base',
+        }),
+      ),
     };
   }),
 
@@ -177,9 +182,25 @@ export const businessGroupRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const result = await ctx.db.businessGroup.update({
-          where: { id: input.id },
-          data: { name: input.name },
+        const result = await ctx.db.$transaction(async (tx) => {
+          const old = await tx.businessGroup.findUnique({
+            where: { id: input.id },
+            select: { name: true },
+          });
+
+          const updated = await tx.businessGroup.update({
+            where: { id: input.id },
+            data: { name: input.name },
+          });
+
+          if (old?.name && old.name !== input.name) {
+            await tx.customerCard.updateMany({
+              where: { businessGroup: old.name },
+              data: { businessGroup: input.name },
+            });
+          }
+
+          return updated;
         });
 
         await createAuditLog(
@@ -218,13 +239,24 @@ export const businessGroupRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const businessGroup = await ctx.db.businessGroup.findUnique({
-          where: { id: input.id },
-          select: { name: true },
-        });
+        const result = await ctx.db.$transaction(async (tx) => {
+          const businessGroup = await tx.businessGroup.findUnique({
+            where: { id: input.id },
+            select: { name: true },
+          });
 
-        const result = await ctx.db.businessGroup.delete({
-          where: { id: input.id },
+          const deleted = await tx.businessGroup.delete({
+            where: { id: input.id },
+          });
+
+          if (businessGroup?.name) {
+            await tx.customerCard.updateMany({
+              where: { businessGroup: businessGroup.name },
+              data: { businessGroup: null },
+            });
+          }
+
+          return deleted;
         });
 
         await createAuditLog(
@@ -235,7 +267,7 @@ export const businessGroupRouter = createTRPCRouter({
           input.id,
           'SUCCESS',
           undefined,
-          `Meslek grubu silindi: ${businessGroup?.name}`,
+          `Meslek grubu silindi: ${result.name}`,
         );
 
         return result;

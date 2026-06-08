@@ -7,10 +7,12 @@ interface GroupStat {
   greenCount: number;
   blueCount: number;
   orangeCount: number;
+  yellowCount: number;
   grayCount: number;
   greenPercent: number;
   bluePercent: number;
   orangePercent: number;
+  yellowPercent: number;
   grayPercent: number;
 }
 
@@ -38,6 +40,9 @@ function GroupRow({ g }: { g: GroupStat }) {
           <span className="font-mono text-orange-500 text-xs tabular-nums">
             {g.orangeCount}
           </span>
+          <span className="font-mono text-yellow-500 text-xs tabular-nums">
+            {g.yellowCount}
+          </span>
           <span className="font-mono text-gray-500 text-xs tabular-nums">
             {g.grayCount}
           </span>
@@ -55,6 +60,10 @@ function GroupRow({ g }: { g: GroupStat }) {
         <div
           className="h-full bg-orange-500 transition-all"
           style={{ width: `${g.orangePercent}%` }}
+        />
+        <div
+          className="h-full bg-yellow-400 transition-all"
+          style={{ width: `${g.yellowPercent}%` }}
         />
         <div
           className="h-full bg-gray-400 transition-all"

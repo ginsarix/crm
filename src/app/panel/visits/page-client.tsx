@@ -2,7 +2,8 @@
 
 import type { PaginationState, SortingState } from '@tanstack/react-table';
 import { useParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
 import type { columnMap } from '~/lib/column-map';
@@ -62,6 +63,20 @@ export function VisitsPageClient() {
         : [],
     [data?.data, customerCardId],
   );
+
+  const noVisitsToastShown = useRef(false);
+  useEffect(() => {
+    if (
+      !isLoading &&
+      data &&
+      customerCardId &&
+      relatedVisits.length === 0 &&
+      !noVisitsToastShown.current
+    ) {
+      noVisitsToastShown.current = true;
+      toast.info('Bu cari kartın henüz ziyareti bulunmamakta');
+    }
+  }, [isLoading, data, customerCardId, relatedVisits.length]);
 
   const columns = createColumns(handleViewVisit);
 

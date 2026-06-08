@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
+import { createLocaleSorter } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
 import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { api } from '~/trpc/react';
@@ -66,7 +67,9 @@ export function ViewCustomerCardDialog({
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
 
   const businessGroupOptions =
-    businessGroups?.map((bg) => ({ key: bg.name, label: bg.name })) ?? [];
+    businessGroups
+      ?.map((bg) => ({ key: bg.name, label: bg.name }))
+      .sort(createLocaleSorter('label')) ?? [];
   const salesRepresentativeOptions =
     salesRepresentatives?.map((sr) => ({ key: sr.name, label: sr.name })) ?? [];
 

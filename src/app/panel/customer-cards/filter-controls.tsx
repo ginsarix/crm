@@ -11,6 +11,7 @@ import {
   InputGroupInput,
 } from '~/components/ui/input-group';
 import { columnMap } from '~/lib/column-map';
+import { createLocaleSorter } from '~/lib/utils';
 import {
   AUTHORIZATION_DOCUMENTS,
   DISTRICTS,
@@ -95,12 +96,7 @@ export function FilterControls({
       .map((businessGroup) => {
         return { key: businessGroup, label: businessGroup };
       })
-      .sort((a, b) =>
-        a.label.localeCompare(b.label, 'tr', {
-          numeric: true,
-          sensitivity: 'base',
-        }),
-      ),
+      .sort(createLocaleSorter('label')),
   ];
   const salesRepresentativeComboboxOptions = [
     { key: '', label: 'Tümü' },

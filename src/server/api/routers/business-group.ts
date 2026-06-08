@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { createLocaleSorter } from '~/lib/utils';
 import {
   adminProcedure,
   createAuditLog,
@@ -90,12 +91,7 @@ export const businessGroupRouter = createTRPCRouter({
     });
 
     return {
-      groups: all.sort((a, b) =>
-        a.name.localeCompare(b.name, 'tr', {
-          numeric: true,
-          sensitivity: 'base',
-        }),
-      ),
+      groups: all.sort(createLocaleSorter('name')),
     };
   }),
 

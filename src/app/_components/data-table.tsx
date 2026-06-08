@@ -2,6 +2,7 @@
 
 import {
   type ColumnDef,
+  type ColumnSizingState,
   flexRender,
   getCoreRowModel,
   type OnChangeFn,
@@ -49,12 +50,16 @@ interface DataTableProps<TData, TValue> {
   setPagination?: OnChangeFn<PaginationState>;
   className?: string;
   pageCount?: number;
-  tableId?: string; // Unique ID for localStorage persistence
+  tableId?: string;
   defaultColumnVisibility?: VisibilityState;
 }
 
-function getStorageKey(tableId: string) {
+function getVisibilityKey(tableId: string) {
   return `table-columns-${tableId}`;
+}
+
+function getSizingKey(tableId: string) {
+  return `table-sizing-${tableId}`;
 }
 
 function loadColumnVisibility(
@@ -63,12 +68,12 @@ function loadColumnVisibility(
 ): VisibilityState {
   if (typeof window === 'undefined') return { ...defaults };
   try {
-    const stored = localStorage.getItem(getStorageKey(tableId));
+    const stored = localStorage.getItem(getVisibilityKey(tableId));
     if (stored) {
       return { ...defaults, ...(JSON.parse(stored) as VisibilityState) };
     }
   } catch {
-    // Ignore parse errors
+    // ignore
   }
   return { ...defaults };
 }
@@ -76,9 +81,29 @@ function loadColumnVisibility(
 function saveColumnVisibility(tableId: string, visibility: VisibilityState) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(getStorageKey(tableId), JSON.stringify(visibility));
+    localStorage.setItem(getVisibilityKey(tableId), JSON.stringify(visibility));
   } catch {
-    // Ignore storage errors
+    // ignore
+  }
+}
+
+function loadColumnSizing(tableId: string): ColumnSizingState {
+  if (typeof window === 'undefined') return {};
+  try {
+    const stored = localStorage.getItem(getSizingKey(tableId));
+    if (stored) return JSON.parse(stored) as ColumnSizingState;
+  } catch {
+    // ignore
+  }
+  return {};
+}
+
+function saveColumnSizing(tableId: string, sizing: ColumnSizingState) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(getSizingKey(tableId), JSON.stringify(sizing));
+  } catch {
+    // ignore
   }
 }
 
@@ -98,29 +123,43 @@ export function DataTable<TData, TValue>({
     () => loadColumnVisibility(tableId, defaultColumnVisibility),
   );
 
-  // Persist column visibility changes to localStorage
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(() =>
+    loadColumnSizing(tableId),
+  );
+
   useEffect(() => {
     saveColumnVisibility(tableId, columnVisibility);
   }, [tableId, columnVisibility]);
+
+  useEffect(() => {
+    saveColumnSizing(tableId, columnSizing);
+  }, [tableId, columnSizing]);
 
   const table = useReactTable({
     data,
     columns,
     pageCount,
+    columnResizeMode: 'onChange',
+    defaultColumn: {
+      size: 180,
+      minSize: 60,
+      maxSize: 600,
+    },
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnSizingChange: setColumnSizing,
     state: {
       sorting,
       pagination,
       columnVisibility,
+      columnSizing,
     },
-    manualPagination: true, // Server-side pagination
-    manualSorting: true, // Server-side sorting
+    manualPagination: true,
+    manualSorting: true,
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Get all columns that can be toggled (exclude actions column)
   const toggleableColumns = table
     .getAllColumns()
     .filter(
@@ -192,49 +231,74 @@ export function DataTable<TData, TValue>({
       {/* Table */}
       <div
         className={cn(
-          'overflow-hidden rounded-lg rounded-t-none border bg-card',
+          'overflow-x-auto rounded-lg rounded-t-none border bg-card',
           className,
           pagination && setPagination && 'rounded-b-none',
         )}
       >
-        <Table>
+        <Table
+          style={{
+            width: `max(100%, ${table.getTotalSize()}px)`,
+            tableLayout: 'fixed',
+          }}
+        >
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                        <button
-                          className={cn(
-                            'flex w-full cursor-pointer select-none items-center gap-2',
-                          )}
-                          onClick={header.column.getToggleSortingHandler()}
-                          type="button"
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                          <span className="ml-auto">
-                            {header.column.getIsSorted() === 'asc' ? (
-                              <ArrowUp className="h-4 w-4" />
-                            ) : header.column.getIsSorted() === 'desc' ? (
-                              <ArrowDown className="h-4 w-4" />
-                            ) : (
-                              <ArrowUpDown className="h-4 w-4 opacity-50" />
-                            )}
-                          </span>
-                        </button>
-                      ) : (
-                        flexRender(
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    className="overflow-hidden"
+                    key={header.id}
+                    style={{
+                      width: `${(header.getSize() / table.getTotalSize()) * 100}%`,
+                      position: 'relative',
+                    }}
+                  >
+                    {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                      <button
+                        className="flex w-full cursor-pointer select-none items-center gap-2"
+                        onClick={header.column.getToggleSortingHandler()}
+                        type="button"
+                      >
+                        {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
-                        )
-                      )}
-                    </TableHead>
-                  );
-                })}
+                        )}
+                        <span className="ml-auto">
+                          {header.column.getIsSorted() === 'asc' ? (
+                            <ArrowUp className="h-4 w-4" />
+                          ) : header.column.getIsSorted() === 'desc' ? (
+                            <ArrowDown className="h-4 w-4" />
+                          ) : (
+                            <ArrowUpDown className="h-4 w-4 opacity-50" />
+                          )}
+                        </span>
+                      </button>
+                    ) : (
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )
+                    )}
+                    {/* Resize handle */}
+                    {header.column.getCanResize() && (
+                      <div
+                        className="absolute top-0 right-0 z-10 flex h-full w-4 cursor-col-resize touch-none select-none items-center justify-center"
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                      >
+                        <span
+                          className={cn(
+                            'h-[60%] w-px rounded-full transition-colors',
+                            header.column.getIsResizing()
+                              ? 'bg-primary'
+                              : 'bg-border group-hover:bg-muted-foreground',
+                          )}
+                        />
+                      </div>
+                    )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -267,7 +331,13 @@ export function DataTable<TData, TValue>({
                     key={row.id}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell
+                        className="overflow-hidden text-ellipsis"
+                        key={cell.id}
+                        style={{
+                          width: `${(cell.column.getSize() / table.getTotalSize()) * 100}%`,
+                        }}
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

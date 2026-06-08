@@ -80,6 +80,7 @@ const sortableFields = [
   'gsm3',
   'contact3',
   'businessGroup',
+  'authorities',
   'color',
   'status',
   'authorizationDocument',

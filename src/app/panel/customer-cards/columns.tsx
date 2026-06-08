@@ -60,6 +60,21 @@ export const createColumns = (
     enableSorting: true,
   },
   {
+    accessorKey: 'authorities',
+    header: 'Yetkililer',
+    enableSorting: true,
+  },
+  {
+    accessorKey: 'gsm1',
+    header: 'GSM 1',
+    enableSorting: true,
+  },
+  {
+    accessorKey: 'contact1',
+    header: 'İletişim 1',
+    enableSorting: true,
+  },
+  {
     accessorKey: 'sicil',
     header: 'Sicil',
     enableSorting: true,
@@ -86,16 +101,6 @@ export const createColumns = (
     enableSorting: true,
   },
   {
-    accessorKey: 'gsm1',
-    header: 'GSM 1',
-    enableSorting: true,
-  },
-  {
-    accessorKey: 'contact1',
-    header: 'İletişim 1',
-    enableSorting: true,
-  },
-  {
     accessorKey: 'gsm2',
     header: 'GSM 2',
     enableSorting: true,
@@ -119,6 +124,22 @@ export const createColumns = (
     accessorKey: 'businessGroup',
     header: 'Meslek Grubu',
     enableSorting: true,
+  },
+  {
+    accessorKey: 'color',
+    header: 'Renk',
+    enableSorting: true,
+    cell: ({ row }) => {
+      const colorLabels: Record<string, string> = {
+        green: 'Yeşil',
+        blue: 'Mavi',
+        orange: 'Turuncu',
+        yellow: 'Sarı',
+        gray: 'Gri',
+      };
+      const c = row.getValue('color') as string;
+      return colorLabels[c] ?? '-';
+    },
   },
   {
     accessorKey: 'status',
@@ -148,11 +169,6 @@ export const createColumns = (
       const v = row.getValue('vote') as $Enums.Vote;
       return v === 'geldi' ? 'Geldi' : v === 'gelmedi' ? 'Gelmedi' : '-';
     },
-  },
-  {
-    accessorKey: 'authorities',
-    header: 'Yetkililer',
-    enableSorting: true,
   },
   {
     accessorKey: 'salesRepresentative',

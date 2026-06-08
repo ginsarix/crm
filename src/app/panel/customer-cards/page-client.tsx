@@ -215,7 +215,6 @@ export function CustomerCardsPageClient() {
                 contact2: false,
                 contact3: false,
                 status: false,
-                authorities: false,
               }}
               pageCount={data?.pagination?.totalPages ?? -1}
               pagination={pagination}

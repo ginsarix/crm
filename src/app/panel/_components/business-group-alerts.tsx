@@ -31,6 +31,14 @@ function GroupRow({ g }: { g: GroupStat }) {
       <div className="flex min-w-0 items-baseline justify-between gap-2">
         <span className="min-w-0 truncate text-sm">{g.name}</span>
         <div className="flex shrink-0 items-baseline gap-2">
+          <span className="font-mono text-xs tabular-nums">
+            {g.greenCount +
+              g.blueCount +
+              g.orangeCount +
+              g.yellowCount +
+              g.grayCount}{' '}
+            /
+          </span>
           <span className="font-mono text-green-600 text-xs tabular-nums">
             {g.greenCount}
           </span>
@@ -40,7 +48,7 @@ function GroupRow({ g }: { g: GroupStat }) {
           <span className="font-mono text-orange-500 text-xs tabular-nums">
             {g.orangeCount}
           </span>
-          <span className="font-mono text-yellow-500 text-xs tabular-nums">
+          <span className="font-mono text-xs text-yellow-500 tabular-nums">
             {g.yellowCount}
           </span>
           <span className="font-mono text-gray-500 text-xs tabular-nums">

@@ -22,7 +22,7 @@ export const RELEASES: Release[] = [
       {
         type: 'new',
         title: 'Değişiklik günlüğü sayfası ve sürüm rozeti',
-        desc: 'Kenar çubuğuna sürüm rozeti eklendi; yeni sürüm çıktığında kullanıcıya bildirim gösteriliyor.',
+        desc: 'Başlık çubuğunun sağ kenarına sürüm rozeti eklendi; yeni sürüm çıktığında kullanıcıya ilk girişinde bilgilendirici bir pop up gösteriliyor.',
       },
       {
         type: 'new',

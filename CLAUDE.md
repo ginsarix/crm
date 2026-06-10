@@ -56,3 +56,5 @@ Validated via `@t3-oss/env-nextjs` in `src/env.js`. Required variables: `DATABAS
 ### UI / Language
 
 All UI text is in Turkish. Enum→display mappings live in `src/lib/enum-map.ts`; column header mappings in `src/lib/column-map.ts`. shadcn/ui components are in `src/components/ui/`.
+
+The search-scope dropdown in filter controls (e.g. `filter-controls.tsx`) is driven by `columnMap.<entity>` — adding a new searchable field to a router's `searchableFields` array **also requires** adding the field to the corresponding entry in `column-map.ts`, otherwise it will never appear as a selectable scope in the UI.

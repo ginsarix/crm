@@ -31,6 +31,7 @@ export const columnMap = {
     vote: 'Oy',
     authorities: 'Yetkililer',
     salesRepresentative: 'Satış Temsilcisi',
+    note: 'Not',
     createdAt: 'Oluşturulma Tarihi',
     updatedAt: 'Güncellenme Tarihi',
   },

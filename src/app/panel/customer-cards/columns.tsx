@@ -178,6 +178,11 @@ export const createColumns = (
     enableSorting: true,
   },
   {
+    accessorKey: 'note',
+    header: 'Not',
+    enableSorting: true,
+  },
+  {
     accessorKey: 'createdAt',
     header: 'Oluşturulma Tarihi',
     enableSorting: true,

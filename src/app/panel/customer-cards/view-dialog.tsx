@@ -18,6 +18,7 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { Textarea } from '~/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -98,6 +99,7 @@ export function ViewCustomerCardDialog({
       vote: customerCard.vote,
       authorities: customerCard.authorities ?? '',
       salesRepresentative: customerCard.salesRepresentative ?? '',
+      note: customerCard.note ?? '',
     };
   };
 
@@ -480,6 +482,16 @@ export function ViewCustomerCardDialog({
                     setColor={field.onChange}
                   />
                 )}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="note">Not</Label>
+              <Textarea
+                {...register('note')}
+                id="note"
+                placeholder="Not"
+                rows={3}
               />
             </div>
 

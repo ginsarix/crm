@@ -24,6 +24,7 @@ export const CustomerCardCreateSchema = z.object({
   vote: VoteValidation.nullable().optional(),
   authorities: z.string().optional(),
   salesRepresentative: z.string().optional(),
+  note: z.string().optional(),
 });
 
 export const CustomerCardFindManySelectSchema = z.object({
@@ -47,6 +48,7 @@ export const CustomerCardFindManySelectSchema = z.object({
   vote: z.boolean().default(true),
   authorities: z.boolean().default(true),
   salesRepresentative: z.boolean().default(true),
+  note: z.boolean().default(true),
   createdById: z.boolean().default(true),
   createdAt: z.boolean().default(true),
   updatedAt: z.boolean().default(true),

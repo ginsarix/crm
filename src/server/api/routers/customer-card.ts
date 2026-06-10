@@ -61,6 +61,7 @@ const searchableFields = [
   'businessGroup',
   'authorities',
   'salesRepresentative',
+  'note',
 ] as const;
 
 type SearchableField = (typeof searchableFields)[number];
@@ -86,6 +87,7 @@ const sortableFields = [
   'authorizationDocument',
   'vote',
   'salesRepresentative',
+  'note',
   'createdAt',
   'updatedAt',
 ] as const;

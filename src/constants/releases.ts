@@ -1,0 +1,220 @@
+export type ChangeType = 'new' | 'fix' | 'improved' | 'changed' | 'removed';
+
+export interface Change {
+  type: ChangeType;
+  title: string;
+  desc?: string;
+}
+
+export interface Release {
+  id: string;
+  version: string;
+  date: string;
+  changes: Change[];
+}
+
+export const RELEASES: Release[] = [
+  {
+    id: 'v1-13',
+    version: '1.13',
+    date: '10 Haziran 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Meslek grubu renk dağılımında toplam satır sayısı',
+        desc: "Dashboard'daki meslek grubu sağlık kartları artık her grupta bulunan cari sayısını gösteriyor.",
+      },
+      {
+        type: 'new',
+        title: 'Tabloların alt çubuğunda toplam kayıt sayısı',
+        desc: 'Tüm veri tablolarının alt kısmında toplam kayıt sayısı görüntüleniyor.',
+      },
+      {
+        type: 'fix',
+        title:
+          '"Cariyi Görüntüle" menü başlığı "Cariyi Düzenle" olarak düzeltildi',
+      },
+    ],
+  },
+  {
+    id: 'v1-12',
+    version: '1.12',
+    date: '2 Haziran 2026',
+    changes: [
+      {
+        type: 'fix',
+        title: 'Eylemler sütunu sabit genişliğe getirildi',
+        desc: 'Tüm tablolardaki işlemler ve avatar sütunları 60px olarak sabitlendi; içerik kayması giderildi.',
+      },
+      {
+        type: 'fix',
+        title: 'Yönetici olmayan kullanıcının cari filtresi düzeltildi',
+        desc: 'Belirli bir meslek grubu seçildiğinde filtrenin yanlış sonuç gösterdiği hata giderildi.',
+      },
+      {
+        type: 'fix',
+        title: 'Meslek grubu işlemleri cari kartlara yansıtılıyor',
+        desc: 'Bir meslek grubu silindiğinde veya adı değiştirildiğinde bağlı cari kartlar otomatik güncelleniyor; listeler artık alfabetik sıralı.',
+      },
+      {
+        type: 'new',
+        title: 'Ziyaret bulunamadığında bildirim',
+        desc: 'Bir cariye ait ziyaret kaydı yokken yönlendirme yapıldığında kullanıcıya açıklayıcı bir bildirim gösteriliyor.',
+      },
+      {
+        type: 'improved',
+        title: 'Türkçe karakter sıralaması iyileştirildi',
+        desc: 'Yerel ayara duyarlı sıralama yardımcısı tüm diyalog, filtre ve yönlendirme bileşenlerine uygulandı.',
+      },
+    ],
+  },
+  {
+    id: 'v1-11',
+    version: '1.11',
+    date: '22 Mayıs 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Sütun genişliği yeniden boyutlandırma',
+        desc: 'Tablolardaki sütun genişlikleri sürükle-bırak ile ayarlanabiliyor; tercihler tarayıcıda saklanıyor.',
+      },
+      {
+        type: 'new',
+        title: 'Sayfa başına satır seçici ve "Tümünü Getir" seçeneği',
+        desc: '"Tümü" seçeneğiyle bir seferde tüm kayıtlar yüklenebiliyor; sayfa başına satır sayısı serbestçe ayarlanabiliyor.',
+      },
+      {
+        type: 'improved',
+        title: 'Cari kartı sütunları yeniden düzenlendi',
+        desc: 'Sütun sırası güncellendi; renk alanı için görsel gösterim eklendi.',
+      },
+      {
+        type: 'new',
+        title: 'Sarı renk varyantı',
+        desc: 'Cari kartlarında sarı renk seçeneği kullanıma açıldı.',
+      },
+    ],
+  },
+  {
+    id: 'v1-10',
+    version: '1.10',
+    date: '13 Mayıs 2026',
+    changes: [
+      {
+        type: 'improved',
+        title: 'Filtre arayüzü iyileştirildi',
+        desc: 'Sıfırlama butonu yeniden konumlandırıldı; arama kapsamı genişletildi; varsayılan sütun görünürlükleri optimize edildi.',
+      },
+      {
+        type: 'new',
+        title: '"Boş" filtre seçeneği',
+        desc: 'Durum, yetki belgesi ve oy alanlarında değer atanmamış kayıtları filtrelemek için "Boş" seçeneği eklendi.',
+      },
+      {
+        type: 'improved',
+        title: 'Açılır liste etiket kısaltma',
+        desc: "Uzun etiketler combobox'larda artık taşmak yerine düzgünce kısaltılıyor.",
+      },
+    ],
+  },
+  {
+    id: 'v1-9',
+    version: '1.9',
+    date: '5 Mayıs 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Yetki belgesi ve oy alanları',
+        desc: 'Cari kartlarına yetki belgesi durumu ve oy alanları eklendi; tabloda filtrelenebilir.',
+      },
+      {
+        type: 'new',
+        title: 'Güvenlik aşımı desteği',
+        desc: 'Cari kartlarına güvenlik aşımı alanı eklendi.',
+      },
+    ],
+  },
+  {
+    id: 'v1-8',
+    version: '1.8',
+    date: '25 Nisan 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Açık / koyu / sistem teması',
+        desc: 'Kullanıcı arayüzüne üç tema seçeneği eklendi; tercih oturum boyunca korunuyor.',
+      },
+      {
+        type: 'new',
+        title: 'Kenar çubuğunda kullanıcı profil kartı',
+        desc: 'Oturum açık kullanıcının adı, e-postası ve rolü kenar çubuğu altında gösteriliyor.',
+      },
+      {
+        type: 'improved',
+        title: 'Dashboard meslek grubuna göre kapsam altına alındı',
+        desc: 'Dashboard sayaçları ve ziyaret listesi artık kullanıcının atandığı meslek gruplarına göre filtreleniyor.',
+      },
+      {
+        type: 'new',
+        title: 'Yetkililer alanı',
+        desc: 'Cari kartlarına birden fazla yetkili girişi destekleyen yetkililer alanı eklendi.',
+      },
+    ],
+  },
+  {
+    id: 'v1-7',
+    version: '1.7',
+    date: '14 Nisan 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Durum alanı ve filtresi',
+        desc: 'Cari kartlarına "Geldi / Gelmedi" durum alanı eklendi; tablo filtresinde kullanılabiliyor.',
+      },
+      {
+        type: 'improved',
+        title: 'Veritabanı sorgu performansı',
+        desc: 'Yönlendirici sorguları paralel hale getirildi; sayfa yükleme sürelerinde iyileşme sağlandı.',
+      },
+    ],
+  },
+  {
+    id: 'v1-6',
+    version: '1.6',
+    date: '1 Nisan 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Renk sistemi ve meslek grubu sağlık uyarıları',
+        desc: "Cari kartları artık yeşil, mavi, turuncu ve gri renk etiketleri destekliyor. Dashboard'a meslek grubu renk dağılımı eklendi.",
+      },
+      {
+        type: 'changed',
+        title: '"Pozitif Kontrol" alanı "Renk" olarak yeniden adlandırıldı',
+        desc: 'Mevcut veriler otomatik olarak taşındı.',
+      },
+    ],
+  },
+  {
+    id: 'v1-5',
+    version: '1.5',
+    date: '20 Mart 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Rol tabanlı erişim kontrolü',
+        desc: 'Kullanıcılar artık meslek gruplarına atanabiliyor; yönetici ve standart kullanıcı rolleri ayrı yetki setleriyle tanımlandı.',
+      },
+      {
+        type: 'new',
+        title: 'Silme işlemleri yöneticiye kısıtlandı',
+        desc: 'Cari kart ve ziyaret silme işlemleri artık yalnızca yöneticiler tarafından gerçekleştirilebiliyor.',
+      },
+      {
+        type: 'improved',
+        title: 'Arayüz yeniden tasarımı',
+        desc: 'Tüm panel sayfaları daha tutarlı bir tasarım diline kavuştu.',
+      },
+    ],
+  },
+];

@@ -1,8 +1,11 @@
 import { cookies } from 'next/headers';
+import Link from 'next/link';
+import { NewVersionDialog } from '~/components/new-version-dialog';
 import { ThemeToggle } from '~/components/theme-toggle';
 import { Separator } from '~/components/ui/separator';
 import { SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
+import { APP_VERSION } from '~/constants/app-version';
 import { SidebarNav } from './_components/sidebar-nav';
 
 export default async function PanelLayout({
@@ -23,14 +26,19 @@ export default async function PanelLayout({
             <Separator className="h-4" orientation="vertical" />
             <div className="flex-1" />
             <ThemeToggle />
-            <span className="select-none font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
-              Nesbir CRM
-            </span>
+            <Separator className="h-4" orientation="vertical" />
+            <Link
+              className="select-none rounded border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground uppercase tracking-[0.15em] transition-colors hover:border-primary/50 hover:text-primary"
+              href="/panel/changelog"
+            >
+              v{APP_VERSION}
+            </Link>
           </header>
           <div className="flex-1 overflow-auto">{children}</div>
         </main>
       </div>
       <Toaster />
+      <NewVersionDialog />
     </SidebarProvider>
   );
 }

@@ -8,6 +8,7 @@ import {
   Home,
   LogOut,
   Settings,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -198,6 +199,18 @@ export function SidebarNav() {
 
       <SidebarFooter className="border-sidebar-border border-t">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === '/panel/changelog'}
+              tooltip="Yenilikler"
+            >
+              <Link href="/panel/changelog">
+                <Sparkles />
+                <span>Yenilikler →</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

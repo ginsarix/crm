@@ -71,6 +71,7 @@ export function UsersPageClient() {
               columns={columns}
               data={data?.data ?? []}
               pageCount={data?.pagination?.totalPages ?? -1}
+              totalCount={data?.pagination?.totalItems}
               pagination={pagination}
               setPagination={setPagination}
               setSorting={setSorting}

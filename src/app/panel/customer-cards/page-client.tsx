@@ -217,6 +217,7 @@ export function CustomerCardsPageClient() {
                 status: false,
               }}
               pageCount={data?.pagination?.totalPages ?? -1}
+              totalCount={data?.pagination?.totalItems}
               pagination={pagination}
               setPagination={setPagination}
               setSorting={setSorting}

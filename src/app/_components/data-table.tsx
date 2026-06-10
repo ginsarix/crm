@@ -57,6 +57,7 @@ interface DataTableProps<TData, TValue> {
   setPagination?: OnChangeFn<PaginationState>;
   className?: string;
   pageCount?: number;
+  totalCount?: number;
   tableId?: string;
   defaultColumnVisibility?: VisibilityState;
 }
@@ -123,6 +124,7 @@ export function DataTable<TData, TValue>({
   setPagination,
   className,
   pageCount = -1,
+  totalCount,
   tableId = 'default',
   defaultColumnVisibility = {},
 }: DataTableProps<TData, TValue>) {
@@ -372,6 +374,11 @@ export function DataTable<TData, TValue>({
       {pagination && setPagination && (
         <div className="flex items-center justify-between rounded-b-lg border-x border-b bg-card px-4 py-3">
           <div className="flex items-center gap-2">
+            {totalCount !== undefined && (
+              <span className="text-muted-foreground text-sm">
+                Toplam Satır Sayısı: {totalCount}
+              </span>
+            )}
             <span className="text-muted-foreground text-sm">
               Sayfa Başı Satır Sayısı
             </span>

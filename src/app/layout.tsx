@@ -33,6 +33,9 @@ export default async function RootLayout({
       lang="tr"
       suppressHydrationWarning
     >
+      <head>
+        <link rel="author" href="humans.txt" />
+      </head>
       <body>
         <ThemeProvider
           attribute="class"

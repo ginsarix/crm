@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { CustomerCard } from 'generated/prisma';
-import { Edit, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -11,9 +11,7 @@ import { Button } from '~/components/ui/button';
 import { Combobox } from '~/components/ui/combobox';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -57,7 +55,6 @@ export function ViewCustomerCardDialog({
   onOpenChange,
   onUpdate,
 }: ViewCustomerCardDialogProps) {
-  const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const utils = api.useUtils();
   const { data: session } = authClient.useSession();
@@ -73,10 +70,8 @@ export function ViewCustomerCardDialog({
   const salesRepresentativeOptions =
     salesRepresentatives?.map((sr) => ({ key: sr.name, label: sr.name })) ?? [];
 
-  // Reset modes when dialog closes
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      setIsEditMode(false);
       setShowDeleteConfirm(false);
     }
     onOpenChange(newOpen);
@@ -127,9 +122,7 @@ export function ViewCustomerCardDialog({
     onSuccess: (updatedCustomerCard) => {
       utils.customerCard.get.invalidate();
       toast.success('Cari kart başarıyla güncellendi');
-
       onUpdate(updatedCustomerCard);
-      setIsEditMode(false);
     },
     onError: (error) => {
       console.error(error);
@@ -163,12 +156,10 @@ export function ViewCustomerCardDialog({
   };
 
   const handleCancel = () => {
-    if (isEditMode) {
-      setIsEditMode(false);
-      reset();
-    }
     if (showDeleteConfirm) {
       setShowDeleteConfirm(false);
+    } else {
+      handleOpenChange(false);
     }
   };
 
@@ -180,45 +171,18 @@ export function ViewCustomerCardDialog({
       >
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>
-              {isEditMode ? 'Cari Kartı Düzenle' : 'Cari Kart Detayı'}
-            </span>
-            <div className="flex gap-2">
-              {!isEditMode && !showDeleteConfirm && (
-                <>
-                  <Button
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setShowDeleteConfirm(false);
-                      setIsEditMode(true);
-                    }}
-                    variant="outline"
-                  >
-                    <Edit />
-                    Düzenle
-                  </Button>
-                  {isAdmin && (
-                    <Button
-                      className="me-4 cursor-pointer"
-                      onClick={() => {
-                        setIsEditMode(false);
-                        setShowDeleteConfirm(true);
-                      }}
-                      size="icon"
-                      variant="destructive"
-                    >
-                      <Trash2 />
-                    </Button>
-                  )}
-                </>
-              )}
-            </div>
+            <span>Cari Kartı Düzenle</span>
+            {!showDeleteConfirm && isAdmin && (
+              <Button
+                className="me-4 cursor-pointer"
+                onClick={() => setShowDeleteConfirm(true)}
+                size="icon"
+                variant="destructive"
+              >
+                <Trash2 />
+              </Button>
+            )}
           </DialogTitle>
-          {!isEditMode && (
-            <DialogDescription>
-              Cari kart bilgilerini görüntüleyin veya düzenleyin
-            </DialogDescription>
-          )}
         </DialogHeader>
 
         {showDeleteConfirm ? (
@@ -245,7 +209,7 @@ export function ViewCustomerCardDialog({
               </Button>
             </div>
           </div>
-        ) : isEditMode ? (
+        ) : (
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             {/* Basic Information */}
             <div className="grid grid-cols-2 gap-4">
@@ -537,206 +501,6 @@ export function ViewCustomerCardDialog({
               </Button>
             </DialogFooter>
           </form>
-        ) : (
-          <div className="space-y-4">
-            {/* View Mode - Display data */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-muted-foreground">Sıra</Label>
-                <p className="text-sm">{customerCard.sira || '-'}</p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Ünvan</Label>
-                <p className="font-medium text-sm">
-                  {customerCard.name || '-'}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-muted-foreground">Sicil</Label>
-                <p className="text-sm">{customerCard.sicil || '-'}</p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Meslek Grubu</Label>
-                <p className="text-sm">{customerCard.businessGroup || '-'}</p>
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Adres</Label>
-              <p className="text-sm">{customerCard.address || '-'}</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-muted-foreground">İlçe</Label>
-                <p className="text-sm">
-                  {customerCard.district
-                    ? DISTRICTS.find((d) => d.value === customerCard.district)
-                        ?.label
-                    : '-'}
-                </p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Bölge</Label>
-                <p className="text-sm">{customerCard.region || '-'}</p>
-              </div>
-            </div>
-
-            <div className="space-y-3 rounded-lg border p-3">
-              <h4 className="font-medium text-sm">İletişim Bilgileri</h4>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">GSM 1</Label>
-                  <p className="text-sm">{customerCard.gsm1 || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">İletişim 1</Label>
-                  <p className="text-sm">{customerCard.contact1 || '-'}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">GSM 2</Label>
-                  <p className="text-sm">{customerCard.gsm2 || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">İletişim 2</Label>
-                  <p className="text-sm">{customerCard.contact2 || '-'}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">GSM 3</Label>
-                  <p className="text-sm">{customerCard.gsm3 || '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">İletişim 3</Label>
-                  <p className="text-sm">{customerCard.contact3 || '-'}</p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Yetkililer</Label>
-              <p className="text-sm">{customerCard.authorities || '-'}</p>
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Satış Temsilcisi</Label>
-              <p className="text-sm">
-                {customerCard.salesRepresentative || '-'}
-              </p>
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Durum</Label>
-              <p className="text-sm">
-                {customerCard.status === 'geldi'
-                  ? 'Geldi'
-                  : customerCard.status === 'gelmedi'
-                    ? 'Gelmedi'
-                    : '-'}
-              </p>
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Yetki Belge</Label>
-              <p className="text-sm">
-                {customerCard.authorizationDocument === 'aldi'
-                  ? 'Aldı'
-                  : customerCard.authorizationDocument === 'almadi'
-                    ? 'Almadı'
-                    : '-'}
-              </p>
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Oy</Label>
-              <p className="text-sm">
-                {customerCard.vote === 'geldi'
-                  ? 'Geldi'
-                  : customerCard.vote === 'gelmedi'
-                    ? 'Gelmedi'
-                    : '-'}
-              </p>
-            </div>
-
-            <div>
-              <Label className="mb-2 text-muted-foreground">Renk</Label>
-              {
-                {
-                  green: (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <span className="h-3 w-3 rounded-full bg-green-500" />{' '}
-                      Yeşil
-                    </div>
-                  ),
-                  blue: (
-                    <div className="flex items-center gap-2 text-blue-600">
-                      <span className="h-3 w-3 rounded-full bg-blue-500" /> Mavi
-                    </div>
-                  ),
-                  orange: (
-                    <div className="flex items-center gap-2 text-orange-500">
-                      <span className="h-3 w-3 rounded-full bg-orange-500" />{' '}
-                      Turuncu
-                    </div>
-                  ),
-                  yellow: (
-                    <div className="flex items-center gap-2 text-yellow-600">
-                      <span className="h-3 w-3 rounded-full bg-yellow-400" />{' '}
-                      Sarı
-                    </div>
-                  ),
-                  gray: (
-                    <div className="flex items-center gap-2 text-gray-500">
-                      <span className="h-3 w-3 rounded-full bg-gray-400" /> Gri
-                    </div>
-                  ),
-                }[
-                  (customerCard.color ?? 'gray') as
-                    | 'green'
-                    | 'blue'
-                    | 'orange'
-                    | 'yellow'
-                    | 'gray'
-                ]
-              }
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-muted-foreground">
-                  Oluşturulma Tarihi
-                </Label>
-                <p className="text-sm">
-                  {new Date(customerCard.createdAt).toLocaleString('tr-TR')}
-                </p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">
-                  Güncellenme Tarihi
-                </Label>
-                <p className="text-sm">
-                  {new Date(customerCard.updatedAt).toLocaleString('tr-TR')}
-                </p>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="outline">
-                  Kapat
-                </Button>
-              </DialogClose>
-            </DialogFooter>
-          </div>
         )}
       </DialogContent>
     </Dialog>

@@ -15,6 +15,23 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-14',
+    version: '1.14',
+    date: '10 Haziran 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Değişiklik günlüğü sayfası ve sürüm rozeti',
+        desc: 'Kenar çubuğuna sürüm rozeti eklendi; yeni sürüm çıktığında kullanıcıya bildirim gösteriliyor.',
+      },
+      {
+        type: 'new',
+        title: 'Cari kartlara "Not" alanı',
+        desc: 'Cari kartlarına serbest metin girilmesine olanak tanıyan isteğe bağlı bir not alanı eklendi.',
+      },
+    ],
+  },
+  {
     id: 'v1-13',
     version: '1.13',
     date: '10 Haziran 2026',

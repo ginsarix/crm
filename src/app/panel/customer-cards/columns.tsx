@@ -39,7 +39,7 @@ export const createColumns = (
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onViewCustomerCard(customerCard)}>
-              Cariyi Görüntüle
+              Cariyi Düzenle
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Link href={`/panel/visits/${customerCard.id}`}>

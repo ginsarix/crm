@@ -70,13 +70,14 @@ export function UsersPageClient() {
             <DataTable
               columns={columns}
               data={data?.data ?? []}
+              exportFilename="kullanıcılar"
               pageCount={data?.pagination?.totalPages ?? -1}
-              totalCount={data?.pagination?.totalItems}
               pagination={pagination}
               setPagination={setPagination}
               setSorting={setSorting}
               sorting={sorting}
               tableId="users"
+              totalCount={data?.pagination?.totalItems}
             />
           </div>
         )}

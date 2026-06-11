@@ -215,14 +215,16 @@ export function CustomerCardsPageClient() {
                 contact2: false,
                 contact3: false,
                 status: false,
+                color: false,
               }}
+              exportFilename="cari_kartlar"
               pageCount={data?.pagination?.totalPages ?? -1}
-              totalCount={data?.pagination?.totalItems}
               pagination={pagination}
               setPagination={setPagination}
               setSorting={setSorting}
               sorting={sorting}
               tableId="customer-cards"
+              totalCount={data?.pagination?.totalItems}
             />
           </div>
         )}

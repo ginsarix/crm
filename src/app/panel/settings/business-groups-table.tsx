@@ -35,6 +35,7 @@ export default function BusinessGroupsTable() {
       <DataTable
         columns={columns}
         data={data ?? []}
+        exportFilename="meslek_grupları"
         tableId="business-groups"
       />
 

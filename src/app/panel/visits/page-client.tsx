@@ -110,13 +110,14 @@ export function VisitsPageClient() {
             <DataTable
               columns={columns}
               data={data?.data ?? []}
+              exportFilename="ziyaretler"
               pageCount={data?.pagination?.totalPages ?? -1}
-              totalCount={data?.pagination?.totalItems}
               pagination={pagination}
               setPagination={setPagination}
               setSorting={setSorting}
               sorting={sorting}
               tableId="visits"
+              totalCount={data?.pagination?.totalItems}
             />
           </div>
         )}

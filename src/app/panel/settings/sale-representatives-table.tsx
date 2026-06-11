@@ -37,6 +37,7 @@ export default function SaleRepresentativesTable() {
       <DataTable
         columns={columns}
         data={data ?? []}
+        exportFilename="satis_temsilcileri"
         tableId="sale-representatives"
       />
 

@@ -45,9 +45,9 @@ export function FilterControls({
 }: {
   search: string;
   onSearch: (search: string) => void;
-  color: 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'all';
+  color: 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'purple' | 'all';
   onColor: (
-    color: 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'all',
+    color: 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'purple' | 'all',
   ) => void;
   searchScope: 'all' | keyof CustomerCard;
   onSearchScope: (searchScope: 'all' | keyof CustomerCard) => void;

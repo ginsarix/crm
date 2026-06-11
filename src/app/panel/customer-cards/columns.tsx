@@ -140,6 +140,7 @@ export const createColumns = (
         orange: 'Turuncu',
         yellow: 'Sarı',
         gray: 'Gri',
+        purple: 'Mor',
       };
 
       return colorLabels[color] ?? '-';

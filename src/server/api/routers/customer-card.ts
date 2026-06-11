@@ -15,7 +15,7 @@ import {
 const filterSchema = z.object({
   search: z.string().optional(),
   color: z
-    .enum(['green', 'blue', 'orange', 'yellow', 'gray', 'all'])
+    .enum(['green', 'blue', 'orange', 'yellow', 'gray', 'purple', 'all'])
     .default('all'),
   searchScope: z
     .enum(['all', ...Object.keys(columnMap.customerCard)])

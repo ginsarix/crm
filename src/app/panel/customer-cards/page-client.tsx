@@ -25,6 +25,7 @@ const ColorValidation = z.enum([
   'orange',
   'yellow',
   'gray',
+  'purple',
   'all',
 ]);
 

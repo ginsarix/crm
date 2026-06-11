@@ -135,6 +135,7 @@ const EXCEL_ROW_COLORS: Record<string, string> = {
   orange: 'FED7AA', // orange-200
   yellow: 'FEF08A', // yellow-200
   gray: 'E5E7EB', // gray-200
+  purple: 'E9D5FF', // purple-200
 };
 
 function makeBorder(color: string) {
@@ -454,6 +455,7 @@ export function DataTable<TData, TValue>({
                   | 'orange'
                   | 'yellow'
                   | 'gray'
+                  | 'purple'
                   | null
                   | undefined;
                 return (
@@ -469,6 +471,8 @@ export function DataTable<TData, TValue>({
                         'bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-900/80 dark:hover:bg-yellow-900/90',
                       color === 'gray' &&
                         'bg-gray-200 hover:bg-gray-300 dark:bg-gray-500/80 dark:hover:bg-gray-500/90',
+                      color === 'purple' &&
+                        'bg-purple-200 hover:bg-purple-300 dark:bg-purple-900/80 dark:hover:bg-purple-900/90',
                     )}
                     data-state={row.getIsSelected() && 'selected'}
                     key={row.id}

@@ -106,6 +106,7 @@ enum Color {
   orange
   yellow
   gray
+  purple
 }
 
 enum Status {

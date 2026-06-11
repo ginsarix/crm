@@ -5,7 +5,7 @@ import { Button } from '~/components/ui/button';
 import { ButtonGroup } from '~/components/ui/button-group';
 import { cn } from '~/lib/utils';
 
-type ColorValue = 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'all';
+type ColorValue = 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'purple' | 'all';
 
 const colorConfig = {
   green: {
@@ -35,6 +35,13 @@ const colorConfig = {
     dot: 'bg-yellow-400',
     active: 'bg-yellow-400/10 text-yellow-600',
     hover: 'hover:bg-yellow-400/20 hover:text-yellow-600',
+  },
+  purple: {
+    label: 'Mor',
+    hint: '(Araf)',
+    dot: 'bg-purple-500',
+    active: 'bg-purple-500/10 text-purple-600',
+    hover: 'hover:bg-purple-500/20 hover:text-purple-600',
   },
   gray: {
     label: 'Gri',

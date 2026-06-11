@@ -41,12 +41,12 @@ export function Combobox({
       <PopoverTrigger asChild>
         <Button
           aria-expanded={open}
-          className={cn('w-[200px] justify-between', className)}
+          className={cn('w-[200px] justify-between overflow-hidden', className)}
           id={id}
           role="combobox"
           variant="outline"
         >
-          <span className="truncate">
+          <span className="min-w-0 truncate text-left">
             {selectedKey
               ? options.find((option) => option.key === selectedKey)?.label
               : label

@@ -89,7 +89,7 @@ export function CreateCustomerCardDialog() {
       </DialogTrigger>
       <DialogContent
         aria-describedby="Cari kart ekleme formu"
-        className="max-h-[99vh] overflow-y-auto"
+        className="max-h-[99vh] overflow-y-auto sm:max-w-2xl"
       >
         <DialogHeader>
           <DialogTitle>Cari Kart Ekle</DialogTitle>

@@ -235,7 +235,7 @@ export function ViewVisitDialog({
             </div>
           </div>
         ) : isEditMode ? (
-          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <form className="min-w-0 space-y-4" onSubmit={handleSubmit(onSubmit)}>
             {/* Customer Card Selection */}
             <div className="space-y-2">
               <Label htmlFor="customerCardId">Müşteri Kartı *</Label>
@@ -401,7 +401,7 @@ export function ViewVisitDialog({
             </DialogFooter>
           </form>
         ) : (
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             {/* View Mode - Display data */}
             <div>
               <Label className="text-muted-foreground">Müşteri</Label>

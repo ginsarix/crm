@@ -169,7 +169,7 @@ export function ViewCustomerCardDialog({
     <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent
         aria-describedby="Cari kart görüntüleme ve düzenleme"
-        className="max-h-[99vh] overflow-y-auto"
+        className="max-h-[99vh] overflow-y-auto sm:max-w-2xl"
       >
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">

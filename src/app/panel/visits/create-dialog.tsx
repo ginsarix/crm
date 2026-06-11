@@ -105,7 +105,7 @@ export function CreateVisitDialog() {
           <DialogDescription>Müşteri ziyaret kaydı oluşturun</DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <form className="min-w-0 space-y-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Customer Card Selection */}
           <div className="space-y-2">
             <Label htmlFor="customerCardId">Müşteri Kartı *</Label>

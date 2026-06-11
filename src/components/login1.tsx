@@ -38,7 +38,7 @@ const Login1 = ({ heading = 'Giriş', buttonText = 'Devam' }: Login1Props) => {
   const sendVerification = async (email: string) => {
     const { error } = await authClient.sendVerificationEmail({
       email,
-      callbackURL: '/panel/dashboard',
+      callbackURL: '/panel/customer-cards',
     });
 
     if (error) {
@@ -66,7 +66,7 @@ const Login1 = ({ heading = 'Giriş', buttonText = 'Devam' }: Login1Props) => {
       {
         email: values.email,
         password: values.password,
-        callbackURL: '/panel/dashboard',
+        callbackURL: '/panel/customer-cards',
       },
       {
         onError: async (ctx) => {

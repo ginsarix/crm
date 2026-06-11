@@ -52,11 +52,9 @@ export const createColumns = (
     },
   },
   {
-    accessorKey: 'image',
-    header: '',
+    id: 'avatar',
     size: 60,
     enableResizing: false,
-    enableSorting: false,
     cell: ({ row }) => {
       const user = row.original;
       const initials = user.name
@@ -89,12 +87,14 @@ export const createColumns = (
     header: 'Rol',
     enableSorting: false,
     cell: ({ row }) => {
-      const r = row.getValue('role') as string | null;
+      const r = row.getValue('role') as string;
       return (
-        <Badge variant={r === 'admin' ? 'default' : 'secondary'}>
-          {r === 'admin' ? 'Yönetici' : 'Kullanıcı'}
-        </Badge>
+        <Badge variant={r === 'Yönetici' ? 'default' : 'secondary'}>{r}</Badge>
       );
+    },
+
+    accessorFn: ({ role }) => {
+      return role === 'admin' ? 'Yönetici' : 'Kullanıcı';
     },
   },
   {
@@ -102,8 +102,8 @@ export const createColumns = (
     header: 'E-posta Doğrulandı',
     enableSorting: true,
     cell: ({ row }) => {
-      const verified = row.getValue('emailVerified') as boolean;
-      return verified ? (
+      const verified = row.getValue('emailVerified') as string;
+      return verified === 'Evet' ? (
         <div className="flex items-center gap-1 text-green-500">
           <Check className="h-4 w-4" />
           <span>Evet</span>
@@ -114,6 +114,10 @@ export const createColumns = (
           <span>Hayır</span>
         </div>
       );
+    },
+
+    accessorFn: ({ emailVerified }) => {
+      return emailVerified ? 'Evet' : 'Hayır';
     },
   },
   {

@@ -87,21 +87,30 @@ export const createColumns = (
     accessorKey: 'time',
     header: 'Saat',
     enableSorting: true,
+
+    // using an accessorFn here instead of `cell` so that excel exporting gets the parsed time directly. if we dont do this, it tries to convert a time value to a full date and fails with: 01.01.1970
+    accessorFn: ({ time }) => {
+      return time
+        ? `${String(time.getUTCHours()).padStart(2, '0')}:${String(
+            time.getUTCMinutes(),
+          ).padStart(2, '0')}`
+        : '';
+    },
+
     cell: ({ row }) => {
-      const time = row.getValue('time') as Date;
-      const date = new Date(time);
-      return `${String(date.getUTCHours()).padStart(2, '0')}:${String(
-        date.getUTCMinutes(),
-      ).padStart(2, '0')}`;
+      const time = row.getValue('time');
+
+      if (!time) return '-';
+
+      return time;
     },
   },
   {
     accessorKey: 'via',
     header: 'İletişim Türü',
     enableSorting: true,
-    cell: ({ row }) => {
-      const via = row.getValue('via') as keyof typeof VIA_MAP | null;
-      return via ? VIA_MAP[via] : '-';
+    accessorFn: ({ via }) => {
+      return VIA_MAP[via!];
     },
   },
   {

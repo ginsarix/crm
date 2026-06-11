@@ -131,16 +131,18 @@ export const createColumns = (
     accessorKey: 'color',
     header: 'Renk',
     enableSorting: true,
-    cell: ({ row }) => {
-      const colorLabels: Record<string, string> = {
+
+    // using an accessorFn instead of the `cell` here so that excel exporting gets the display text and not the internal values
+    accessorFn: ({ color }) => {
+      const colorLabels = {
         green: 'Yeşil',
         blue: 'Mavi',
         orange: 'Turuncu',
         yellow: 'Sarı',
         gray: 'Gri',
       };
-      const c = row.getValue('color') as string;
-      return colorLabels[c] ?? '-';
+
+      return colorLabels[color] ?? '-';
     },
   },
   {

@@ -377,7 +377,7 @@ export const customerCardRouter = createTRPCRouter({
       where,
     });
 
-    const counts = { green: 0, blue: 0, orange: 0, yellow: 0, gray: 0 };
+    const counts = { green: 0, blue: 0, orange: 0, yellow: 0, purple: 0, gray: 0 };
     for (const row of rows) counts[row.color] += row._count;
     return counts;
   }),

@@ -15,6 +15,28 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-15',
+    version: '1.15',
+    date: '11 Haziran 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Mor renk varyantı',
+        desc: 'Cari kartlarına mor(araf) renk seçeneği eklendi.',
+      },
+      {
+        type: 'new',
+        title: 'Excel dışa aktarma',
+        desc: 'Tüm tablolara Excel olarak dışa aktarma eklendi.',
+      },
+      {
+        type: 'improved',
+        title: 'Girişten sonra cari kartlara yönlendirme',
+        desc: "Kullanıcılar giriş yapmanın ardından artık doğrudan cari kartlar sayfasına yönlendiriliyor; giriş anında dashboard'daki role özgü verilerin görünmesinin önüne geçiliyor.",
+      },
+    ],
+  },
+  {
     id: 'v1-14',
     version: '1.14',
     date: '10 Haziran 2026',

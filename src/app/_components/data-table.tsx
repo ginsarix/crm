@@ -18,8 +18,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Columns3,
+  Download,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import XLSX from 'xlsx-js-style';
 
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
@@ -60,6 +62,7 @@ interface DataTableProps<TData, TValue> {
   totalCount?: number;
   tableId?: string;
   defaultColumnVisibility?: VisibilityState;
+  exportFilename?: string;
 }
 
 function getVisibilityKey(tableId: string) {
@@ -115,6 +118,125 @@ function saveColumnSizing(tableId: string, sizing: ColumnSizingState) {
   }
 }
 
+// oklch tokens from globals.css converted to hex for Excel compatibility
+const EXCEL_COLORS = {
+  primary: 'C07B2E', // oklch(0.65 0.14 72)  — warm amber
+  primaryFg: 'FFFFFF', // oklch(1 0 0)
+  fg: '1B1D27', // oklch(0.15 0.014 245) — near-black blue-gray
+  border: 'DFE1EA', // oklch(0.88 0.007 245) — light border
+  card: 'FFFFFF', // oklch(1 0 0)
+  muted: 'ECEEF4', // oklch(0.93 0.007 245) — alternating row
+} as const;
+
+// mirrors the Tailwind bg-*-200 classes used for colored rows in the UI
+const EXCEL_ROW_COLORS: Record<string, string> = {
+  green: 'BBF7D0', // green-200
+  blue: 'BFDBFE', // blue-200
+  orange: 'FED7AA', // orange-200
+  yellow: 'FEF08A', // yellow-200
+  gray: 'E5E7EB', // gray-200
+};
+
+function makeBorder(color: string) {
+  const side = { style: 'thin', color: { rgb: color } };
+  return { top: side, bottom: side, left: side, right: side };
+}
+
+function cellValue(value: unknown): {
+  v: string | number | boolean;
+  t: 's' | 'n' | 'b';
+} {
+  if (value === null || value === undefined) return { v: '', t: 's' };
+  if (value instanceof Date)
+    return { v: value.toLocaleDateString('tr-TR'), t: 's' };
+  if (typeof value === 'number') return { v: value, t: 'n' };
+  if (typeof value === 'boolean') return { v: value, t: 'b' };
+  return { v: String(value), t: 's' };
+}
+
+function exportToExcel<TData>(
+  table: ReturnType<typeof useReactTable<TData>>,
+  filename: string,
+) {
+  const visibleColumns = table
+    .getVisibleLeafColumns()
+    .filter((col) => typeof col.accessorFn !== 'undefined');
+
+  const rows = table.getRowModel().rows;
+  const ws: Record<string, unknown> = {};
+  const border = makeBorder(EXCEL_COLORS.border);
+
+  // Header row
+  visibleColumns.forEach((col, c) => {
+    const h = col.columnDef.header;
+    const label =
+      typeof h === 'string'
+        ? h
+        : col.id.charAt(0).toUpperCase() + col.id.slice(1);
+    ws[XLSX.utils.encode_cell({ r: 0, c })] = {
+      v: label,
+      t: 's',
+      s: {
+        fill: { patternType: 'solid', fgColor: { rgb: EXCEL_COLORS.primary } },
+        font: {
+          bold: true,
+          color: { rgb: EXCEL_COLORS.primaryFg },
+          sz: 11,
+          name: 'Calibri',
+        },
+        border,
+        alignment: { horizontal: 'left', vertical: 'center' },
+      },
+    };
+  });
+
+  // Data rows — use row color if present, otherwise alternate card/muted
+  rows.forEach((row, r) => {
+    const rowColor = (row.original as Record<string, unknown>).color as
+      | string
+      | null
+      | undefined;
+    const bg =
+      (rowColor && EXCEL_ROW_COLORS[rowColor]) ??
+      (r % 2 === 1 ? EXCEL_COLORS.muted : EXCEL_COLORS.card);
+    visibleColumns.forEach((col, c) => {
+      const { v, t } = cellValue(row.getValue(col.id));
+      ws[XLSX.utils.encode_cell({ r: r + 1, c })] = {
+        v,
+        t,
+        s: {
+          fill: { patternType: 'solid', fgColor: { rgb: bg } },
+          font: { color: { rgb: EXCEL_COLORS.fg }, sz: 11, name: 'Calibri' },
+          border,
+          alignment: { horizontal: 'left', vertical: 'center' },
+        },
+      };
+    });
+  });
+
+  ws['!ref'] = XLSX.utils.encode_range({
+    s: { r: 0, c: 0 },
+    e: { r: rows.length, c: visibleColumns.length - 1 },
+  });
+  ws['!cols'] = visibleColumns.map((col) => {
+    const h = col.columnDef.header;
+    const headerLabel =
+      typeof h === 'string'
+        ? h
+        : col.id.charAt(0).toUpperCase() + col.id.slice(1);
+    const maxLen = rows.reduce((max, row) => {
+      const { v } = cellValue(row.getValue(col.id));
+      return Math.max(max, String(v).length);
+    }, headerLabel.length);
+    return { wch: Math.min(maxLen + 3, 60) };
+  });
+  ws['!rows'] = [{ hpx: 22 }, ...rows.map(() => ({ hpx: 20 }))];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sayfa1');
+  XLSX.writeFile(wb, `nesbir_crm_${filename}.xlsx`);
+}
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -127,6 +249,7 @@ export function DataTable<TData, TValue>({
   totalCount,
   tableId = 'default',
   defaultColumnVisibility = {},
+  exportFilename,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     () => loadColumnVisibility(tableId, defaultColumnVisibility),
@@ -179,7 +302,18 @@ export function DataTable<TData, TValue>({
   return (
     <div className="flex flex-col">
       {/* Column Selector */}
-      <div className="flex justify-end border-x border-t bg-card px-4 py-2">
+      <div className="flex justify-end gap-2 border-x border-t bg-card px-4 py-2">
+        {exportFilename && (
+          <Button
+            className="gap-2"
+            onClick={() => exportToExcel(table, exportFilename)}
+            size="sm"
+            variant="outline"
+          >
+            <Download className="h-4 w-4" />
+            Excel
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button className="gap-2" size="sm" variant="outline">

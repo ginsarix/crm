@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { auditAction } from '~/lib/enum-map';
@@ -11,26 +12,39 @@ export default async function DashboardPage() {
     visitTotal,
     latestAudit,
     businessGroupStats,
+    visitRanking,
   ] = await Promise.all([
     api.customerCard.getTotal(),
     api.customerCard.getColorCounts(),
     api.visit.getTotal(),
     api.auditLog.getLatest(),
     api.businessGroup.getStats(),
+    // api.visit.getRankedVisitsBySalesRepresentative(),
   ]);
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto w-full max-w-[1600px]">
-        <div className="mb-6">
+    <div className="w-full">
+      <div className="p-4 sm:p-6 lg:p-8 pb-4">
+        <div className="mx-auto w-full max-w-[1600px]">
           <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
           <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>
         </div>
+      </div>
+      <Image
+        alt="Biz Geleceğiz"
+        className="h-auto w-full"
+        height={1080}
+        priority
+        src="/images/biz-gelecegiz-banner.png"
+        width={1920}
+      />
+      <div className="p-4 sm:p-6 lg:p-8 pt-6">
+        <div className="mx-auto w-full max-w-[1600px]">
         <div className="grid gap-3 md:grid-cols-2">
-          <Link href="/panel/customer-cards">
-            <Card className="group cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
+          <Link className="h-full" href="/panel/customer-cards">
+            <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
+                <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
                   Toplam Cari Kart
                 </CardTitle>
               </CardHeader>
@@ -42,10 +56,10 @@ export default async function DashboardPage() {
             </Card>
           </Link>
 
-          <Link href="/panel/visits">
-            <Card className="group cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
+          <Link className="h-full" href="/panel/visits">
+            <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
+                <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
                   Toplam Ziyaret
                 </CardTitle>
               </CardHeader>
@@ -56,14 +70,57 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           </Link>
+
+          {/*<Card className="border-l-2 border-l-primary">
+            <CardHeader className="pt-4 pb-1">
+              <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
+                Ziyaret Sıralaması — Satış Temsilcileri
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              {visitRanking.length === 0 ? (
+                <p className="text-muted-foreground text-sm">Veri yok</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-4">
+                  {[visitRanking.slice(0, 5), visitRanking.slice(5)].map(
+                    (col, colIdx) => (
+                      <div key={colIdx} className="space-y-1.5">
+                        {col.map((item, rowIdx) => (
+                          <div
+                            key={item.salesRepresentative}
+                            className="flex items-center justify-between gap-2"
+                          >
+                            <div className="flex min-w-0 items-center gap-2">
+                              <span className="w-5 shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
+                                {colIdx * 5 + rowIdx + 1}.
+                              </span>
+                              <span className="truncate text-sm">
+                                {item.salesRepresentative}
+                              </span>
+                            </div>
+                            <span className="shrink-0 font-mono font-semibold tabular-nums">
+                              {item.visitCount}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ),
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>*/}
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-6">
           <Link href="/panel/customer-cards?color=green">
             <Card className="group cursor-pointer border-l-2 border-l-green-500 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
-                  Yeşil
+                <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
+                  <span className="flex flex-col items-start leading-tight">
+                    Yeşil
+                    <span className="text-[10px] opacity-60">(Biz)</span>
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
@@ -77,8 +134,11 @@ export default async function DashboardPage() {
           <Link href="/panel/customer-cards?color=blue">
             <Card className="group cursor-pointer border-l-2 border-l-blue-500 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
-                  Mavi
+                <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
+                  <span className="flex flex-col items-start leading-tight">
+                    Mavi
+                    <span className="text-[10px] opacity-60">(M.A.Ö)</span>
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
@@ -92,8 +152,11 @@ export default async function DashboardPage() {
           <Link href="/panel/customer-cards?color=orange">
             <Card className="group cursor-pointer border-l-2 border-l-orange-500 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
-                  Turuncu
+                <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
+                  <span className="flex flex-col items-start leading-tight">
+                    Turuncu
+                    <span className="text-[10px] opacity-60">(Y.B)</span>
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
@@ -107,8 +170,11 @@ export default async function DashboardPage() {
           <Link href="/panel/customer-cards?color=yellow">
             <Card className="group cursor-pointer border-l-2 border-l-yellow-400 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
-                  Sarı
+                <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
+                  <span className="flex flex-col items-start leading-tight">
+                    Sarı
+                    <span className="text-[10px] opacity-60">(Gelmeyecek)</span>
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">
@@ -119,11 +185,32 @@ export default async function DashboardPage() {
             </Card>
           </Link>
 
+          <Link href="/panel/customer-cards?color=purple">
+            <Card className="group cursor-pointer border-l-2 border-l-purple-400 transition-colors hover:bg-accent">
+              <CardHeader className="pt-4 pb-1">
+                <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
+                  <span className="flex flex-col items-start leading-tight">
+                    Mor
+                    <span className="text-[10px] opacity-60">(Araf)</span>
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <div className="font-mono font-semibold text-3xl text-purple-500 tabular-nums">
+                  {colorCounts.purple}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
           <Link href="/panel/customer-cards?color=gray">
             <Card className="group cursor-pointer border-l-2 border-l-gray-400 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
-                  Gri
+                <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
+                  <span className="flex flex-col items-start leading-tight">
+                    Gri
+                    <span className="text-[10px] opacity-60">(Boş)</span>
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-4">

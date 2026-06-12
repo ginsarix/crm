@@ -15,6 +15,28 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-16',
+    version: '1.16',
+    date: '12 Haziran 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Mor renk — tam dashboard desteği',
+        desc: 'Mor renk; dashboard sayacı, meslek grubu renk dağılımı çubukları ve yüzdelerinde artık tam olarak görünüyor.',
+      },
+      {
+        type: 'improved',
+        title: 'Dashboard görsel iyileştirmeleri',
+        desc: "Banner görseli, renk kartlarına kısa açıklama etiketleri (Biz, M.A.Ö, Y.B vb.) ve tam yükseklik kart düzeni eklendi.",
+      },
+      {
+        type: 'fix',
+        title: 'Kayıt sonrası dialog kapanıyor',
+        desc: 'Cari kart, ziyaret, kullanıcı, meslek grubu ve satış temsilcisi güncellendikten sonra dialog artık düzenleme modundan çıkmak yerine tamamen kapanıyor.',
+      },
+    ],
+  },
+  {
     id: 'v1-15',
     version: '1.15',
     date: '11 Haziran 2026',

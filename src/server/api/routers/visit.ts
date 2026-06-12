@@ -1,4 +1,4 @@
-import type { Prisma } from 'generated/prisma';
+import { Prisma } from 'generated/prisma';
 import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
 import { VisitCreateSchema } from '~/shared/zod-schemas/visit';
@@ -54,6 +54,53 @@ export const visitRouter = createTRPCRouter({
       },
     });
   }),
+  getRankedVisitsBySalesRepresentative: protectedProcedure.query(
+    async ({ ctx }) => {
+      const isAdmin = ctx.session.user.role === 'admin';
+
+      type RawRow = { salesRepresentative: string; visitCount: bigint };
+
+      if (isAdmin) {
+        const rows = await ctx.db.$queryRaw<RawRow[]>`
+          SELECT cc."salesRepresentative", COUNT(v.id)::int AS "visitCount"
+          FROM "Visit" v
+          JOIN "CustomerCard" cc ON v."customerCardId" = cc.id
+          WHERE cc."salesRepresentative" IS NOT NULL AND cc."salesRepresentative" <> ''
+          GROUP BY cc."salesRepresentative"
+          ORDER BY "visitCount" DESC
+          LIMIT 10
+        `;
+        return rows.map((r) => ({
+          salesRepresentative: r.salesRepresentative,
+          visitCount: Number(r.visitCount),
+        }));
+      }
+
+      const assignedGroups = await ctx.db.businessGroup.findMany({
+        where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+        select: { name: true },
+      });
+      const groupNames = assignedGroups.map((g) => g.name);
+      if (groupNames.length === 0) return [];
+
+      const rows = await ctx.db.$queryRaw<RawRow[]>(
+        Prisma.sql`
+          SELECT cc."salesRepresentative", COUNT(v.id)::int AS "visitCount"
+          FROM "Visit" v
+          JOIN "CustomerCard" cc ON v."customerCardId" = cc.id
+          WHERE cc."salesRepresentative" IS NOT NULL AND cc."salesRepresentative" <> ''
+            AND cc."businessGroup" IN (${Prisma.join(groupNames)})
+          GROUP BY cc."salesRepresentative"
+          ORDER BY "visitCount" DESC
+          LIMIT 10
+        `,
+      );
+      return rows.map((r) => ({
+        salesRepresentative: r.salesRepresentative,
+        visitCount: Number(r.visitCount),
+      }));
+    },
+  ),
   get: protectedProcedure
     .input(
       z.object({
@@ -151,7 +198,9 @@ export const visitRouter = createTRPCRouter({
           },
         }),
       ]);
-      const totalPages = fetchAll ? 1 : Math.ceil(totalItems / input.itemsPerPage);
+      const totalPages = fetchAll
+        ? 1
+        : Math.ceil(totalItems / input.itemsPerPage);
 
       return {
         data,

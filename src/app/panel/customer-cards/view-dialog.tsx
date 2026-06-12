@@ -125,6 +125,7 @@ export function ViewCustomerCardDialog({
       utils.customerCard.get.invalidate();
       toast.success('Cari kart başarıyla güncellendi');
       onUpdate(updatedCustomerCard);
+      handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);

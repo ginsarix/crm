@@ -102,7 +102,7 @@ export function ViewUserDialog({
       utils.user.get.invalidate();
       toast.success('Kullanıcı başarıyla güncellendi');
       onUpdate(updatedUser);
-      setIsEditMode(false);
+      handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);

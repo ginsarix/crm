@@ -117,7 +117,7 @@ export function ViewVisitDialog({
       toast.success('Ziyaret başarıyla güncellendi');
 
       onUpdate?.(updatedVisit);
-      setIsEditMode(false);
+      handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);

@@ -76,7 +76,7 @@ export function ViewSaleRepresentativeDialog({
       utils.salesRepresentative.get.invalidate();
       toast.success('Satış temsilcisi başarıyla güncellendi');
       onUpdate(updatedSalesRepresentative);
-      setIsEditMode(false);
+      handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);

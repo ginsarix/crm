@@ -73,7 +73,7 @@ export function ViewBusinessGroupDialog({
       utils.businessGroup.get.invalidate();
       toast.success('Meslek grubu başarıyla güncellendi');
       onUpdate(updatedBusinessGroup);
-      setIsEditMode(false);
+      handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);

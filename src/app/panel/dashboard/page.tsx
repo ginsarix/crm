@@ -30,7 +30,7 @@ export default async function DashboardPage() {
           <Link href="/panel/customer-cards">
             <Card className="group cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
                   Toplam Cari Kart
                 </CardTitle>
               </CardHeader>
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
           <Link href="/panel/visits">
             <Card className="group cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
                   Toplam Ziyaret
                 </CardTitle>
               </CardHeader>
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
           <Link href="/panel/customer-cards?color=green">
             <Card className="group cursor-pointer border-l-2 border-l-green-500 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
                   Yeşil
                 </CardTitle>
               </CardHeader>
@@ -77,7 +77,7 @@ export default async function DashboardPage() {
           <Link href="/panel/customer-cards?color=blue">
             <Card className="group cursor-pointer border-l-2 border-l-blue-500 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
                   Mavi
                 </CardTitle>
               </CardHeader>
@@ -92,7 +92,7 @@ export default async function DashboardPage() {
           <Link href="/panel/customer-cards?color=orange">
             <Card className="group cursor-pointer border-l-2 border-l-orange-500 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
                   Turuncu
                 </CardTitle>
               </CardHeader>
@@ -107,7 +107,7 @@ export default async function DashboardPage() {
           <Link href="/panel/customer-cards?color=yellow">
             <Card className="group cursor-pointer border-l-2 border-l-yellow-400 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
                   Sarı
                 </CardTitle>
               </CardHeader>
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
           <Link href="/panel/customer-cards?color=gray">
             <Card className="group cursor-pointer border-l-2 border-l-gray-400 transition-colors hover:bg-accent">
               <CardHeader className="pt-4 pb-1">
-                <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">
+                <CardTitle className="font-bold text-[17px] text-muted-foreground uppercase tracking-widest">
                   Gri
                 </CardTitle>
               </CardHeader>

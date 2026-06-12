@@ -44,6 +44,7 @@ export const businessGroupRouter = createTRPCRouter({
         blue: number;
         orange: number;
         yellow: number;
+        purple: number;
         gray: number;
       }
     >();
@@ -58,16 +59,18 @@ export const businessGroupRouter = createTRPCRouter({
           blue: 0,
           orange: 0,
           yellow: 0,
+          purple: 0,
           gray: 0,
         });
       const entry = map.get(name);
       if (!entry) continue;
       entry.total += row._count;
-      if (row.color === 'green') entry.green += row._count;
-      else if (row.color === 'blue') entry.blue += row._count;
-      else if (row.color === 'orange') entry.orange += row._count;
-      else if (row.color === 'yellow') entry.yellow += row._count;
-      else entry.gray += row._count;
+
+      entry[
+        ['green', 'blue', 'orange', 'yellow', 'purple'].includes(row.color)
+          ? row.color
+          : 'gray'
+      ] += row._count;
     }
 
     const all = Array.from(map.entries()).map(([name, counts]) => {
@@ -79,6 +82,7 @@ export const businessGroupRouter = createTRPCRouter({
         blueCount: counts.blue,
         orangeCount: counts.orange,
         yellowCount: counts.yellow,
+        purpleCount: counts.purple,
         grayCount: counts.gray,
         greenPercent: total > 0 ? Math.round((counts.green / total) * 100) : 0,
         bluePercent: total > 0 ? Math.round((counts.blue / total) * 100) : 0,
@@ -86,6 +90,8 @@ export const businessGroupRouter = createTRPCRouter({
           total > 0 ? Math.round((counts.orange / total) * 100) : 0,
         yellowPercent:
           total > 0 ? Math.round((counts.yellow / total) * 100) : 0,
+        purplePercent:
+          total > 0 ? Math.round((counts.purple / total) * 100) : 0,
         grayPercent: total > 0 ? Math.round((counts.gray / total) * 100) : 0,
       };
     });

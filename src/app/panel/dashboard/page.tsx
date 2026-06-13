@@ -12,7 +12,6 @@ export default async function DashboardPage() {
     visitTotal,
     latestAudit,
     businessGroupStats,
-    visitRanking,
   ] = await Promise.all([
     api.customerCard.getTotal(),
     api.customerCard.getColorCounts(),

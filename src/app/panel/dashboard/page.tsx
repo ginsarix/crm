@@ -23,17 +23,17 @@ export default async function DashboardPage() {
 
   return (
     <div className="w-full">
-      <div className="relative aspect-[2.5/1] w-full overflow-hidden">
-        <Image
-          alt="Biz Geleceğiz"
-          className="object-cover object-[center_44%]"
-          fill
-          priority
-          src="/images/biz-gelecegiz-banner.png"
-        />
-      </div>
       <div className="p-4 sm:p-6 lg:p-8">
-        <div className="mx-auto w-full max-w-[1600px]">
+        <div className="mx-auto w-full max-w-400">
+          <div className="relative mx-auto mb-6 flex aspect-2.5/1 w-150 overflow-hidden rounded-lg">
+            <Image
+              alt="Biz Geleceğiz"
+              className="object-cover object-[center_44%]"
+              fill
+              priority
+              src="/images/biz-gelecegiz-banner.png"
+            />
+          </div>
           <div className="mb-6">
             <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
             <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>

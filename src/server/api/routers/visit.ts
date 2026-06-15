@@ -68,7 +68,7 @@ export const visitRouter = createTRPCRouter({
           WHERE cc."salesRepresentative" IS NOT NULL AND cc."salesRepresentative" <> ''
           GROUP BY cc."salesRepresentative"
           ORDER BY "visitCount" DESC
-          LIMIT 10
+          LIMIT 5
         `;
         return rows.map((r) => ({
           salesRepresentative: r.salesRepresentative,

@@ -97,7 +97,9 @@ export const userRouter = createTRPCRouter({
       const totalItems = await ctx.db.user.count({
         where: whereClause,
       });
-      const totalPages = fetchAll ? 1 : Math.ceil(totalItems / input.itemsPerPage);
+      const totalPages = fetchAll
+        ? 1
+        : Math.ceil(totalItems / input.itemsPerPage);
 
       const data = await ctx.db.user.findMany({
         select: input.select,
@@ -296,6 +298,46 @@ export const userRouter = createTRPCRouter({
           'FAILURE',
           error instanceof Error ? error.message : 'Bilinmeyen hata',
           `Kullanıcı silinemedi`,
+        );
+        throw error;
+      }
+    }),
+
+  bulkDelete: adminProcedure
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const idsToDelete = input.ids.filter((id) => id !== ctx.session.user.id);
+      const skipped = input.ids.length - idsToDelete.length;
+
+      if (idsToDelete.length === 0) {
+        throw new Error('Kendinizi silemezsiniz');
+      }
+
+      try {
+        const result = await ctx.db.user.deleteMany({
+          where: { id: { in: idsToDelete } },
+        });
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'USER_DELETED',
+          'USER',
+          '',
+          'SUCCESS',
+          undefined,
+          `${result.count} kullanıcı silindi (toplu)${skipped > 0 ? ', kendi hesabınız atlandı' : ''}`,
+        );
+        return { ...result, skipped };
+      } catch (error) {
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'USER_DELETED',
+          'USER',
+          '',
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          `Toplu kullanıcı silinemedi`,
         );
         throw error;
       }

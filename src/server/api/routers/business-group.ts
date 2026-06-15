@@ -288,4 +288,53 @@ export const businessGroupRouter = createTRPCRouter({
         throw error;
       }
     }),
+
+  bulkDelete: adminProcedure
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.db.$transaction(async (tx) => {
+          const groups = await tx.businessGroup.findMany({
+            where: { id: { in: input.ids } },
+            select: { name: true },
+          });
+          const names = groups.map((g) => g.name);
+
+          if (names.length > 0) {
+            await tx.customerCard.updateMany({
+              where: { businessGroup: { in: names } },
+              data: { businessGroup: null },
+            });
+          }
+
+          return tx.businessGroup.deleteMany({
+            where: { id: { in: input.ids } },
+          });
+        });
+
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'BUSINESS_GROUP_DELETED',
+          'BUSINESS_GROUP',
+          '',
+          'SUCCESS',
+          undefined,
+          `${result.count} meslek grubu silindi (toplu)`,
+        );
+        return result;
+      } catch (error) {
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'BUSINESS_GROUP_DELETED',
+          'BUSINESS_GROUP',
+          '',
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          `Toplu meslek grubu silinemedi`,
+        );
+        throw error;
+      }
+    }),
 });

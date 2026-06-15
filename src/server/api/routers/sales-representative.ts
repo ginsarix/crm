@@ -138,6 +138,40 @@ export const salesRepresentativeRouter = createTRPCRouter({
         throw error;
       }
     }),
+
+  bulkDelete: adminProcedure
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.db.salesRepresentative.deleteMany({
+          where: { id: { in: input.ids } },
+        });
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'SALES_REPRESENTATIVE_DELETED',
+          'SALES_REPRESENTATIVE',
+          '',
+          'SUCCESS',
+          undefined,
+          `${result.count} satış temsilcisi silindi (toplu)`,
+        );
+        return result;
+      } catch (error) {
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'SALES_REPRESENTATIVE_DELETED',
+          'SALES_REPRESENTATIVE',
+          '',
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          `Toplu satış temsilcisi silinemedi`,
+        );
+        throw error;
+      }
+    }),
+
   customerCardGreens: protectedProcedure.query(async ({ ctx }) => {
     const counts = await ctx.db.customerCard.groupBy({
       by: ['salesRepresentative'],

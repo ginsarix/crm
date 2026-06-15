@@ -238,7 +238,9 @@ export const customerCardRouter = createTRPCRouter({
           orderBy,
         }),
       ]);
-      const totalPages = fetchAll ? 1 : Math.ceil(totalItems / input.itemsPerPage);
+      const totalPages = fetchAll
+        ? 1
+        : Math.ceil(totalItems / input.itemsPerPage);
 
       return {
         data,
@@ -361,6 +363,78 @@ export const customerCardRouter = createTRPCRouter({
       }
     }),
 
+  bulkDelete: adminProcedure
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.db.customerCard.deleteMany({
+          where: { id: { in: input.ids } },
+        });
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'CUSTOMER_CARD_DELETED',
+          'CUSTOMER_CARD',
+          '',
+          'SUCCESS',
+          undefined,
+          `${result.count} cari kart silindi (toplu)`,
+        );
+        return result;
+      } catch (error) {
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'CUSTOMER_CARD_DELETED',
+          'CUSTOMER_CARD',
+          '',
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          `Toplu cari kart silinemedi`,
+        );
+        throw error;
+      }
+    }),
+
+  bulkUpdateColor: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string()).min(1),
+        color: z.enum(['green', 'blue', 'orange', 'yellow', 'gray', 'purple']),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.db.customerCard.updateMany({
+          where: { id: { in: input.ids } },
+          data: { color: input.color },
+        });
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'CUSTOMER_CARD_UPDATED',
+          'CUSTOMER_CARD',
+          '',
+          'SUCCESS',
+          undefined,
+          `${result.count} cari kartın rengi "${input.color}" olarak güncellendi (toplu)`,
+        );
+        return result;
+      } catch (error) {
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'CUSTOMER_CARD_UPDATED',
+          'CUSTOMER_CARD',
+          '',
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          `Toplu renk güncellemesi başarısız`,
+        );
+        throw error;
+      }
+    }),
+
   getColorCounts: protectedProcedure.query(async ({ ctx }) => {
     const isAdmin = ctx.session.user.role === 'admin';
     let where: Prisma.CustomerCardWhereInput = {};
@@ -377,7 +451,14 @@ export const customerCardRouter = createTRPCRouter({
       where,
     });
 
-    const counts = { green: 0, blue: 0, orange: 0, yellow: 0, purple: 0, gray: 0 };
+    const counts = {
+      green: 0,
+      blue: 0,
+      orange: 0,
+      yellow: 0,
+      purple: 0,
+      gray: 0,
+    };
     for (const row of rows) counts[row.color] += row._count;
     return counts;
   }),

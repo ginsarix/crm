@@ -1,7 +1,12 @@
 import { sub } from 'date-fns';
 import type { Prisma } from 'generated/prisma';
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '../trpc';
+import {
+  adminProcedure,
+  createAuditLog,
+  createTRPCRouter,
+  protectedProcedure,
+} from '../trpc';
 
 const filterSchema = z.object({
   search: z.string().optional(),
@@ -127,7 +132,9 @@ export const auditLogRouter = createTRPCRouter({
           orderBy,
         }),
       ]);
-      const totalPages = fetchAll ? 1 : Math.ceil(totalItems / input.itemsPerPage);
+      const totalPages = fetchAll
+        ? 1
+        : Math.ceil(totalItems / input.itemsPerPage);
 
       return {
         data,
@@ -194,5 +201,24 @@ export const auditLogRouter = createTRPCRouter({
           createdAt: { gt: cutoffDate },
         },
       });
+    }),
+
+  bulkDelete: adminProcedure
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.db.auditLog.deleteMany({
+        where: { id: { in: input.ids } },
+      });
+      await createAuditLog(
+        ctx.db,
+        ctx.session.user.id,
+        'AUDIT_LOG_DELETED',
+        'AUDIT_LOG',
+        '',
+        'SUCCESS',
+        undefined,
+        `${result.count} denetim kaydı silindi (toplu)`,
+      );
+      return result;
     }),
 });

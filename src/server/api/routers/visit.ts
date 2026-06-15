@@ -350,4 +350,37 @@ export const visitRouter = createTRPCRouter({
         throw error;
       }
     }),
+
+  bulkDelete: adminProcedure
+    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.db.visit.deleteMany({
+          where: { id: { in: input.ids } },
+        });
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'VISIT_DELETED',
+          'VISIT',
+          '',
+          'SUCCESS',
+          undefined,
+          `${result.count} ziyaret silindi (toplu)`,
+        );
+        return result;
+      } catch (error) {
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'VISIT_DELETED',
+          'VISIT',
+          '',
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          `Toplu ziyaret silinemedi`,
+        );
+        throw error;
+      }
+    }),
 });

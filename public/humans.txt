@@ -9,7 +9,7 @@
     Note: Thank you to my boss Aykut for giving me the opportunity to build these exciting projects
 
 /* SITE */
-    Last update: 2026/06/10
+    Last update: 2026/06/15
     Standards: HTML5, CSS3, TypeScript
     Components: Next.js, tRPC, Prisma, better-auth, shadcn/ui, React Hook Form, Zod
     Software: Zed, pnpm, PostgreSQL

@@ -5,7 +5,14 @@ import { Button } from '~/components/ui/button';
 import { ButtonGroup } from '~/components/ui/button-group';
 import { cn } from '~/lib/utils';
 
-type ColorValue = 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'purple' | 'all';
+type ColorValue =
+  | 'green'
+  | 'blue'
+  | 'orange'
+  | 'yellow'
+  | 'gray'
+  | 'purple'
+  | 'all';
 
 const colorConfig = {
   green: {

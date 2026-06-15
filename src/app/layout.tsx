@@ -34,7 +34,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <link rel="author" href="humans.txt" />
+        <link href="humans.txt" rel="author" />
       </head>
       <body>
         <ThemeProvider

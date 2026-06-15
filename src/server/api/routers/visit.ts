@@ -92,7 +92,7 @@ export const visitRouter = createTRPCRouter({
             AND cc."businessGroup" IN (${Prisma.join(groupNames)})
           GROUP BY cc."salesRepresentative"
           ORDER BY "visitCount" DESC
-          LIMIT 10
+          LIMIT 5
         `,
       );
       return rows.map((r) => ({

@@ -12,13 +12,14 @@ export default async function DashboardPage() {
     visitTotal,
     latestAudit,
     businessGroupStats,
+    visitRanking,
   ] = await Promise.all([
     api.customerCard.getTotal(),
     api.customerCard.getColorCounts(),
     api.visit.getTotal(),
     api.auditLog.getLatest(),
     api.businessGroup.getStats(),
-    // api.visit.getRankedVisitsBySalesRepresentative(),
+    api.visit.getRankedVisitsBySalesRepresentative(),
   ]);
 
   return (
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
             <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
             <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>
           </div>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-3">
             <Link className="h-full" href="/panel/customer-cards">
               <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
                 <CardHeader className="pt-4 pb-1">
@@ -69,45 +70,39 @@ export default async function DashboardPage() {
               </Card>
             </Link>
 
-            {/*<Card className="border-l-2 border-l-primary">
-            <CardHeader className="pt-4 pb-1">
-              <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
-                Ziyaret Sıralaması — Satış Temsilcileri
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pb-4">
-              {visitRanking.length === 0 ? (
-                <p className="text-muted-foreground text-sm">Veri yok</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-x-4">
-                  {[visitRanking.slice(0, 5), visitRanking.slice(5)].map(
-                    (col, colIdx) => (
-                      <div key={colIdx} className="space-y-1.5">
-                        {col.map((item, rowIdx) => (
-                          <div
-                            key={item.salesRepresentative}
-                            className="flex items-center justify-between gap-2"
-                          >
-                            <div className="flex min-w-0 items-center gap-2">
-                              <span className="w-5 shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
-                                {colIdx * 5 + rowIdx + 1}.
-                              </span>
-                              <span className="truncate text-sm">
-                                {item.salesRepresentative}
-                              </span>
-                            </div>
-                            <span className="shrink-0 font-mono font-semibold tabular-nums">
-                              {item.visitCount}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ),
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>*/}
+            <Card className="border-l-2 border-l-primary">
+              <CardHeader className="pt-4 pb-1">
+                <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
+                  Ziyaret Sıralaması — Satış Temsilcileri
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {visitRanking.length === 0 ? (
+                  <div className="font-mono text-muted-foreground text-sm">
+                    —
+                  </div>
+                ) : (
+                  <ol className="space-y-1.5">
+                    {visitRanking.map((entry, i) => (
+                      <li
+                        className="flex items-center gap-2 font-mono text-xs"
+                        key={entry.salesRepresentative}
+                      >
+                        <span className="w-4 shrink-0 text-right text-muted-foreground">
+                          {i + 1}.
+                        </span>
+                        <span className="flex-1 truncate">
+                          {entry.salesRepresentative}
+                        </span>
+                        <span className="font-semibold tabular-nums">
+                          {entry.visitCount}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-6">

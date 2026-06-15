@@ -7,6 +7,7 @@ import {
   getCoreRowModel,
   type OnChangeFn,
   type PaginationState,
+  type RowSelectionState,
   type SortingState,
   useReactTable,
   type VisibilityState,
@@ -20,7 +21,7 @@ import {
   Columns3,
   Download,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import XLSX from 'xlsx-js-style';
 
 import { Button } from '~/components/ui/button';
@@ -63,6 +64,10 @@ interface DataTableProps<TData, TValue> {
   tableId?: string;
   defaultColumnVisibility?: VisibilityState;
   exportFilename?: string;
+  rowSelection?: RowSelectionState;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  bulkActionsBar?: ReactNode;
+  getRowId?: (row: TData) => string;
 }
 
 function getVisibilityKey(tableId: string) {
@@ -251,6 +256,10 @@ export function DataTable<TData, TValue>({
   tableId = 'default',
   defaultColumnVisibility = {},
   exportFilename,
+  rowSelection,
+  onRowSelectionChange,
+  bulkActionsBar,
+  getRowId,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     () => loadColumnVisibility(tableId, defaultColumnVisibility),
@@ -268,9 +277,52 @@ export function DataTable<TData, TValue>({
     saveColumnSizing(tableId, columnSizing);
   }, [tableId, columnSizing]);
 
+  const internalColumns = useMemo<ColumnDef<TData, TValue>[]>(() => {
+    if (rowSelection === undefined) return columns;
+    const selectCol = {
+      id: 'select',
+      size: 40,
+      enableResizing: false,
+      enableSorting: false,
+      header: ({
+        table: t,
+      }: {
+        table: ReturnType<typeof useReactTable<TData>>;
+      }) => (
+        <Checkbox
+          aria-label="Tümünü seç"
+          checked={
+            t.getIsAllPageRowsSelected()
+              ? true
+              : t.getIsSomePageRowsSelected()
+                ? 'indeterminate'
+                : false
+          }
+          onCheckedChange={(v) => t.toggleAllPageRowsSelected(!!v)}
+        />
+      ),
+      cell: ({
+        row,
+      }: {
+        row: {
+          getIsSelected: () => boolean;
+          toggleSelected: (v: boolean) => void;
+        };
+      }) => (
+        <Checkbox
+          aria-label="Satırı seç"
+          checked={row.getIsSelected()}
+          onCheckedChange={(v) => row.toggleSelected(!!v)}
+          onClick={(e) => e.stopPropagation()}
+        />
+      ),
+    } as ColumnDef<TData, TValue>;
+    return [selectCol, ...columns];
+  }, [columns, rowSelection]);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: internalColumns,
     pageCount,
     columnResizeMode: 'onChange',
     defaultColumn: {
@@ -282,11 +334,19 @@ export function DataTable<TData, TValue>({
     onPaginationChange: setPagination,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnSizingChange: setColumnSizing,
+    ...(rowSelection !== undefined && {
+      enableRowSelection: true,
+      onRowSelectionChange,
+      getRowId:
+        getRowId ??
+        ((row: TData) => (row as Record<string, unknown>).id as string),
+    }),
     state: {
       sorting,
       pagination,
       columnVisibility,
       columnSizing,
+      ...(rowSelection !== undefined && { rowSelection }),
     },
     manualPagination: true,
     manualSorting: true,
@@ -371,6 +431,9 @@ export function DataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Bulk Actions Bar */}
+      {bulkActionsBar}
 
       {/* Table */}
       <div

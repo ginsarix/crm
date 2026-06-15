@@ -15,6 +15,28 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-17',
+    version: '1.17',
+    date: '15 Haziran 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Toplu işlemler',
+        desc: 'Tüm tablolarda toplu silme, cari kartlarda toplu renk değiştirme. Seçili kayıtlar ekranın altında beliren çubukla yönetilir.',
+      },
+      {
+        type: 'new',
+        title: 'Dashboard — satış temsilcisi ziyaret sıralaması',
+        desc: "Dashboard'a, en çok ziyaret gerçekleştiren satış temsilcilerini sıralayan yeni bir kart eklendi.",
+      },
+      {
+        type: 'improved',
+        title: 'Animasyon iyileştirmeleri',
+        desc: 'Sayfa geçiş animasyonları yeniden ayarlandı; azaltılmış hareket tercihi artık destekleniyor.',
+      },
+    ],
+  },
+  {
     id: 'v1-16',
     version: '1.16',
     date: '12 Haziran 2026',

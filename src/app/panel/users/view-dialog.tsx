@@ -126,6 +126,7 @@ export function ViewUserDialog({
     onSuccess: () => {
       utils.businessGroup.getAssigned.invalidate({ userId: user.id });
       toast.success('Meslek grupları güncellendi');
+      handleOpenChange(false);
     },
     onError: () => {
       toast.error('Meslek grupları güncellenirken bir hata oluştu');

@@ -1,12 +1,25 @@
 'use client';
 
-import type { PaginationState, SortingState } from '@tanstack/react-table';
+import type {
+  PaginationState,
+  RowSelectionState,
+  SortingState,
+} from '@tanstack/react-table';
 import type { AuditLog, User } from 'generated/prisma';
-import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import {
   Select,
@@ -19,6 +32,7 @@ import { Spinner } from '~/components/ui/spinner';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import type { RouterInputs } from '~/trpc/types';
+import { BulkActionsBar } from '../_components/bulk-actions-bar';
 import { DataTable } from '../../_components/data-table';
 import { createColumns } from './columns';
 import { FilterControls } from './filter-controls';
@@ -41,6 +55,8 @@ export function AuditLogsPageClient() {
   const [action, setAction] = useState('');
   const [resourceType, setResourceType] = useState('');
   const [result, setResult] = useState<'SUCCESS' | 'FAILURE' | 'all'>('all');
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const { data, isLoading } = api.auditLog.get.useQuery({
     page: pagination.pageIndex + 1,
@@ -61,6 +77,21 @@ export function AuditLogsPageClient() {
 
   const columns = createColumns(handleViewAuditLog);
 
+  const selectedIds = Object.keys(rowSelection);
+
+  const bulkActionsBar = (
+    <BulkActionsBar count={selectedIds.length} onClear={() => setRowSelection({})}>
+      <Button
+        onClick={() => setDeleteConfirmOpen(true)}
+        size="sm"
+        variant="destructive"
+      >
+        <Trash2 className="h-4 w-4" />
+        Sil
+      </Button>
+    </BulkActionsBar>
+  );
+
   type unitType = RouterInputs['auditLog']['clearLogs']['unit'];
 
   const clearOptionsSchema = z.object({
@@ -77,6 +108,21 @@ export function AuditLogsPageClient() {
   });
 
   const utils = api.useUtils();
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
+  useEffect(() => {
+    setRowSelection({});
+  }, [pagination.pageIndex, pagination.pageSize]);
+
+  const bulkDeleteMutation = api.auditLog.bulkDelete.useMutation({
+    onSuccess: (deleteResult) => {
+      utils.auditLog.get.invalidate();
+      toast.success(`${deleteResult.count} denetim kaydı silindi`);
+      setRowSelection({});
+      setDeleteConfirmOpen(false);
+    },
+    onError: () => toast.error('Silme işlemi sırasında hata oluştu'),
+  });
 
   const clearMutation = api.auditLog.clearLogs.useMutation({
     onSuccess: () => {
@@ -176,15 +222,18 @@ export function AuditLogsPageClient() {
         ) : (
           <div className="overflow-x-auto">
             <DataTable
+              bulkActionsBar={bulkActionsBar}
               columns={columns}
               data={data?.data ?? []}
+              onRowSelectionChange={setRowSelection}
               pageCount={data?.pagination?.totalPages ?? -1}
-              totalCount={data?.pagination?.totalItems}
               pagination={pagination}
+              rowSelection={rowSelection}
               setPagination={setPagination}
               setSorting={setSorting}
               sorting={sorting}
               tableId="audit-logs"
+              totalCount={data?.pagination?.totalItems}
             />
           </div>
         )}
@@ -196,6 +245,33 @@ export function AuditLogsPageClient() {
             open={viewDialogOpen}
           />
         )}
+
+        <Dialog onOpenChange={setDeleteConfirmOpen} open={deleteConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Toplu Silme</DialogTitle>
+              <DialogDescription>
+                {selectedIds.length} denetim kaydını silmek istediğinizden emin
+                misiniz? Bu işlem geri alınamaz.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                onClick={() => setDeleteConfirmOpen(false)}
+                variant="outline"
+              >
+                İptal
+              </Button>
+              <Button
+                disabled={bulkDeleteMutation.isPending}
+                onClick={() => bulkDeleteMutation.mutate({ ids: selectedIds })}
+                variant="destructive"
+              >
+                {bulkDeleteMutation.isPending ? 'Siliniyor...' : 'Evet, Sil'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

@@ -1,19 +1,35 @@
 'use client';
 
-import type { PaginationState, SortingState } from '@tanstack/react-table';
+import type {
+  PaginationState,
+  RowSelectionState,
+  SortingState,
+} from '@tanstack/react-table';
+import { Trash2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '~/components/ui/button';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
 import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
+import { authClient } from '~/server/better-auth/client';
 import { api } from '~/trpc/react';
 import type { RouterOutputs } from '~/trpc/types';
 
 type VisitWithCustomerCard = RouterOutputs['visit']['get']['data'][number];
 type VisitSearchScope = 'all' | keyof typeof columnMap.visit;
 
+import { BulkActionsBar } from '../_components/bulk-actions-bar';
 import { DataTable } from '../../_components/data-table';
 import { createColumns } from './columns';
 import { CreateVisitDialog } from './create-dialog';
@@ -36,6 +52,28 @@ export function VisitsPageClient() {
     'phone' | 'inPerson' | 'email' | 'sms' | 'all'
   >('all');
   const [searchScope, setSearchScope] = useState<VisitSearchScope>('all');
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === 'admin';
+  const utils = api.useUtils();
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
+  useEffect(() => {
+    setRowSelection({});
+  }, [pagination.pageIndex, pagination.pageSize]);
+
+  const bulkDeleteMutation = api.visit.bulkDelete.useMutation({
+    onSuccess: (result) => {
+      utils.visit.get.invalidate();
+      utils.visit.getTotal.invalidate();
+      toast.success(`${result.count} ziyaret silindi`);
+      setRowSelection({});
+      setDeleteConfirmOpen(false);
+    },
+    onError: () => toast.error('Silme işlemi sırasında hata oluştu'),
+  });
 
   const { data, isLoading } = api.visit.get.useQuery({
     page: pagination.pageIndex + 1, // Convert 0-based to 1-based for API
@@ -80,6 +118,24 @@ export function VisitsPageClient() {
 
   const columns = createColumns(handleViewVisit);
 
+  const selectedIds = Object.keys(rowSelection);
+
+  const bulkActionsBar = (
+    <BulkActionsBar
+      count={isAdmin ? selectedIds.length : 0}
+      onClear={() => setRowSelection({})}
+    >
+      <Button
+        onClick={() => setDeleteConfirmOpen(true)}
+        size="sm"
+        variant="destructive"
+      >
+        <Trash2 className="h-4 w-4" />
+        Sil
+      </Button>
+    </BulkActionsBar>
+  );
+
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
       <div className="mx-auto w-full max-w-[1600px]">
@@ -108,11 +164,14 @@ export function VisitsPageClient() {
         ) : (
           <div className="overflow-x-auto">
             <DataTable
+              bulkActionsBar={bulkActionsBar}
               columns={columns}
               data={data?.data ?? []}
               exportFilename="ziyaretler"
+              onRowSelectionChange={setRowSelection}
               pageCount={data?.pagination?.totalPages ?? -1}
               pagination={pagination}
+              rowSelection={rowSelection}
               setPagination={setPagination}
               setSorting={setSorting}
               sorting={sorting}
@@ -134,6 +193,33 @@ export function VisitsPageClient() {
         {customerCardId && relatedVisits.length > 0 && (
           <RelatedVisitsDialog visits={relatedVisits} />
         )}
+
+        <Dialog onOpenChange={setDeleteConfirmOpen} open={deleteConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Toplu Silme</DialogTitle>
+              <DialogDescription>
+                {selectedIds.length} ziyareti silmek istediğinizden emin
+                misiniz? Bu işlem geri alınamaz.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                onClick={() => setDeleteConfirmOpen(false)}
+                variant="outline"
+              >
+                İptal
+              </Button>
+              <Button
+                disabled={bulkDeleteMutation.isPending}
+                onClick={() => bulkDeleteMutation.mutate({ ids: selectedIds })}
+                variant="destructive"
+              >
+                {bulkDeleteMutation.isPending ? 'Siliniyor...' : 'Evet, Sil'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

@@ -1,19 +1,37 @@
 'use client';
 
-import type { PaginationState, SortingState } from '@tanstack/react-table';
+import type {
+  PaginationState,
+  RowSelectionState,
+  SortingState,
+} from '@tanstack/react-table';
 import type { $Enums, CustomerCard } from 'generated/prisma';
+import { Trash2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { z } from 'zod';
+import { Button } from '~/components/ui/button';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
 import { cn } from '~/lib/utils';
+import { authClient } from '~/server/better-auth/client';
 import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
 import { DistrictValidation } from '~/shared/zod-schemas/district';
 import { StatusValidation } from '~/shared/zod-schemas/status';
 import { VoteValidation } from '~/shared/zod-schemas/vote';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
+import { BulkActionsBar } from '../_components/bulk-actions-bar';
+import ColorControl from './color-control';
 import { createColumns } from './columns';
 import { CreateCustomerCardDialog } from './create-dialog';
 import { FilterControls } from './filter-controls';
@@ -41,6 +59,14 @@ export function CustomerCardsPageClient() {
   const [selectedCustomerCard, setSelectedCustomerCard] =
     useState<CustomerCard | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  type BulkColor = 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'purple';
+  const [bulkColor, setBulkColor] = useState<BulkColor | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === 'admin';
+  const utils = api.useUtils();
 
   // Local state for the search input — avoids sluggish typing caused by URL-roundtrip on every keystroke
   const urlSearch = searchParams.get('search') ?? '';
@@ -105,6 +131,34 @@ export function CustomerCardsPageClient() {
     updateParamRef.current = updateParam;
   });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
+  useEffect(() => {
+    setRowSelection({});
+  }, [pagination.pageIndex, pagination.pageSize]);
+
+  const bulkUpdateColorMutation = api.customerCard.bulkUpdateColor.useMutation({
+    onSuccess: (result) => {
+      utils.customerCard.get.invalidate();
+      utils.customerCard.getColorCounts.invalidate();
+      toast.success(`${result.count} kartın rengi güncellendi`);
+      setRowSelection({});
+      setBulkColor(null);
+    },
+    onError: () => toast.error('Renk güncellenirken hata oluştu'),
+  });
+
+  const bulkDeleteMutation = api.customerCard.bulkDelete.useMutation({
+    onSuccess: (result) => {
+      utils.customerCard.get.invalidate();
+      utils.customerCard.getTotal.invalidate();
+      utils.customerCard.getColorCounts.invalidate();
+      toast.success(`${result.count} cari kart silindi`);
+      setRowSelection({});
+      setDeleteConfirmOpen(false);
+    },
+    onError: () => toast.error('Silme işlemi sırasında hata oluştu'),
+  });
+
   // Debounce search → URL so the query only fires after the user pauses typing
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -147,6 +201,49 @@ export function CustomerCardsPageClient() {
   };
 
   const columns = createColumns(handleViewCustomerCard);
+
+  const selectedIds = Object.keys(rowSelection);
+
+  const bulkActionsBar = (
+    <BulkActionsBar count={selectedIds.length} onClear={() => setRowSelection({})}>
+      <ColorControl
+        color={
+          (bulkColor ??
+            'all') as
+            | 'green'
+            | 'blue'
+            | 'orange'
+            | 'yellow'
+            | 'gray'
+            | 'purple'
+            | 'all'
+        }
+        setColor={(c) => setBulkColor(c === 'all' ? null : (c as BulkColor))}
+      />
+      <Button
+        disabled={!bulkColor || bulkUpdateColorMutation.isPending}
+        onClick={() =>
+          bulkUpdateColorMutation.mutate({
+            ids: selectedIds,
+            color: bulkColor as $Enums.Color,
+          })
+        }
+        size="sm"
+      >
+        {bulkUpdateColorMutation.isPending ? 'Uygulanıyor...' : 'Uygula'}
+      </Button>
+      {isAdmin && (
+        <Button
+          onClick={() => setDeleteConfirmOpen(true)}
+          size="sm"
+          variant="destructive"
+        >
+          <Trash2 className="h-4 w-4" />
+          Sil
+        </Button>
+      )}
+    </BulkActionsBar>
+  );
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
@@ -205,6 +302,7 @@ export function CustomerCardsPageClient() {
         ) : (
           <div className="overflow-x-auto">
             <DataTable
+              bulkActionsBar={bulkActionsBar}
               columns={columns}
               data={data?.data ?? []}
               defaultColumnVisibility={{
@@ -219,8 +317,10 @@ export function CustomerCardsPageClient() {
                 color: false,
               }}
               exportFilename="cari_kartlar"
+              onRowSelectionChange={setRowSelection}
               pageCount={data?.pagination?.totalPages ?? -1}
               pagination={pagination}
+              rowSelection={rowSelection}
               setPagination={setPagination}
               setSorting={setSorting}
               sorting={sorting}
@@ -240,6 +340,33 @@ export function CustomerCardsPageClient() {
             open={viewDialogOpen}
           />
         )}
+
+        <Dialog onOpenChange={setDeleteConfirmOpen} open={deleteConfirmOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Toplu Silme</DialogTitle>
+              <DialogDescription>
+                {selectedIds.length} cari kartı silmek istediğinizden emin
+                misiniz? Bu işlem geri alınamaz.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                onClick={() => setDeleteConfirmOpen(false)}
+                variant="outline"
+              >
+                İptal
+              </Button>
+              <Button
+                disabled={bulkDeleteMutation.isPending}
+                onClick={() => bulkDeleteMutation.mutate({ ids: selectedIds })}
+                variant="destructive"
+              >
+                {bulkDeleteMutation.isPending ? 'Siliniyor...' : 'Evet, Sil'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

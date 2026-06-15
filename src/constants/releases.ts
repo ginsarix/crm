@@ -27,7 +27,7 @@ export const RELEASES: Release[] = [
       {
         type: 'improved',
         title: 'Dashboard görsel iyileştirmeleri',
-        desc: "Banner görseli, renk kartlarına kısa açıklama etiketleri (Biz, M.A.Ö, Y.B vb.) ve tam yükseklik kart düzeni eklendi.",
+        desc: 'Banner görseli, renk kartlarına kısa açıklama etiketleri (Biz, M.A.Ö, Y.B vb.) ve tam yükseklik kart düzeni eklendi.',
       },
       {
         type: 'fix',

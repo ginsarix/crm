@@ -15,6 +15,23 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-18',
+    version: '1.18',
+    date: '17 Haziran 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Geri bildirim sistemi',
+        desc: 'Panel başlığının sağındaki yeni simgeyle genel geri bildirim gönderebilirsiniz ve ayrıca sürüm geçmişinde her güncelleme için beğeni/beğenmeme butonları da eklendi.',
+      },
+      {
+        type: 'fix',
+        title: 'Tarih alanına manuel yazma düzeltildi',
+        desc: 'Tarih alanına manuel (el ile) yazarken tarihin bozulması düzeltildi.',
+      },
+    ],
+  },
+  {
     id: 'v1-17',
     version: '1.17',
     date: '15 Haziran 2026',

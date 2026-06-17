@@ -1,7 +1,7 @@
 'use client';
 
-import { AnimatePresence, motion } from 'motion/react';
 import { X } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import React, { type ReactNode } from 'react';
 import { Button } from '~/components/ui/button';
 
@@ -54,7 +54,11 @@ const itemVariants = {
   },
 };
 
-export function BulkActionsBar({ count, onClear, children }: BulkActionsBarProps) {
+export function BulkActionsBar({
+  count,
+  onClear,
+  children,
+}: BulkActionsBarProps) {
   return (
     <AnimatePresence>
       {count > 0 && (

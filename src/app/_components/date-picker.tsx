@@ -92,10 +92,11 @@ export function DatePicker({
   }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    setDisplayValue(inputValue);
+    setDisplayValue(e.target.value);
+  };
 
-    const parsed = parseTurkishDate(inputValue);
+  const commitDisplayValue = () => {
+    const parsed = parseTurkishDate(displayValue);
     if (parsed) {
       setDate(parsed);
       setMonth(parsed);
@@ -130,11 +131,15 @@ export function DatePicker({
       <Input
         className={cn('bg-background pr-10', className)}
         id={id}
+        onBlur={commitDisplayValue}
         onChange={handleInputChange}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') {
             e.preventDefault();
             setOpen(true);
+          }
+          if (e.key === 'Enter') {
+            commitDisplayValue();
           }
         }}
         placeholder="GG.AA.YYYY"

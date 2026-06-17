@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { HeaderFeedbackButton } from '~/components/header-feedback-button';
 import { NewVersionDialog } from '~/components/new-version-dialog';
 import { ThemeToggle } from '~/components/theme-toggle';
 import { Separator } from '~/components/ui/separator';
@@ -25,6 +26,8 @@ export default async function PanelLayout({
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <Separator className="h-4" orientation="vertical" />
             <div className="flex-1" />
+            <HeaderFeedbackButton />
+            <Separator className="h-4" orientation="vertical" />
             <ThemeToggle />
             <Separator className="h-4" orientation="vertical" />
             <Link

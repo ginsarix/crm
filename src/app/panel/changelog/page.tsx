@@ -2,6 +2,7 @@
 
 import { SearchIcon, XIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { EntryFeedbackButtons } from '~/components/entry-feedback-buttons';
 import { type ChangeType, RELEASES } from '~/constants/releases';
 
 const BADGE_CONFIG: Record<ChangeType, { label: string; className: string }> = {
@@ -262,21 +263,29 @@ export default function ChangelogPage() {
                   <div className="-mx-2.5 flex flex-col">
                     {filtered.map((change, i) => (
                       <div
-                        className="grid grid-cols-[96px_1fr] gap-3.5 rounded px-2.5 py-2.5 hover:bg-accent"
+                        className="group grid grid-cols-[96px_1fr] gap-3.5 rounded px-2.5 py-2.5 hover:bg-accent"
                         key={i}
                       >
                         <div className="pt-0.5">
                           <ChangeTypeBadge type={change.type} />
                         </div>
-                        <div>
-                          <p className="font-medium text-[13.5px] leading-snug">
-                            {change.title}
-                          </p>
-                          {change.desc && (
-                            <p className="mt-1 text-[12.5px] text-muted-foreground leading-relaxed">
-                              {change.desc}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium text-[13.5px] leading-snug">
+                              {change.title}
                             </p>
-                          )}
+                            {change.desc && (
+                              <p className="mt-1 text-[12.5px] text-muted-foreground leading-relaxed">
+                                {change.desc}
+                              </p>
+                            )}
+                          </div>
+                          <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+                            <EntryFeedbackButtons
+                              changeTitle={change.title}
+                              version={release.version}
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}

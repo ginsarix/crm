@@ -1,6 +1,7 @@
 import { auditLogRouter } from '~/server/api/routers/audit-log';
 import { businessGroupRouter } from '~/server/api/routers/business-group';
 import { customerCardRouter } from '~/server/api/routers/customer-card';
+import { feedbackRouter } from '~/server/api/routers/feedback';
 import { salesRepresentativeRouter } from '~/server/api/routers/sales-representative';
 import { userRouter } from '~/server/api/routers/user';
 import { visitRouter } from '~/server/api/routers/visit';
@@ -15,6 +16,7 @@ export const appRouter = createTRPCRouter({
   auditLog: auditLogRouter,
   businessGroup: businessGroupRouter,
   customerCard: customerCardRouter,
+  feedback: feedbackRouter,
   user: userRouter,
   visit: visitRouter,
   salesRepresentative: salesRepresentativeRouter,

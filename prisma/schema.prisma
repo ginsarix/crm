@@ -43,26 +43,26 @@ enum AuditResult {
 }
 
 model CustomerCard {
-  id                  String    @id @default(cuid())
-  sira                String?
-  name                String?
-  sicil               String?
-  address             String?
-  district            District?
-  region              String?
-  gsm1                String?
-  contact1            String?
-  gsm2                String?
-  contact2            String?
-  gsm3                String?
-  contact3            String?
-  businessGroup       String?
-  color               Color     @default(gray)
+  id                    String                 @id @default(cuid())
+  sira                  String?
+  name                  String?
+  sicil                 String?
+  address               String?
+  district              District?
+  region                String?
+  gsm1                  String?
+  contact1              String?
+  gsm2                  String?
+  contact2              String?
+  gsm3                  String?
+  contact3              String?
+  businessGroup         String?
+  color                 Color                  @default(gray)
   status                Status?
   authorizationDocument AuthorizationDocument?
   vote                  Vote?
   authorities           String?
-  salesRepresentative String?
+  salesRepresentative   String?
   note                  String?
 
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
@@ -162,6 +162,25 @@ enum Via {
   sms      @map("SMS")
 }
 
+model Feedback {
+  id          String   @id @default(cuid())
+  version     String
+  subjectType String?
+  subjectId   String?
+  feedback    String?
+  like        Boolean?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([version])
+  @@index([subjectType, subjectId]) // query all feedback for a specific thing
+  @@index([createdAt])
+}
+
 model User {
   id            String    @id
   name          String //@db.Text
@@ -180,9 +199,10 @@ model User {
   audits AuditLog[]
 
   role       String?
-  banned     Boolean?  @default(false)
+  banned     Boolean?   @default(false)
   banReason  String?
   banExpires DateTime?
+  feedbacks  Feedback[]
 
   @@unique([email])
   @@map("user")

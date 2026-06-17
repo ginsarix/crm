@@ -205,11 +205,13 @@ export function CustomerCardsPageClient() {
   const selectedIds = Object.keys(rowSelection);
 
   const bulkActionsBar = (
-    <BulkActionsBar count={selectedIds.length} onClear={() => setRowSelection({})}>
+    <BulkActionsBar
+      count={selectedIds.length}
+      onClear={() => setRowSelection({})}
+    >
       <ColorControl
         color={
-          (bulkColor ??
-            'all') as
+          (bulkColor ?? 'all') as
             | 'green'
             | 'blue'
             | 'orange'

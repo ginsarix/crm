@@ -4,8 +4,8 @@ import type { BusinessGroup } from 'generated/prisma';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { BulkActionsBar } from '~/app/panel/_components/bulk-actions-bar';
 import { DataTable } from '~/app/_components/data-table';
+import { BulkActionsBar } from '~/app/panel/_components/bulk-actions-bar';
 import { Button } from '~/components/ui/button';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import {
@@ -45,7 +45,10 @@ export default function BusinessGroupsTable() {
   const selectedIds = Object.keys(rowSelection);
 
   const bulkActionsBar = (
-    <BulkActionsBar count={selectedIds.length} onClear={() => setRowSelection({})}>
+    <BulkActionsBar
+      count={selectedIds.length}
+      onClear={() => setRowSelection({})}
+    >
       <Button
         onClick={() => setDeleteConfirmOpen(true)}
         size="sm"

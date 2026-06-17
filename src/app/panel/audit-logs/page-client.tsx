@@ -32,8 +32,8 @@ import { Spinner } from '~/components/ui/spinner';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import type { RouterInputs } from '~/trpc/types';
-import { BulkActionsBar } from '../_components/bulk-actions-bar';
 import { DataTable } from '../../_components/data-table';
+import { BulkActionsBar } from '../_components/bulk-actions-bar';
 import { createColumns } from './columns';
 import { FilterControls } from './filter-controls';
 import { ViewAuditLogDialog } from './view-dialog';
@@ -80,7 +80,10 @@ export function AuditLogsPageClient() {
   const selectedIds = Object.keys(rowSelection);
 
   const bulkActionsBar = (
-    <BulkActionsBar count={selectedIds.length} onClear={() => setRowSelection({})}>
+    <BulkActionsBar
+      count={selectedIds.length}
+      onClear={() => setRowSelection({})}
+    >
       <Button
         onClick={() => setDeleteConfirmOpen(true)}
         size="sm"

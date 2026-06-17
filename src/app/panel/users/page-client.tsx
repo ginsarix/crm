@@ -23,8 +23,8 @@ import {
 import { Spinner } from '~/components/ui/spinner';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
-import { BulkActionsBar } from '../_components/bulk-actions-bar';
 import { DataTable } from '../../_components/data-table';
+import { BulkActionsBar } from '../_components/bulk-actions-bar';
 import { createColumns } from './columns';
 import { CreateUserDialog } from './create-dialog';
 import { FilterControls } from './filter-controls';
@@ -84,7 +84,10 @@ export function UsersPageClient() {
   const selectedIds = Object.keys(rowSelection);
 
   const bulkActionsBar = (
-    <BulkActionsBar count={selectedIds.length} onClear={() => setRowSelection({})}>
+    <BulkActionsBar
+      count={selectedIds.length}
+      onClear={() => setRowSelection({})}
+    >
       <Button
         onClick={() => setDeleteConfirmOpen(true)}
         size="sm"

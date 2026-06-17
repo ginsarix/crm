@@ -29,8 +29,8 @@ import type { RouterOutputs } from '~/trpc/types';
 type VisitWithCustomerCard = RouterOutputs['visit']['get']['data'][number];
 type VisitSearchScope = 'all' | keyof typeof columnMap.visit;
 
-import { BulkActionsBar } from '../_components/bulk-actions-bar';
 import { DataTable } from '../../_components/data-table';
+import { BulkActionsBar } from '../_components/bulk-actions-bar';
 import { createColumns } from './columns';
 import { CreateVisitDialog } from './create-dialog';
 import { FilterControls } from './filter-controls';

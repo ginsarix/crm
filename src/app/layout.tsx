@@ -45,7 +45,7 @@ export default async function RootLayout({
         >
           <TRPCReactProvider>
             <ViewTransition>
-              <span>Site Bakım Modundadır</span>
+              <span>{children}</span>
             </ViewTransition>
           </TRPCReactProvider>
         </ThemeProvider>

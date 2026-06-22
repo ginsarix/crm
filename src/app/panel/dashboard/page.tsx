@@ -4,8 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { auditAction } from '~/lib/enum-map';
 import { api } from '~/trpc/server';
 import { BusinessGroupAlerts } from '../_components/business-group-alerts';
+import { auth } from '~/server/better-auth';
+import { headers } from 'next/headers';
 
 export default async function DashboardPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  const isAdmin = session?.user.role === 'admin';
+
   const [
     customerTotal,
     colorCounts,
@@ -13,6 +18,7 @@ export default async function DashboardPage() {
     latestAudit,
     businessGroupStats,
     visitRanking,
+    graySubtractionBusinessGroupCount
   ] = await Promise.all([
     api.customerCard.getTotal(),
     api.customerCard.getColorCounts(),
@@ -20,6 +26,7 @@ export default async function DashboardPage() {
     api.auditLog.getLatest(),
     api.businessGroup.getStats(),
     api.visit.getRankedVisitsBySalesRepresentative(),
+    isAdmin ? api.businessGroup.getGraySubtractionBusinessGroupCount() : Promise.resolve(null)
   ]);
 
   return (
@@ -39,7 +46,7 @@ export default async function DashboardPage() {
             <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
             <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className={`grid gap-3 ${!graySubtractionBusinessGroupCount ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
             <Link className="h-full" href="/panel/customer-cards">
               <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
                 <CardHeader className="pt-4 pb-1">
@@ -54,6 +61,20 @@ export default async function DashboardPage() {
                 </CardContent>
               </Card>
             </Link>
+
+            {graySubtractionBusinessGroupCount &&
+              <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
+                <CardHeader className="pt-4 pb-1">
+                  <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
+                    {graySubtractionBusinessGroupCount.graySubtractionBusinessGroup}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-4">
+                  <div className="font-mono font-semibold text-3xl tabular-nums">
+                    {graySubtractionBusinessGroupCount.count}
+                  </div>
+                </CardContent>
+              </Card>}
 
             <Link className="h-full" href="/panel/visits">
               <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">

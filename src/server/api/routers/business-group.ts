@@ -6,6 +6,8 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from '../trpc';
+import { getDashboardConfig } from '~/server/lib/get-dashboard-config';
+import { defaultGraySubtractionBusinessGroup } from '~/constants/dashboard-config';
 
 export const businessGroupRouter = createTRPCRouter({
   getTotal: protectedProcedure.query(async ({ ctx }) => {
@@ -100,6 +102,26 @@ export const businessGroupRouter = createTRPCRouter({
       groups: all.sort(createLocaleSorter('name')),
     };
   }),
+
+  getGraySubtractionBusinessGroupCount: adminProcedure
+    .query(async ({ ctx }) => {
+      const config = await getDashboardConfig();
+
+      if (!config?.graySubtractionBusinessGroup) {
+        await ctx.db.dashboardConfig.create({ data: { id: 'singleton', graySubtractionBusinessGroup: defaultGraySubtractionBusinessGroup } });
+      }
+
+      const graySubtractionBusinessGroup = config?.graySubtractionBusinessGroup ?? defaultGraySubtractionBusinessGroup;
+
+      const customerCardCountSpecialBusinessGroup =
+        ctx.db.customerCard.count({
+          where: {
+            businessGroup: graySubtractionBusinessGroup,
+          }
+        });
+
+      return { count: customerCardCountSpecialBusinessGroup, graySubtractionBusinessGroup };
+    }),
 
   get: protectedProcedure.query(async ({ ctx }) => {
     const isAdmin = ctx.session.user.role === 'admin';

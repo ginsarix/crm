@@ -438,18 +438,35 @@ export const customerCardRouter = createTRPCRouter({
   getColorCounts: protectedProcedure.query(async ({ ctx }) => {
     const isAdmin = ctx.session.user.role === 'admin';
     let where: Prisma.CustomerCardWhereInput = {};
-    if (!isAdmin) {
-      const assignedGroups = await ctx.db.businessGroup.findMany({
-        where: { assignedUsers: { some: { id: ctx.session.user.id } } },
-        select: { name: true },
-      });
+
+    const [assignedGroups, dashboardConfig] = await Promise.all([
+      isAdmin
+        ? null
+        : ctx.db.businessGroup.findMany({
+            where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+            select: { name: true },
+          }),
+      isAdmin
+        ? ctx.db.dashboardConfig.findUnique({ where: { id: 'singleton' } })
+        : null,
+    ]);
+
+    if (!isAdmin && assignedGroups) {
       where = { businessGroup: { in: assignedGroups.map((g) => g.name) } };
     }
-    const rows = await ctx.db.customerCard.groupBy({
-      by: ['color'],
-      _count: true,
-      where,
-    });
+
+    const graySubtractGroup = isAdmin
+      ? dashboardConfig?.graySubtractionBusinessGroup
+      : null;
+
+    const [rows, graySubtractCount] = await Promise.all([
+      ctx.db.customerCard.groupBy({ by: ['color'], _count: true, where }),
+      graySubtractGroup
+        ? ctx.db.customerCard.count({
+            where: { businessGroup: graySubtractGroup },
+          })
+        : null,
+    ]);
 
     const counts = {
       green: 0,
@@ -460,6 +477,7 @@ export const customerCardRouter = createTRPCRouter({
       gray: 0,
     };
     for (const row of rows) counts[row.color] += row._count;
+    if (graySubtractCount) counts.gray -= graySubtractCount;
     return counts;
   }),
 });

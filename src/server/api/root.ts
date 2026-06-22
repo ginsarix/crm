@@ -6,6 +6,7 @@ import { salesRepresentativeRouter } from '~/server/api/routers/sales-representa
 import { userRouter } from '~/server/api/routers/user';
 import { visitRouter } from '~/server/api/routers/visit';
 import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc';
+import { dashboardConfigRouter } from './routers/dashboard-config';
 
 /**
  * This is the primary router for your server.
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   visit: visitRouter,
   salesRepresentative: salesRepresentativeRouter,
+  dashboardConfig: dashboardConfigRouter
 });
 
 // export type definition of API

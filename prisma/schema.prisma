@@ -93,6 +93,13 @@ model BusinessGroup {
   assignedUsers User[]
 }
 
+model DashboardConfig {
+  id                           String  @id @default("singleton")
+  graySubtractionBusinessGroup String?
+
+  updatedAt DateTime @updatedAt
+}
+
 model SalesRepresentative {
   id        String   @id @default(cuid())
   name      String

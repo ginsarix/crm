@@ -2,14 +2,40 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { auditAction } from '~/lib/enum-map';
+import { createLocaleSorter } from '~/lib/utils';
 import { api } from '~/trpc/server';
 import { BusinessGroupAlerts } from '../_components/business-group-alerts';
+import { BusinessGroupFilter } from '../_components/business-group-filter';
 import { auth } from '~/server/better-auth';
 import { headers } from 'next/headers';
 
-export default async function DashboardPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+const ALL_KEY = '__all__';
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const [session, resolvedParams] = await Promise.all([
+    auth.api.getSession({ headers: await headers() }),
+    searchParams,
+  ]);
   const isAdmin = session?.user.role === 'admin';
+
+  const allBusinessGroups = isAdmin ? await api.businessGroup.get() : [];
+
+  let selectedGroup: string | null = null;
+  if (isAdmin) {
+    const bgParam = typeof resolvedParams.bg === 'string' ? resolvedParams.bg : undefined;
+    if (bgParam === ALL_KEY) {
+      selectedGroup = null;
+    } else if (bgParam) {
+      selectedGroup = bgParam;
+    } else {
+      const sorted = [...allBusinessGroups].sort(createLocaleSorter('name'));
+      selectedGroup = sorted.find((g) => g.name.startsWith('01'))?.name ?? null;
+    }
+  }
 
   const [
     customerTotal,
@@ -20,13 +46,15 @@ export default async function DashboardPage() {
     visitRanking,
     graySubtractionBusinessGroupCount
   ] = await Promise.all([
-    api.customerCard.getTotal(),
-    api.customerCard.getColorCounts(),
-    api.visit.getTotal(),
+    api.customerCard.getTotal({ businessGroup: selectedGroup ?? undefined }),
+    api.customerCard.getColorCounts({ businessGroup: selectedGroup ?? undefined }),
+    api.visit.getTotal({ businessGroup: selectedGroup ?? undefined }),
     api.auditLog.getLatest(),
-    api.businessGroup.getStats(),
-    api.visit.getRankedVisitsBySalesRepresentative(),
-    isAdmin ? api.businessGroup.getGraySubtractionBusinessGroupCount() : Promise.resolve(null)
+    api.businessGroup.getStats({ businessGroup: selectedGroup ?? undefined }),
+    api.visit.getRankedVisitsBySalesRepresentative({ businessGroup: selectedGroup ?? undefined }),
+    isAdmin && selectedGroup === null
+      ? api.businessGroup.getGraySubtractionBusinessGroupCount()
+      : Promise.resolve(null)
   ]);
 
   return (
@@ -42,6 +70,15 @@ export default async function DashboardPage() {
               src="/images/biz-gelecegiz-banner.png"
             />
           </div>
+          {isAdmin && (
+            <div className="mb-4">
+              <p className="mb-1.5 text-muted-foreground text-sm">Meslek Grubu</p>
+              <BusinessGroupFilter
+                groups={allBusinessGroups}
+                selected={selectedGroup}
+              />
+            </div>
+          )}
           <div className="mb-6">
             <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
             <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>

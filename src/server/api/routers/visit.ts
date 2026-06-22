@@ -39,28 +39,55 @@ const sortableFields = [
 type SortableField = (typeof sortableFields)[number];
 
 export const visitRouter = createTRPCRouter({
-  getTotal: protectedProcedure.query(async ({ ctx }) => {
-    const isAdmin = ctx.session.user.role === 'admin';
-    if (isAdmin) return ctx.db.visit.count();
-    const assignedGroups = await ctx.db.businessGroup.findMany({
-      where: { assignedUsers: { some: { id: ctx.session.user.id } } },
-      select: { name: true },
-    });
-    return ctx.db.visit.count({
-      where: {
-        customerCard: {
-          businessGroup: { in: assignedGroups.map((g) => g.name) },
+  getTotal: protectedProcedure
+    .input(z.object({ businessGroup: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const isAdmin = ctx.session.user.role === 'admin';
+      if (isAdmin) {
+        return ctx.db.visit.count({
+          where: input?.businessGroup
+            ? { customerCard: { businessGroup: input.businessGroup } }
+            : {},
+        });
+      }
+      const assignedGroups = await ctx.db.businessGroup.findMany({
+        where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+        select: { name: true },
+      });
+      return ctx.db.visit.count({
+        where: {
+          customerCard: {
+            businessGroup: { in: assignedGroups.map((g) => g.name) },
+          },
         },
-      },
-    });
-  }),
-  getRankedVisitsBySalesRepresentative: protectedProcedure.query(
-    async ({ ctx }) => {
+      });
+    }),
+  getRankedVisitsBySalesRepresentative: protectedProcedure
+    .input(z.object({ businessGroup: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
       const isAdmin = ctx.session.user.role === 'admin';
 
       type RawRow = { salesRepresentative: string; visitCount: bigint };
 
       if (isAdmin) {
+        if (input?.businessGroup) {
+          const rows = await ctx.db.$queryRaw<RawRow[]>(
+            Prisma.sql`
+              SELECT cc."salesRepresentative", COUNT(v.id)::int AS "visitCount"
+              FROM "Visit" v
+              JOIN "CustomerCard" cc ON v."customerCardId" = cc.id
+              WHERE cc."salesRepresentative" IS NOT NULL AND cc."salesRepresentative" <> ''
+                AND cc."businessGroup" = ${input.businessGroup}
+              GROUP BY cc."salesRepresentative"
+              ORDER BY "visitCount" DESC
+              LIMIT 5
+            `,
+          );
+          return rows.map((r) => ({
+            salesRepresentative: r.salesRepresentative,
+            visitCount: Number(r.visitCount),
+          }));
+        }
         const rows = await ctx.db.$queryRaw<RawRow[]>`
           SELECT cc."salesRepresentative", COUNT(v.id)::int AS "visitCount"
           FROM "Visit" v
@@ -99,8 +126,7 @@ export const visitRouter = createTRPCRouter({
         salesRepresentative: r.salesRepresentative,
         visitCount: Number(r.visitCount),
       }));
-    },
-  ),
+    }),
   get: protectedProcedure
     .input(
       z.object({

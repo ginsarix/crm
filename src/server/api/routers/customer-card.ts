@@ -95,17 +95,23 @@ const sortableFields = [
 type SortableField = (typeof sortableFields)[number];
 
 export const customerCardRouter = createTRPCRouter({
-  getTotal: protectedProcedure.query(async ({ ctx }) => {
-    const isAdmin = ctx.session.user.role === 'admin';
-    if (isAdmin) return ctx.db.customerCard.count();
-    const assignedGroups = await ctx.db.businessGroup.findMany({
-      where: { assignedUsers: { some: { id: ctx.session.user.id } } },
-      select: { name: true },
-    });
-    return ctx.db.customerCard.count({
-      where: { businessGroup: { in: assignedGroups.map((g) => g.name) } },
-    });
-  }),
+  getTotal: protectedProcedure
+    .input(z.object({ businessGroup: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const isAdmin = ctx.session.user.role === 'admin';
+      if (isAdmin) {
+        return ctx.db.customerCard.count({
+          where: input?.businessGroup ? { businessGroup: input.businessGroup } : {},
+        });
+      }
+      const assignedGroups = await ctx.db.businessGroup.findMany({
+        where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+        select: { name: true },
+      });
+      return ctx.db.customerCard.count({
+        where: { businessGroup: { in: assignedGroups.map((g) => g.name) } },
+      });
+    }),
   get: protectedProcedure
     .input(
       z.object({
@@ -435,9 +441,13 @@ export const customerCardRouter = createTRPCRouter({
       }
     }),
 
-  getColorCounts: protectedProcedure.query(async ({ ctx }) => {
+  getColorCounts: protectedProcedure
+    .input(z.object({ businessGroup: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
     const isAdmin = ctx.session.user.role === 'admin';
     let where: Prisma.CustomerCardWhereInput = {};
+
+    const filterByGroup = input?.businessGroup;
 
     const [assignedGroups, dashboardConfig] = await Promise.all([
       isAdmin
@@ -446,16 +456,18 @@ export const customerCardRouter = createTRPCRouter({
             where: { assignedUsers: { some: { id: ctx.session.user.id } } },
             select: { name: true },
           }),
-      isAdmin
+      isAdmin && !filterByGroup
         ? ctx.db.dashboardConfig.findUnique({ where: { id: 'singleton' } })
         : null,
     ]);
 
     if (!isAdmin && assignedGroups) {
       where = { businessGroup: { in: assignedGroups.map((g) => g.name) } };
+    } else if (isAdmin && filterByGroup) {
+      where = { businessGroup: filterByGroup };
     }
 
-    const graySubtractGroup = isAdmin
+    const graySubtractGroup = isAdmin && !filterByGroup
       ? dashboardConfig?.graySubtractionBusinessGroup
       : null;
 

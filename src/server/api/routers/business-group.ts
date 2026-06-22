@@ -18,7 +18,9 @@ export const businessGroupRouter = createTRPCRouter({
     });
   }),
 
-  getStats: protectedProcedure.query(async ({ ctx }) => {
+  getStats: protectedProcedure
+    .input(z.object({ businessGroup: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
     const isAdmin = ctx.session.user.role === 'admin';
 
     let allowedGroups: string[] | null = null;
@@ -34,7 +36,11 @@ export const businessGroupRouter = createTRPCRouter({
       by: ['businessGroup', 'color'],
       _count: true,
       where: {
-        businessGroup: allowedGroups ? { in: allowedGroups } : { not: null },
+        businessGroup: input?.businessGroup
+          ? input.businessGroup
+          : allowedGroups
+            ? { in: allowedGroups }
+            : { not: null },
       },
     });
 

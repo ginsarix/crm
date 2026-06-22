@@ -4,6 +4,7 @@ import { createAuthMiddleware } from 'better-auth/api';
 import { nextCookies } from 'better-auth/next-js';
 import { admin } from 'better-auth/plugins';
 import { env } from '~/env';
+import { auditLogEmitter } from '~/server/audit-log-emitter';
 import { db } from '~/server/db';
 import { getVerificationEmailHtml, sendEmail } from './email';
 
@@ -29,6 +30,7 @@ async function createAuthAuditLog(
         details,
       },
     });
+    auditLogEmitter.emit('new-log');
   } catch (err) {
     console.error('Auth audit log failed:', err);
   }

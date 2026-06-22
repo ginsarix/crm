@@ -7,7 +7,7 @@ import type {
 } from '@tanstack/react-table';
 import type { AuditLog, User } from 'generated/prisma';
 import { Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
@@ -19,7 +19,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
+import type { HeartbeatHandle } from '~/components/ui/heartbeat-indicator';
+import { HeartbeatIndicator } from '~/components/ui/heartbeat-indicator';
 import { Spinner } from '~/components/ui/spinner';
+import { useAuditLogStream } from '~/hooks/use-audit-log-stream';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
@@ -87,6 +90,17 @@ export function AuditLogsPageClient() {
 
   const utils = api.useUtils();
 
+  const [newLogCount, setNewLogCount] = useState(0);
+  const heartbeatRef = useRef<HeartbeatHandle>(null);
+
+  const { connected } = useAuditLogStream({
+    onNewLog: () => {
+      setNewLogCount((c) => c + 1);
+      utils.auditLog.get.invalidate();
+      heartbeatRef.current?.spike();
+    },
+  });
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
   useEffect(() => {
     setRowSelection({});
@@ -119,9 +133,17 @@ export function AuditLogsPageClient() {
         </div>
         <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
-            <CardTitle className="mr-auto">Denetim Kayıtları</CardTitle>
-            <div className="text-muted-foreground text-sm">
-              {data?.pagination?.totalItems ?? 0} kayıt
+            <CardTitle className="mr-auto flex items-center gap-2">
+              Denetim Kayıtları
+              <HeartbeatIndicator connected={connected} ref={heartbeatRef} />
+            </CardTitle>
+            <div className="text-right text-muted-foreground text-sm">
+              <div>{data?.pagination?.totalItems ?? 0} kayıt</div>
+              {newLogCount > 0 && (
+                <div className="text-green-500 text-xs">
+                  Sayfa açıldığından beri {newLogCount} kayıt geldi
+                </div>
+              )}
             </div>
           </CardHeader>
         </Card>

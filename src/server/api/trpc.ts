@@ -11,7 +11,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import type { PrismaClient } from 'generated/prisma';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
-
+import { auditLogEmitter } from '~/server/audit-log-emitter';
 import { auth } from '~/server/better-auth';
 import { db } from '~/server/db';
 
@@ -124,6 +124,7 @@ export async function createAuditLog(
         details,
       },
     });
+    auditLogEmitter.emit('new-log');
   } catch (error) {
     console.error('Audit log failed:', error);
   }

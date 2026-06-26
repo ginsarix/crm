@@ -52,6 +52,7 @@ export function VisitsPageClient() {
     'phone' | 'inPerson' | 'email' | 'sms' | 'all'
   >('all');
   const [searchScope, setSearchScope] = useState<VisitSearchScope>('all');
+  const [salesRepresentativeId, setSalesRepresentativeId] = useState('');
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
@@ -82,6 +83,7 @@ export function VisitsPageClient() {
       search,
       via,
       searchScope,
+      salesRepresentativeId: salesRepresentativeId || undefined,
     },
     sorting,
   });
@@ -143,7 +145,9 @@ export function VisitsPageClient() {
           <FilterControls
             onSearch={setSearch}
             onSearchScope={setSearchScope}
+            onSalesRepresentativeId={setSalesRepresentativeId}
             onVia={setVia}
+            salesRepresentativeId={salesRepresentativeId}
             search={search}
             searchScope={searchScope}
             via={via}

@@ -56,6 +56,8 @@ export function CreateVisitDialog() {
     },
   });
 
+  const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
+
   const {
     register,
     handleSubmit,
@@ -67,6 +69,7 @@ export function CreateVisitDialog() {
     mode: 'onChange',
     defaultValues: {
       via: undefined,
+      salesRepresentativeId: undefined,
     },
     shouldFocusError: false,
   });
@@ -141,6 +144,30 @@ export function CreateVisitDialog() {
                 {errors.customerCardId.message}
               </p>
             )}
+          </div>
+
+          {/* Sales Representative */}
+          <div className="space-y-2">
+            <Label htmlFor="salesRepresentativeId">Satış Temsilcisi</Label>
+            <Controller
+              control={control}
+              name="salesRepresentativeId"
+              render={({ field }) => (
+                <Combobox
+                  className="w-full"
+                  id="salesRepresentativeId"
+                  label="Satış temsilcisi seçin"
+                  onChange={field.onChange}
+                  options={
+                    salesRepresentatives?.map((sr) => ({
+                      key: sr.id,
+                      label: sr.name,
+                    })) ?? []
+                  }
+                  selectedKey={field.value ?? ''}
+                />
+              )}
+            />
           </div>
 
           {/* Date and Time */}

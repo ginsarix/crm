@@ -9,6 +9,7 @@ import {
   InputGroupInput,
 } from '~/components/ui/input-group';
 import { columnMap } from '~/lib/column-map';
+import { api } from '~/trpc/react';
 import ViaControl from './via-control';
 
 type VisitSearchScope = 'all' | keyof typeof columnMap.visit;
@@ -17,9 +18,11 @@ export function FilterControls({
   search,
   via,
   searchScope,
+  salesRepresentativeId,
   onSearch,
   onVia,
   onSearchScope,
+  onSalesRepresentativeId,
 }: {
   search: string;
   onSearch: (search: string) => void;
@@ -27,7 +30,10 @@ export function FilterControls({
   onVia: (via: 'phone' | 'inPerson' | 'email' | 'sms' | 'all') => void;
   searchScope: VisitSearchScope;
   onSearchScope: (searchScope: VisitSearchScope) => void;
+  salesRepresentativeId: string;
+  onSalesRepresentativeId: (id: string) => void;
 }) {
+  const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
   const comboboxOptions = [
     { key: 'all', label: 'Tümü' },
     ...Object.entries(columnMap.visit)
@@ -70,8 +76,21 @@ export function FilterControls({
           selectedKey={searchScope}
         />
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <ViaControl id="via" includeAll setVia={onVia} via={via} />
+        <Combobox
+          className="sm:w-56"
+          label="Satış Temsilcisi"
+          onChange={onSalesRepresentativeId}
+          options={[
+            { key: '', label: 'Tümü' },
+            ...(salesRepresentatives?.map((sr) => ({
+              key: sr.id,
+              label: sr.name,
+            })) ?? []),
+          ]}
+          selectedKey={salesRepresentativeId}
+        />
       </CardContent>
     </Card>
   );

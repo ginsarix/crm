@@ -14,6 +14,7 @@ const filterSchema = z.object({
   via: z.enum(['phone', 'inPerson', 'email', 'sms', 'all']).default('all'),
   searchScope: z.enum(['all', ...Object.keys(columnMap.visit)]).default('all'),
   customerCardId: z.string().optional(),
+  salesRepresentativeId: z.string().optional(),
 });
 
 const sortingSchema = z.object({
@@ -181,6 +182,11 @@ export const visitRouter = createTRPCRouter({
         whereClause.customerCardId = input.filter.customerCardId;
       }
 
+      // Filter by salesRepresentativeId if provided
+      if (input.filter?.salesRepresentativeId) {
+        whereClause.salesRepresentativeId = input.filter.salesRepresentativeId;
+      }
+
       // Build orderBy clause
       const orderBy: Prisma.VisitOrderByWithRelationInput[] = [];
 
@@ -221,6 +227,12 @@ export const visitRouter = createTRPCRouter({
                 gsm1: true,
               },
             },
+            salesRepresentative: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         }),
       ]);
@@ -248,12 +260,23 @@ export const visitRouter = createTRPCRouter({
             note: input.note,
             customerCard: { connect: { id: input.customerCardId } },
             createdBy: { connect: { id: ctx.session.user.id } },
+            ...(input.salesRepresentativeId && {
+              salesRepresentative: {
+                connect: { id: input.salesRepresentativeId },
+              },
+            }),
           },
           include: {
             customerCard: {
               select: {
                 name: true,
                 gsm1: true,
+              },
+            },
+            salesRepresentative: {
+              select: {
+                id: true,
+                name: true,
               },
             },
           },
@@ -288,19 +311,28 @@ export const visitRouter = createTRPCRouter({
   update: protectedProcedure
     .input(VisitCreateSchema.extend({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { id, customerCardId, ...data } = input;
+      const { id, customerCardId, salesRepresentativeId, ...data } = input;
       try {
         const result = await ctx.db.visit.update({
           where: { id },
           data: {
             ...data,
             customerCard: { connect: { id: customerCardId } },
+            salesRepresentative: salesRepresentativeId
+              ? { connect: { id: salesRepresentativeId } }
+              : { disconnect: true },
           },
           include: {
             customerCard: {
               select: {
                 name: true,
                 gsm1: true,
+              },
+            },
+            salesRepresentative: {
+              select: {
+                id: true,
+                name: true,
               },
             },
           },

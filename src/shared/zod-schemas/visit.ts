@@ -8,6 +8,7 @@ export const VisitCreateSchema = z.object({
   via: z.enum(['phone', 'inPerson', 'email', 'sms']).optional(),
   note: z.string().optional(),
   customerCardId: z.string().min(1, 'Müşteri kartı zorunludur'),
+  salesRepresentativeId: z.string().optional(),
 });
 
 export const VisitFindManySelectSchema = z.object({

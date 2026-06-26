@@ -105,6 +105,8 @@ model SalesRepresentative {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  visits Visit[]
 }
 
 enum Color {
@@ -155,11 +157,15 @@ model Visit {
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdById String?
 
+  salesRepresentative   SalesRepresentative? @relation(fields: [salesRepresentativeId], references: [id], onDelete: SetNull)
+  salesRepresentativeId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([customerCardId])
   @@index([date])
+  @@index([salesRepresentativeId])
 }
 
 enum Via {

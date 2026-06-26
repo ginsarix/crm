@@ -75,6 +75,8 @@ export function ViewVisitDialog({
     },
   });
 
+  const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
+
   // Reset modes when dialog closes
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
@@ -91,6 +93,7 @@ export function ViewVisitDialog({
       via: visit.via ?? undefined,
       note: visit.note ?? '',
       customerCardId: visit.customerCardId,
+      salesRepresentativeId: visit.salesRepresentativeId ?? undefined,
     };
   };
 
@@ -279,6 +282,30 @@ export function ViewVisitDialog({
               )}
             </div>
 
+            {/* Sales Representative */}
+            <div className="space-y-2">
+              <Label htmlFor="salesRepresentativeId">Satış Temsilcisi</Label>
+              <Controller
+                control={control}
+                name="salesRepresentativeId"
+                render={({ field }) => (
+                  <Combobox
+                    className="w-full"
+                    id="salesRepresentativeId"
+                    label="Satış temsilcisi seçin"
+                    onChange={field.onChange}
+                    options={
+                      salesRepresentatives?.map((sr) => ({
+                        key: sr.id,
+                        label: sr.name,
+                      })) ?? []
+                    }
+                    selectedKey={field.value ?? ''}
+                  />
+                )}
+              />
+            </div>
+
             {/* Date and Time */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -442,6 +469,13 @@ export function ViewVisitDialog({
                 {visit.via
                   ? VIA_OPTIONS.find((opt) => opt.value === visit.via)?.label
                   : '-'}
+              </p>
+            </div>
+
+            <div>
+              <Label className="text-muted-foreground">Satış Temsilcisi</Label>
+              <p className="text-sm">
+                {visit.salesRepresentative?.name || '-'}
               </p>
             </div>
 

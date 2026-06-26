@@ -15,6 +15,23 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-19',
+    version: '1.19',
+    date: '26 Haziran 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Ziyaretlerde satış temsilcisi',
+        desc: 'Ziyaret oluşturma ve düzenleme formlarına satış temsilcisi alanı eklendi; ziyaret listesi üzerinden satış temsilcisine göre filtreleme de yapılabilir.',
+      },
+      {
+        type: 'fix',
+        title: 'Tablolarda satır yeniden sıralanması ve sayfa titremesi giderildi',
+        desc: 'Düzenleme işlemlerinden sonra satırların yer değiştirmesi ve filtre geçişlerinde oluşan yükleme yanıp sönmesi düzeltildi.',
+      },
+    ],
+  },
+  {
     id: 'v1-18',
     version: '1.18',
     date: '17 Haziran 2026',

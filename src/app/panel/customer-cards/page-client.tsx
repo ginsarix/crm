@@ -1,5 +1,6 @@
 'use client';
 
+import { keepPreviousData } from '@tanstack/react-query';
 import type {
   PaginationState,
   RowSelectionState,
@@ -136,6 +137,27 @@ export function CustomerCardsPageClient() {
     setRowSelection({});
   }, [pagination.pageIndex, pagination.pageSize]);
 
+  // Reset to page 0 when any filter changes. This effect fires after the URL update is
+  // reflected in searchParams, preventing a query with page 0 + stale filter.
+  const filterKey = [
+    color,
+    urlSearch,
+    searchScope,
+    businessGroup,
+    salesRepresentative,
+    district,
+    status,
+    authorizationDocument,
+    vote,
+  ].join('|');
+  const prevFilterKeyRef = useRef(filterKey);
+  useEffect(() => {
+    if (filterKey !== prevFilterKeyRef.current) {
+      prevFilterKeyRef.current = filterKey;
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    }
+  }, [filterKey]);
+
   const bulkUpdateColorMutation = api.customerCard.bulkUpdateColor.useMutation({
     onSuccess: (result) => {
       utils.customerCard.get.invalidate();
@@ -193,7 +215,7 @@ export function CustomerCardsPageClient() {
       vote,
     },
     sorting,
-  });
+  }, { placeholderData: keepPreviousData });
 
   const handleViewCustomerCard = (customerCard: CustomerCard) => {
     setSelectedCustomerCard(customerCard);
@@ -336,9 +358,18 @@ export function CustomerCardsPageClient() {
           <ViewCustomerCardDialog
             customerCard={selectedCustomerCard}
             onOpenChange={setViewDialogOpen}
-            onUpdate={(updatedCustomerCard) =>
-              setSelectedCustomerCard(updatedCustomerCard)
-            }
+            onUpdate={(updatedCustomerCard) => {
+              setSelectedCustomerCard(updatedCustomerCard);
+              utils.customerCard.get.setData(
+                {
+                  page: pagination.pageIndex + 1,
+                  itemsPerPage: pagination.pageSize,
+                  filter: { search: urlSearch, color, searchScope, businessGroup, salesRepresentative, district, status, authorizationDocument, vote },
+                  sorting,
+                },
+                (old) => old ? { ...old, data: old.data.map((c) => c.id === updatedCustomerCard.id ? updatedCustomerCard : c) } : old,
+              );
+            }}
             open={viewDialogOpen}
           />
         )}

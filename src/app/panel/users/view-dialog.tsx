@@ -99,7 +99,7 @@ export function ViewUserDialog({
 
   const updateMutation = api.user.update.useMutation({
     onSuccess: (updatedUser) => {
-      utils.user.get.invalidate();
+      utils.user.get.invalidate(undefined, { refetchType: 'none' });
       toast.success('Kullanıcı başarıyla güncellendi');
       onUpdate(updatedUser);
       handleOpenChange(false);

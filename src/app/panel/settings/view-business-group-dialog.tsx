@@ -70,7 +70,7 @@ export function ViewBusinessGroupDialog({
 
   const updateMutation = api.businessGroup.update.useMutation({
     onSuccess: (updatedBusinessGroup) => {
-      utils.businessGroup.get.invalidate();
+      utils.businessGroup.get.invalidate(undefined, { refetchType: 'none' });
       toast.success('Meslek grubu başarıyla güncellendi');
       onUpdate(updatedBusinessGroup);
       handleOpenChange(false);

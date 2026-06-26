@@ -91,9 +91,13 @@ export default function SaleRepresentativesTable() {
       {selectedSalesRepresentative && (
         <ViewSaleRepresentativeDialog
           onOpenChange={setViewDialogOpen}
-          onUpdate={(updatedSalesRepresentative) =>
-            setSelectedSalesRepresentative(updatedSalesRepresentative)
-          }
+          onUpdate={(updatedSalesRepresentative) => {
+            setSelectedSalesRepresentative(updatedSalesRepresentative);
+            utils.salesRepresentative.get.setData(
+              undefined,
+              (old) => old ? old.map((s) => s.id === updatedSalesRepresentative.id ? updatedSalesRepresentative : s) : old,
+            );
+          }}
           open={viewDialogOpen}
           salesRepresentative={selectedSalesRepresentative}
         />

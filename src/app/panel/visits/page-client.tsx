@@ -188,7 +188,18 @@ export function VisitsPageClient() {
         {selectedVisit && (
           <ViewVisitDialog
             onOpenChange={setViewDialogOpen}
-            onUpdate={(updatedVisit) => setSelectedVisit(updatedVisit)}
+            onUpdate={(updatedVisit) => {
+              setSelectedVisit(updatedVisit);
+              utils.visit.get.setData(
+                {
+                  page: pagination.pageIndex + 1,
+                  itemsPerPage: pagination.pageSize,
+                  filter: { search, via, searchScope, salesRepresentativeId: salesRepresentativeId || undefined },
+                  sorting,
+                },
+                (old) => old ? { ...old, data: old.data.map((v) => v.id === updatedVisit.id ? updatedVisit : v) } : old,
+              );
+            }}
             open={viewDialogOpen}
             visit={selectedVisit}
           />

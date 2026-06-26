@@ -200,22 +200,25 @@ export function CustomerCardsPageClient() {
   const { data: salesRepresentativeOptions } =
     api.salesRepresentative.get.useQuery();
 
-  const { data, isLoading } = api.customerCard.get.useQuery({
-    page: pagination.pageIndex + 1,
-    itemsPerPage: pagination.pageSize,
-    filter: {
-      search: urlSearch,
-      color,
-      searchScope,
-      businessGroup,
-      salesRepresentative,
-      district,
-      status,
-      authorizationDocument,
-      vote,
+  const { data, isLoading } = api.customerCard.get.useQuery(
+    {
+      page: pagination.pageIndex + 1,
+      itemsPerPage: pagination.pageSize,
+      filter: {
+        search: urlSearch,
+        color,
+        searchScope,
+        businessGroup,
+        salesRepresentative,
+        district,
+        status,
+        authorizationDocument,
+        vote,
+      },
+      sorting,
     },
-    sorting,
-  }, { placeholderData: keepPreviousData });
+    { placeholderData: keepPreviousData },
+  );
 
   const handleViewCustomerCard = (customerCard: CustomerCard) => {
     setSelectedCustomerCard(customerCard);
@@ -364,10 +367,30 @@ export function CustomerCardsPageClient() {
                 {
                   page: pagination.pageIndex + 1,
                   itemsPerPage: pagination.pageSize,
-                  filter: { search: urlSearch, color, searchScope, businessGroup, salesRepresentative, district, status, authorizationDocument, vote },
+                  filter: {
+                    search: urlSearch,
+                    color,
+                    searchScope,
+                    businessGroup,
+                    salesRepresentative,
+                    district,
+                    status,
+                    authorizationDocument,
+                    vote,
+                  },
                   sorting,
                 },
-                (old) => old ? { ...old, data: old.data.map((c) => c.id === updatedCustomerCard.id ? updatedCustomerCard : c) } : old,
+                (old) =>
+                  old
+                    ? {
+                        ...old,
+                        data: old.data.map((c) =>
+                          c.id === updatedCustomerCard.id
+                            ? updatedCustomerCard
+                            : c,
+                        ),
+                      }
+                    : old,
               );
             }}
             open={viewDialogOpen}

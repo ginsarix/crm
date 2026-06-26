@@ -26,8 +26,8 @@ export const RELEASES: Release[] = [
       },
       {
         type: 'fix',
-        title: 'Tablolarda satır yeniden sıralanması ve sayfa titremesi giderildi',
-        desc: 'Düzenleme işlemlerinden sonra satırların yer değiştirmesi ve filtre geçişlerinde oluşan yükleme yanıp sönmesi düzeltildi.',
+        title: 'Düzenleme sonrası satır yeniden sıralanması ',
+        desc: 'Tablolarda düzenleme işlemlerinden sonra satırların yer değiştirmesi düzeltildi.',
       },
     ],
   },

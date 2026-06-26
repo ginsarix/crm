@@ -8,6 +8,7 @@ interface GroupStat {
   blueCount: number;
   orangeCount: number;
   yellowCount: number;
+  purpleCount: number;
   grayCount: number;
   greenPercent: number;
   bluePercent: number;
@@ -37,7 +38,7 @@ function GroupRow({ g }: { g: GroupStat }) {
               g.blueCount +
               g.orangeCount +
               g.yellowCount +
-              g.purplePercent +
+              g.purpleCount +
               g.grayCount}{' '}
             /
           </span>
@@ -56,7 +57,7 @@ function GroupRow({ g }: { g: GroupStat }) {
             {g.yellowCount}
           </span>
           <span className="font-mono text-purple-500 tabular-nums">
-            {g.purplePercent}
+            {g.purpleCount}
           </span>
           <span className="font-mono text-gray-500 tabular-nums">
             {g.grayCount}

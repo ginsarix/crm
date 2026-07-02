@@ -24,7 +24,7 @@ export const columnMap = {
     contact2: 'İletişim 2',
     gsm3: 'GSM 3',
     contact3: 'İletişim 3',
-    businessGroup: 'İş Grubu',
+    businessGroup: 'Meslek Grubu',
     color: 'Renk',
     status: 'Durum',
     authorizationDocument: 'Yetki Belge',

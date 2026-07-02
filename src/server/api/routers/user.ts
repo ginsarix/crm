@@ -7,6 +7,7 @@ import {
   UserFindManySelectSchema,
   UserUpdateSchema,
 } from '~/shared/zod-schemas/user';
+import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
 import { adminProcedure, createAuditLog, createTRPCRouter } from '../trpc';
 
 const filterSchema = z.object({
@@ -56,21 +57,21 @@ export const userRouter = createTRPCRouter({
       if (input.filter?.search) {
         const searchValue = input.filter.search;
         const scope = input.filter.searchScope;
+        const fields =
+          scope === 'all'
+            ? searchableFields
+            : searchableFields.includes(scope as SearchableField)
+              ? [scope as SearchableField]
+              : [];
 
-        if (scope === 'all') {
-          // Search across all searchable fields
-          whereClause.OR = searchableFields.map((field) => ({
-            [field]: {
-              contains: searchValue,
-              mode: 'insensitive' as const,
-            },
-          })) as Prisma.UserWhereInput[];
-        } else if (searchableFields.includes(scope as SearchableField)) {
-          // Search in specific field
-          const field = scope as SearchableField;
-          whereClause[field] = {
-            contains: searchValue,
-            mode: 'insensitive' as const,
+        if (fields.length > 0) {
+          whereClause.id = {
+            in: await findTurkishSearchMatchesInTable(
+              ctx.db,
+              'user',
+              fields,
+              searchValue,
+            ),
           };
         }
       }

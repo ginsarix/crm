@@ -1,5 +1,6 @@
-import type { Prisma } from 'generated/prisma';
+import { Prisma } from 'generated/prisma';
 import { z } from 'zod';
+import { findTurkishSearchMatches } from '../lib/turkish-search';
 import {
   adminProcedure,
   createAuditLog,
@@ -50,16 +51,28 @@ export const auditLogRouter = createTRPCRouter({
 
       // Search filter
       if (input.filter?.search) {
-        const searchValue = input.filter.search;
-        whereClause.OR = [
-          { action: { contains: searchValue, mode: 'insensitive' } },
-          { resourceType: { contains: searchValue, mode: 'insensitive' } },
-          { resourceId: { contains: searchValue, mode: 'insensitive' } },
-          { details: { contains: searchValue, mode: 'insensitive' } },
-          { error: { contains: searchValue, mode: 'insensitive' } },
-          { user: { name: { contains: searchValue, mode: 'insensitive' } } },
-          { user: { email: { contains: searchValue, mode: 'insensitive' } } },
-        ];
+        const ownColumns = [
+          'action',
+          'resourceType',
+          'resourceId',
+          'details',
+          'error',
+        ].map((field) => Prisma.raw(`"AuditLog"."${field}"`));
+        const userColumns = ['name', 'email'].map((field) =>
+          Prisma.raw(`"user"."${field}"`),
+        );
+
+        whereClause.id = {
+          in: await findTurkishSearchMatches(
+            ctx.db,
+            Prisma.raw(
+              '"AuditLog" LEFT JOIN "user" ON "AuditLog"."userId" = "user"."id"',
+            ),
+            Prisma.raw('"AuditLog"."id"'),
+            [...ownColumns, ...userColumns],
+            input.filter.search,
+          ),
+        };
       }
 
       // Action filter

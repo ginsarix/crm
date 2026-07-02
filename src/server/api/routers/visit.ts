@@ -2,6 +2,7 @@ import { Prisma } from 'generated/prisma';
 import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
 import { VisitCreateSchema } from '~/shared/zod-schemas/visit';
+import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
 import {
   adminProcedure,
   createAuditLog,
@@ -153,21 +154,21 @@ export const visitRouter = createTRPCRouter({
       if (input.filter?.search) {
         const searchValue = input.filter.search;
         const scope = input.filter.searchScope;
+        const fields =
+          scope === 'all'
+            ? searchableFields
+            : searchableFields.includes(scope as SearchableField)
+              ? [scope as SearchableField]
+              : [];
 
-        if (scope === 'all') {
-          // Search across all searchable fields
-          whereClause.OR = searchableFields.map((field) => ({
-            [field]: {
-              contains: searchValue,
-              mode: 'insensitive' as const,
-            },
-          })) as Prisma.VisitWhereInput[];
-        } else if (searchableFields.includes(scope as SearchableField)) {
-          // Search in specific field
-          const field = scope as SearchableField;
-          whereClause[field] = {
-            contains: searchValue,
-            mode: 'insensitive' as const,
+        if (fields.length > 0) {
+          whereClause.id = {
+            in: await findTurkishSearchMatchesInTable(
+              ctx.db,
+              'Visit',
+              fields,
+              searchValue,
+            ),
           };
         }
       }

@@ -1,4 +1,10 @@
-export type ChangeType = 'new' | 'fix' | 'improved' | 'changed' | 'removed';
+export type ChangeType =
+  | 'new'
+  | 'fix'
+  | 'improved'
+  | 'changed'
+  | 'removed'
+  | 'announcement';
 
 export interface Change {
   type: ChangeType;

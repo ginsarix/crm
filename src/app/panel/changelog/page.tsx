@@ -28,10 +28,16 @@ const BADGE_CONFIG: Record<ChangeType, { label: string; className: string }> = {
     label: 'Kaldırıldı',
     className: 'bg-muted text-muted-foreground border-border',
   },
+  announcement: {
+    label: 'Duyuru',
+    className:
+      'bg-purple-500/10 text-purple-700 border-purple-500/20 dark:text-purple-400',
+  },
 };
 
 const FILTER_OPTIONS: Array<{ key: ChangeType | 'all'; label: string }> = [
   { key: 'all', label: 'Tümü' },
+  { key: 'announcement', label: BADGE_CONFIG.announcement.label },
   { key: 'new', label: BADGE_CONFIG.new.label },
   { key: 'fix', label: BADGE_CONFIG.fix.label },
   { key: 'improved', label: BADGE_CONFIG.improved.label },

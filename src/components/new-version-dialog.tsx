@@ -27,6 +27,12 @@ export function NewVersionDialog() {
 
   if (!latestRelease) return null;
 
+  // Announcements surface first regardless of their position in the release.
+  const prioritizedChanges = [
+    ...latestRelease.changes.filter((c) => c.type === 'announcement'),
+    ...latestRelease.changes.filter((c) => c.type !== 'announcement'),
+  ];
+
   return (
     <Dialog
       onOpenChange={(open) => {
@@ -52,10 +58,16 @@ export function NewVersionDialog() {
         </DialogHeader>
 
         <div className="flex flex-col gap-1.5 rounded-lg border bg-muted/50 p-3">
-          {latestRelease.changes.slice(0, 3).map((change, i) => (
+          {prioritizedChanges.slice(0, 3).map((change, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: static list
             <div className="flex items-start gap-2" key={i}>
-              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
+              <span
+                className={`mt-1.5 size-1.5 shrink-0 rounded-full ${
+                  change.type === 'announcement'
+                    ? 'bg-purple-500'
+                    : 'bg-primary'
+                }`}
+              />
               <span className="text-[13px] text-foreground/80 leading-snug">
                 {change.title}
               </span>

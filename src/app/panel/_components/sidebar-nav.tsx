@@ -9,11 +9,12 @@ import {
   LogOut,
   Settings,
   Sparkles,
+  UserCog,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback } from '~/components/ui/avatar';
 import {
   DropdownMenu,
@@ -38,6 +39,7 @@ import {
   useSidebar,
 } from '~/components/ui/sidebar';
 import { authClient } from '~/server/better-auth/client';
+import { AccountSheet } from './account-sheet';
 
 const navigationItems = [
   {
@@ -84,6 +86,7 @@ export function SidebarNav() {
   const { data: session, isPending } = authClient.useSession();
   const { setOpenMobile } = useSidebar();
   const isAdmin = session?.user?.role === 'admin';
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
 
   // Close sidebar on navigation (mobile)
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is used to trigger the effect on navigation
@@ -270,6 +273,14 @@ export function SidebarNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setAccountSheetOpen(true)}
+                >
+                  <UserCog className="size-4" />
+                  Hesap Ayarları
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
                   className="cursor-pointer text-destructive focus:text-destructive"
                   onClick={signOut}
                 >
@@ -283,6 +294,10 @@ export function SidebarNav() {
       </SidebarFooter>
 
       <SidebarRail />
+      <AccountSheet
+        onOpenChange={setAccountSheetOpen}
+        open={accountSheetOpen}
+      />
     </Sidebar>
   );
 }

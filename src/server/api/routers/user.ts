@@ -3,12 +3,19 @@ import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
 import { auth } from '~/server/better-auth';
 import {
+  UserChangePasswordSchema,
   UserCreateSchema,
   UserFindManySelectSchema,
+  UserSelfUpdateSchema,
   UserUpdateSchema,
 } from '~/shared/zod-schemas/user';
 import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
-import { adminProcedure, createAuditLog, createTRPCRouter } from '../trpc';
+import {
+  adminProcedure,
+  createAuditLog,
+  createTRPCRouter,
+  protectedProcedure,
+} from '../trpc';
 
 const filterSchema = z.object({
   search: z.string().optional(),
@@ -139,6 +146,157 @@ export const userRouter = createTRPCRouter({
           },
         },
       });
+    }),
+  getMyAccount: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.user.findUniqueOrThrow({
+      where: { id: ctx.session.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        assignedBusinessGroups: {
+          select: { id: true, name: true },
+          orderBy: { name: 'asc' },
+        },
+        _count: {
+          select: { createdCustomerCards: true, createdVisits: true },
+        },
+      },
+    });
+  }),
+  updateMyProfile: protectedProcedure
+    .input(UserSelfUpdateSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Goes through better-auth (not a raw db.user.update) so it also
+        // refreshes the session cookie cache with the new name.
+        await auth.api.updateUser({
+          body: { name: input.name },
+          headers: ctx.headers,
+        });
+
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'USER_UPDATED',
+          'USER',
+          ctx.session.user.id,
+          'SUCCESS',
+          undefined,
+          `Kullanıcı kendi profilini güncelledi: ${input.name}`,
+        );
+
+        return { success: true };
+      } catch (error) {
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'USER_UPDATED',
+          'USER',
+          ctx.session.user.id,
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          `Kullanıcı kendi profilini güncelleyemedi`,
+        );
+        throw error;
+      }
+    }),
+  changeMyPassword: protectedProcedure
+    .input(UserChangePasswordSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await auth.api.changePassword({
+          body: {
+            currentPassword: input.currentPassword,
+            newPassword: input.newPassword,
+          },
+          headers: ctx.headers,
+        });
+
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'PASSWORD_CHANGED',
+          'USER',
+          ctx.session.user.id,
+          'SUCCESS',
+          undefined,
+          `Kullanıcı kendi şifresini değiştirdi`,
+        );
+
+        return { success: true };
+      } catch (error) {
+        await createAuditLog(
+          ctx.db,
+          ctx.session.user.id,
+          'PASSWORD_CHANGED',
+          'USER',
+          ctx.session.user.id,
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          `Kullanıcı kendi şifresini değiştiremedi`,
+        );
+        throw error;
+      }
+    }),
+  listMySessions: protectedProcedure.query(async ({ ctx }) => {
+    return await auth.api.listSessions({ headers: ctx.headers });
+  }),
+  getMyCustomerCards: protectedProcedure
+    .input(z.object({ page: z.number().min(1).default(1) }))
+    .query(async ({ ctx, input }) => {
+      const itemsPerPage = 10;
+      const whereClause = { createdById: ctx.session.user.id };
+
+      const [totalItems, data] = await Promise.all([
+        ctx.db.customerCard.count({ where: whereClause }),
+        ctx.db.customerCard.findMany({
+          where: whereClause,
+          select: { id: true, name: true },
+          skip: (input.page - 1) * itemsPerPage,
+          take: itemsPerPage,
+          orderBy: { createdAt: 'desc' },
+        }),
+      ]);
+
+      return {
+        data,
+        pagination: {
+          totalItems,
+          totalPages: Math.ceil(totalItems / itemsPerPage),
+        },
+      };
+    }),
+  getMyVisits: protectedProcedure
+    .input(z.object({ page: z.number().min(1).default(1) }))
+    .query(async ({ ctx, input }) => {
+      const itemsPerPage = 10;
+      const whereClause = { createdById: ctx.session.user.id };
+
+      const [totalItems, data] = await Promise.all([
+        ctx.db.visit.count({ where: whereClause }),
+        ctx.db.visit.findMany({
+          where: whereClause,
+          select: {
+            id: true,
+            date: true,
+            customerCard: { select: { name: true } },
+          },
+          skip: (input.page - 1) * itemsPerPage,
+          take: itemsPerPage,
+          orderBy: { date: 'desc' },
+        }),
+      ]);
+
+      return {
+        data,
+        pagination: {
+          totalItems,
+          totalPages: Math.ceil(totalItems / itemsPerPage),
+        },
+      };
     }),
   create: adminProcedure
     .input(UserCreateSchema)

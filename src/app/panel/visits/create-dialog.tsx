@@ -77,6 +77,8 @@ export function CreateVisitDialog() {
   const createMutation = api.visit.create.useMutation({
     onSuccess: () => {
       utils.visit.get.invalidate();
+      utils.user.getMyAccount.invalidate();
+      utils.user.getMyVisits.invalidate();
     },
   });
 

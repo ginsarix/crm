@@ -65,6 +65,8 @@ export function CreateCustomerCardDialog() {
   const createMutation = api.customerCard.create.useMutation({
     onSuccess: () => {
       utils.customerCard.get.invalidate();
+      utils.user.getMyAccount.invalidate();
+      utils.user.getMyCustomerCards.invalidate();
     },
   });
 

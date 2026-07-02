@@ -178,13 +178,19 @@ export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
 
         {view === 'customer-cards' && (
           <div className="fade-in slide-in-from-right-2 animate-in p-6 duration-300">
-            <AccountCustomerCardsList onBack={() => setView('overview')} />
+            <AccountCustomerCardsList
+              onBack={() => setView('overview')}
+              onNavigate={() => handleOpenChange(false)}
+            />
           </div>
         )}
 
         {view === 'visits' && (
           <div className="fade-in slide-in-from-right-2 animate-in p-6 duration-300">
-            <AccountVisitsList onBack={() => setView('overview')} />
+            <AccountVisitsList
+              onBack={() => setView('overview')}
+              onNavigate={() => handleOpenChange(false)}
+            />
           </div>
         )}
 

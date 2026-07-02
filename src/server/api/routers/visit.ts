@@ -249,6 +249,38 @@ export const visitRouter = createTRPCRouter({
         },
       };
     }),
+  getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const visit = await ctx.db.visit.findUnique({
+        where: { id: input.id },
+        include: {
+          customerCard: {
+            select: { name: true, gsm1: true, businessGroup: true },
+          },
+          salesRepresentative: {
+            select: { id: true, name: true },
+          },
+        },
+      });
+      if (!visit) return null;
+
+      if (ctx.session.user.role !== 'admin') {
+        const assignedGroups = await ctx.db.businessGroup.findMany({
+          where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+          select: { name: true },
+        });
+        const allowedNames = assignedGroups.map((g) => g.name);
+        if (
+          !visit.customerCard.businessGroup ||
+          !allowedNames.includes(visit.customerCard.businessGroup)
+        ) {
+          return null;
+        }
+      }
+
+      return visit;
+    }),
   create: protectedProcedure
     .input(VisitCreateSchema)
     .mutation(async ({ ctx, input }) => {

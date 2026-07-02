@@ -6,8 +6,8 @@ import type {
   SortingState,
 } from '@tanstack/react-table';
 import { Trash2 } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
@@ -38,6 +38,9 @@ import RelatedVisitsDialog from './related-visits-dialog';
 import { ViewVisitDialog } from './view-dialog';
 
 export function VisitsPageClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -59,6 +62,19 @@ export function VisitsPageClient() {
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === 'admin';
   const utils = api.useUtils();
+
+  const updateParam = useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+      router.replace(`?${params.toString()}`);
+    },
+    [router, searchParams],
+  );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
   useEffect(() => {
@@ -91,6 +107,29 @@ export function VisitsPageClient() {
   const handleViewVisit = (visit: VisitWithCustomerCard) => {
     setSelectedVisit(visit);
     setViewDialogOpen(true);
+  };
+
+  // Deep-link support: ?id=<visitId> opens the view dialog directly
+  const idParam = searchParams.get('id');
+  const { data: visitById, isFetched: visitByIdFetched } =
+    api.visit.getById.useQuery({ id: idParam ?? '' }, { enabled: !!idParam });
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: handleViewVisit/updateParam are recreated every render; only re-run when the id param or its fetch result changes
+  useEffect(() => {
+    if (!idParam) return;
+    if (visitById) {
+      handleViewVisit(visitById);
+    } else if (visitByIdFetched) {
+      toast.error('Ziyaret bulunamadı');
+      updateParam('id', '');
+    }
+  }, [idParam, visitById, visitByIdFetched]);
+
+  const handleViewDialogOpenChange = (next: boolean) => {
+    setViewDialogOpen(next);
+    if (!next && idParam) {
+      updateParam('id', '');
+    }
   };
 
   const pathname = useParams();
@@ -187,7 +226,7 @@ export function VisitsPageClient() {
 
         {selectedVisit && (
           <ViewVisitDialog
-            onOpenChange={setViewDialogOpen}
+            onOpenChange={handleViewDialogOpenChange}
             onUpdate={(updatedVisit) => {
               setSelectedVisit(updatedVisit);
               utils.visit.get.setData(

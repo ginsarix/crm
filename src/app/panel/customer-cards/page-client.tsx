@@ -225,6 +225,32 @@ export function CustomerCardsPageClient() {
     setViewDialogOpen(true);
   };
 
+  // Deep-link support: ?id=<customerCardId> opens the view dialog directly
+  const idParam = searchParams.get('id');
+  const { data: customerCardById, isFetched: customerCardByIdFetched } =
+    api.customerCard.getById.useQuery(
+      { id: idParam ?? '' },
+      { enabled: !!idParam },
+    );
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: handleViewCustomerCard/updateParam are recreated every render; only re-run when the id param or its fetch result changes
+  useEffect(() => {
+    if (!idParam) return;
+    if (customerCardById) {
+      handleViewCustomerCard(customerCardById);
+    } else if (customerCardByIdFetched) {
+      toast.error('Cari kart bulunamadı');
+      updateParam('id', '');
+    }
+  }, [idParam, customerCardById, customerCardByIdFetched]);
+
+  const handleViewDialogOpenChange = (next: boolean) => {
+    setViewDialogOpen(next);
+    if (!next && idParam) {
+      updateParam('id', '');
+    }
+  };
+
   const columns = createColumns(handleViewCustomerCard);
 
   const selectedIds = Object.keys(rowSelection);
@@ -360,7 +386,7 @@ export function CustomerCardsPageClient() {
         {selectedCustomerCard && (
           <ViewCustomerCardDialog
             customerCard={selectedCustomerCard}
-            onOpenChange={setViewDialogOpen}
+            onOpenChange={handleViewDialogOpenChange}
             onUpdate={(updatedCustomerCard) => {
               setSelectedCustomerCard(updatedCustomerCard);
               utils.customerCard.get.setData(

@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Skeleton } from '~/components/ui/skeleton';
@@ -10,10 +11,12 @@ const SKELETON_ROWS = ['a', 'b', 'c', 'd', 'e'];
 
 interface AccountCustomerCardsListProps {
   onBack: () => void;
+  onNavigate: () => void;
 }
 
 export function AccountCustomerCardsList({
   onBack,
+  onNavigate,
 }: AccountCustomerCardsListProps) {
   const [page, setPage] = useState(1);
   const { data, isLoading } = api.user.getMyCustomerCards.useQuery({ page });
@@ -46,15 +49,14 @@ export function AccountCustomerCardsList({
         )}
         {!isLoading &&
           data?.data.map((card) => (
-            // biome-ignore lint/a11y/useValidAnchor: placeholder link, will route to the customer card record later
-            <a
+            <Link
               className="block p-3 text-sm underline-offset-4 hover:bg-accent hover:underline"
-              href="#"
+              href={`/panel/customer-cards?id=${card.id}`}
               key={card.id}
-              onClick={(e) => e.preventDefault()}
+              onClick={onNavigate}
             >
               {card.name ?? 'İsimsiz Cari Kart'}
-            </a>
+            </Link>
           ))}
       </div>
 

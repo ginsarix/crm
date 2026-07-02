@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Skeleton } from '~/components/ui/skeleton';
@@ -10,9 +11,13 @@ const SKELETON_ROWS = ['a', 'b', 'c', 'd', 'e'];
 
 interface AccountVisitsListProps {
   onBack: () => void;
+  onNavigate: () => void;
 }
 
-export function AccountVisitsList({ onBack }: AccountVisitsListProps) {
+export function AccountVisitsList({
+  onBack,
+  onNavigate,
+}: AccountVisitsListProps) {
   const [page, setPage] = useState(1);
   const { data, isLoading } = api.user.getMyVisits.useQuery({ page });
 
@@ -44,16 +49,15 @@ export function AccountVisitsList({ onBack }: AccountVisitsListProps) {
         )}
         {!isLoading &&
           data?.data.map((visit) => (
-            // biome-ignore lint/a11y/useValidAnchor: placeholder link, will route to the visit record later
-            <a
+            <Link
               className="block p-3 text-sm underline-offset-4 hover:bg-accent hover:underline"
-              href="#"
+              href={`/panel/visits?id=${visit.id}`}
               key={visit.id}
-              onClick={(e) => e.preventDefault()}
+              onClick={onNavigate}
             >
               {new Date(visit.date).toLocaleDateString('tr-TR')} -{' '}
               {visit.customerCard?.name ?? 'İsimsiz Cari Kart'}
-            </a>
+            </Link>
           ))}
       </div>
 

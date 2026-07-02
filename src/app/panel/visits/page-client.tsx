@@ -143,9 +143,9 @@ export function VisitsPageClient() {
       <div className="mx-auto w-full max-w-[1600px]">
         <div className="mb-4">
           <FilterControls
+            onSalesRepresentativeId={setSalesRepresentativeId}
             onSearch={setSearch}
             onSearchScope={setSearchScope}
-            onSalesRepresentativeId={setSalesRepresentativeId}
             onVia={setVia}
             salesRepresentativeId={salesRepresentativeId}
             search={search}
@@ -194,10 +194,23 @@ export function VisitsPageClient() {
                 {
                   page: pagination.pageIndex + 1,
                   itemsPerPage: pagination.pageSize,
-                  filter: { search, via, searchScope, salesRepresentativeId: salesRepresentativeId || undefined },
+                  filter: {
+                    search,
+                    via,
+                    searchScope,
+                    salesRepresentativeId: salesRepresentativeId || undefined,
+                  },
                   sorting,
                 },
-                (old) => old ? { ...old, data: old.data.map((v) => v.id === updatedVisit.id ? updatedVisit : v) } : old,
+                (old) =>
+                  old
+                    ? {
+                        ...old,
+                        data: old.data.map((v) =>
+                          v.id === updatedVisit.id ? updatedVisit : v,
+                        ),
+                      }
+                    : old,
               );
             }}
             open={viewDialogOpen}

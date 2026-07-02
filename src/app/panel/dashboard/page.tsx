@@ -1,13 +1,13 @@
+import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { auditAction } from '~/lib/enum-map';
 import { createLocaleSorter } from '~/lib/utils';
+import { auth } from '~/server/better-auth';
 import { api } from '~/trpc/server';
 import { BusinessGroupAlerts } from '../_components/business-group-alerts';
 import { BusinessGroupFilter } from '../_components/business-group-filter';
-import { auth } from '~/server/better-auth';
-import { headers } from 'next/headers';
 
 const ALL_KEY = '__all__';
 
@@ -26,7 +26,8 @@ export default async function DashboardPage({
 
   let selectedGroup: string | null = null;
   if (isAdmin) {
-    const bgParam = typeof resolvedParams.bg === 'string' ? resolvedParams.bg : undefined;
+    const bgParam =
+      typeof resolvedParams.bg === 'string' ? resolvedParams.bg : undefined;
     if (bgParam === ALL_KEY) {
       selectedGroup = null;
     } else if (bgParam) {
@@ -44,17 +45,21 @@ export default async function DashboardPage({
     latestAudit,
     businessGroupStats,
     visitRanking,
-    graySubtractionBusinessGroupCount
+    graySubtractionBusinessGroupCount,
   ] = await Promise.all([
     api.customerCard.getTotal({ businessGroup: selectedGroup ?? undefined }),
-    api.customerCard.getColorCounts({ businessGroup: selectedGroup ?? undefined }),
+    api.customerCard.getColorCounts({
+      businessGroup: selectedGroup ?? undefined,
+    }),
     api.visit.getTotal({ businessGroup: selectedGroup ?? undefined }),
     api.auditLog.getLatest(),
     api.businessGroup.getStats({ businessGroup: selectedGroup ?? undefined }),
-    api.visit.getRankedVisitsBySalesRepresentative({ businessGroup: selectedGroup ?? undefined }),
+    api.visit.getRankedVisitsBySalesRepresentative({
+      businessGroup: selectedGroup ?? undefined,
+    }),
     isAdmin && selectedGroup === null
       ? api.businessGroup.getGraySubtractionBusinessGroupCount()
-      : Promise.resolve(null)
+      : Promise.resolve(null),
   ]);
 
   return (
@@ -72,7 +77,9 @@ export default async function DashboardPage({
           </div>
           {isAdmin && (
             <div className="mb-4">
-              <p className="mb-1.5 text-muted-foreground text-sm">Meslek Grubu</p>
+              <p className="mb-1.5 text-muted-foreground text-sm">
+                Meslek Grubu
+              </p>
               <BusinessGroupFilter
                 groups={allBusinessGroups}
                 selected={selectedGroup}
@@ -83,7 +90,9 @@ export default async function DashboardPage({
             <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
             <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>
           </div>
-          <div className={`grid gap-3 ${!graySubtractionBusinessGroupCount ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
+          <div
+            className={`grid gap-3 ${!graySubtractionBusinessGroupCount ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}
+          >
             <Link className="h-full" href="/panel/customer-cards">
               <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
                 <CardHeader className="pt-4 pb-1">
@@ -99,11 +108,13 @@ export default async function DashboardPage({
               </Card>
             </Link>
 
-            {graySubtractionBusinessGroupCount &&
+            {graySubtractionBusinessGroupCount && (
               <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
                 <CardHeader className="pt-4 pb-1">
                   <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
-                    {graySubtractionBusinessGroupCount.graySubtractionBusinessGroup}
+                    {
+                      graySubtractionBusinessGroupCount.graySubtractionBusinessGroup
+                    }
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-4">
@@ -111,7 +122,8 @@ export default async function DashboardPage({
                     {graySubtractionBusinessGroupCount.count}
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
             <Link className="h-full" href="/panel/visits">
               <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">

@@ -101,7 +101,9 @@ export const customerCardRouter = createTRPCRouter({
       const isAdmin = ctx.session.user.role === 'admin';
       if (isAdmin) {
         return ctx.db.customerCard.count({
-          where: input?.businessGroup ? { businessGroup: input.businessGroup } : {},
+          where: input?.businessGroup
+            ? { businessGroup: input.businessGroup }
+            : {},
         });
       }
       const assignedGroups = await ctx.db.businessGroup.findMany({
@@ -444,52 +446,53 @@ export const customerCardRouter = createTRPCRouter({
   getColorCounts: protectedProcedure
     .input(z.object({ businessGroup: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
-    const isAdmin = ctx.session.user.role === 'admin';
-    let where: Prisma.CustomerCardWhereInput = {};
+      const isAdmin = ctx.session.user.role === 'admin';
+      let where: Prisma.CustomerCardWhereInput = {};
 
-    const filterByGroup = input?.businessGroup;
+      const filterByGroup = input?.businessGroup;
 
-    const [assignedGroups, dashboardConfig] = await Promise.all([
-      isAdmin
-        ? null
-        : ctx.db.businessGroup.findMany({
-            where: { assignedUsers: { some: { id: ctx.session.user.id } } },
-            select: { name: true },
-          }),
-      isAdmin && !filterByGroup
-        ? ctx.db.dashboardConfig.findUnique({ where: { id: 'singleton' } })
-        : null,
-    ]);
+      const [assignedGroups, dashboardConfig] = await Promise.all([
+        isAdmin
+          ? null
+          : ctx.db.businessGroup.findMany({
+              where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+              select: { name: true },
+            }),
+        isAdmin && !filterByGroup
+          ? ctx.db.dashboardConfig.findUnique({ where: { id: 'singleton' } })
+          : null,
+      ]);
 
-    if (!isAdmin && assignedGroups) {
-      where = { businessGroup: { in: assignedGroups.map((g) => g.name) } };
-    } else if (isAdmin && filterByGroup) {
-      where = { businessGroup: filterByGroup };
-    }
+      if (!isAdmin && assignedGroups) {
+        where = { businessGroup: { in: assignedGroups.map((g) => g.name) } };
+      } else if (isAdmin && filterByGroup) {
+        where = { businessGroup: filterByGroup };
+      }
 
-    const graySubtractGroup = isAdmin && !filterByGroup
-      ? dashboardConfig?.graySubtractionBusinessGroup
-      : null;
+      const graySubtractGroup =
+        isAdmin && !filterByGroup
+          ? dashboardConfig?.graySubtractionBusinessGroup
+          : null;
 
-    const [rows, graySubtractCount] = await Promise.all([
-      ctx.db.customerCard.groupBy({ by: ['color'], _count: true, where }),
-      graySubtractGroup
-        ? ctx.db.customerCard.count({
-            where: { businessGroup: graySubtractGroup },
-          })
-        : null,
-    ]);
+      const [rows, graySubtractCount] = await Promise.all([
+        ctx.db.customerCard.groupBy({ by: ['color'], _count: true, where }),
+        graySubtractGroup
+          ? ctx.db.customerCard.count({
+              where: { businessGroup: graySubtractGroup },
+            })
+          : null,
+      ]);
 
-    const counts = {
-      green: 0,
-      blue: 0,
-      orange: 0,
-      yellow: 0,
-      purple: 0,
-      gray: 0,
-    };
-    for (const row of rows) counts[row.color] += row._count;
-    if (graySubtractCount) counts.gray -= graySubtractCount;
-    return counts;
-  }),
+      const counts = {
+        green: 0,
+        blue: 0,
+        orange: 0,
+        yellow: 0,
+        purple: 0,
+        gray: 0,
+      };
+      for (const row of rows) counts[row.color] += row._count;
+      if (graySubtractCount) counts.gray -= graySubtractCount;
+      return counts;
+    }),
 });

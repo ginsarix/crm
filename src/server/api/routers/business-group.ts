@@ -1,13 +1,13 @@
 import { z } from 'zod';
+import { defaultGraySubtractionBusinessGroup } from '~/constants/dashboard-config';
 import { createLocaleSorter } from '~/lib/utils';
+import { getDashboardConfig } from '~/server/lib/get-dashboard-config';
 import {
   adminProcedure,
   createAuditLog,
   createTRPCRouter,
   protectedProcedure,
 } from '../trpc';
-import { getDashboardConfig } from '~/server/lib/get-dashboard-config';
-import { defaultGraySubtractionBusinessGroup } from '~/constants/dashboard-config';
 
 export const businessGroupRouter = createTRPCRouter({
   getTotal: protectedProcedure.query(async ({ ctx }) => {
@@ -21,113 +21,124 @@ export const businessGroupRouter = createTRPCRouter({
   getStats: protectedProcedure
     .input(z.object({ businessGroup: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
-    const isAdmin = ctx.session.user.role === 'admin';
+      const isAdmin = ctx.session.user.role === 'admin';
 
-    let allowedGroups: string[] | null = null;
-    if (!isAdmin) {
-      const assigned = await ctx.db.businessGroup.findMany({
-        where: { assignedUsers: { some: { id: ctx.session.user.id } } },
-        select: { name: true },
-      });
-      allowedGroups = assigned.map((g) => g.name);
-    }
-
-    const rows = await ctx.db.customerCard.groupBy({
-      by: ['businessGroup', 'color'],
-      _count: true,
-      where: {
-        businessGroup: input?.businessGroup
-          ? input.businessGroup
-          : allowedGroups
-            ? { in: allowedGroups }
-            : { not: null },
-      },
-    });
-
-    const map = new Map<
-      string,
-      {
-        total: number;
-        green: number;
-        blue: number;
-        orange: number;
-        yellow: number;
-        purple: number;
-        gray: number;
-      }
-    >();
-
-    for (const row of rows) {
-      const name = row.businessGroup ?? '';
-      if (!name) continue;
-      if (!map.has(name))
-        map.set(name, {
-          total: 0,
-          green: 0,
-          blue: 0,
-          orange: 0,
-          yellow: 0,
-          purple: 0,
-          gray: 0,
+      let allowedGroups: string[] | null = null;
+      if (!isAdmin) {
+        const assigned = await ctx.db.businessGroup.findMany({
+          where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+          select: { name: true },
         });
-      const entry = map.get(name);
-      if (!entry) continue;
-      entry.total += row._count;
+        allowedGroups = assigned.map((g) => g.name);
+      }
 
-      entry[
-        ['green', 'blue', 'orange', 'yellow', 'purple'].includes(row.color)
-          ? row.color
-          : 'gray'
-      ] += row._count;
-    }
+      const rows = await ctx.db.customerCard.groupBy({
+        by: ['businessGroup', 'color'],
+        _count: true,
+        where: {
+          businessGroup: input?.businessGroup
+            ? input.businessGroup
+            : allowedGroups
+              ? { in: allowedGroups }
+              : { not: null },
+        },
+      });
 
-    const all = Array.from(map.entries()).map(([name, counts]) => {
-      const { total } = counts;
+      const map = new Map<
+        string,
+        {
+          total: number;
+          green: number;
+          blue: number;
+          orange: number;
+          yellow: number;
+          purple: number;
+          gray: number;
+        }
+      >();
+
+      for (const row of rows) {
+        const name = row.businessGroup ?? '';
+        if (!name) continue;
+        if (!map.has(name))
+          map.set(name, {
+            total: 0,
+            green: 0,
+            blue: 0,
+            orange: 0,
+            yellow: 0,
+            purple: 0,
+            gray: 0,
+          });
+        const entry = map.get(name);
+        if (!entry) continue;
+        entry.total += row._count;
+
+        entry[
+          ['green', 'blue', 'orange', 'yellow', 'purple'].includes(row.color)
+            ? row.color
+            : 'gray'
+        ] += row._count;
+      }
+
+      const all = Array.from(map.entries()).map(([name, counts]) => {
+        const { total } = counts;
+        return {
+          name,
+          total,
+          greenCount: counts.green,
+          blueCount: counts.blue,
+          orangeCount: counts.orange,
+          yellowCount: counts.yellow,
+          purpleCount: counts.purple,
+          grayCount: counts.gray,
+          greenPercent:
+            total > 0 ? Math.round((counts.green / total) * 100) : 0,
+          bluePercent: total > 0 ? Math.round((counts.blue / total) * 100) : 0,
+          orangePercent:
+            total > 0 ? Math.round((counts.orange / total) * 100) : 0,
+          yellowPercent:
+            total > 0 ? Math.round((counts.yellow / total) * 100) : 0,
+          purplePercent:
+            total > 0 ? Math.round((counts.purple / total) * 100) : 0,
+          grayPercent: total > 0 ? Math.round((counts.gray / total) * 100) : 0,
+        };
+      });
+
       return {
-        name,
-        total,
-        greenCount: counts.green,
-        blueCount: counts.blue,
-        orangeCount: counts.orange,
-        yellowCount: counts.yellow,
-        purpleCount: counts.purple,
-        grayCount: counts.gray,
-        greenPercent: total > 0 ? Math.round((counts.green / total) * 100) : 0,
-        bluePercent: total > 0 ? Math.round((counts.blue / total) * 100) : 0,
-        orangePercent:
-          total > 0 ? Math.round((counts.orange / total) * 100) : 0,
-        yellowPercent:
-          total > 0 ? Math.round((counts.yellow / total) * 100) : 0,
-        purplePercent:
-          total > 0 ? Math.round((counts.purple / total) * 100) : 0,
-        grayPercent: total > 0 ? Math.round((counts.gray / total) * 100) : 0,
+        groups: all.sort(createLocaleSorter('name')),
       };
-    });
+    }),
 
-    return {
-      groups: all.sort(createLocaleSorter('name')),
-    };
-  }),
-
-  getGraySubtractionBusinessGroupCount: adminProcedure
-    .query(async ({ ctx }) => {
+  getGraySubtractionBusinessGroupCount: adminProcedure.query(
+    async ({ ctx }) => {
       const config = await getDashboardConfig();
 
       if (!config?.graySubtractionBusinessGroup) {
-        await ctx.db.dashboardConfig.create({ data: { id: 'singleton', graySubtractionBusinessGroup: defaultGraySubtractionBusinessGroup } });
+        await ctx.db.dashboardConfig.create({
+          data: {
+            id: 'singleton',
+            graySubtractionBusinessGroup: defaultGraySubtractionBusinessGroup,
+          },
+        });
       }
 
-      const graySubtractionBusinessGroup = config?.graySubtractionBusinessGroup ?? defaultGraySubtractionBusinessGroup;
+      const graySubtractionBusinessGroup =
+        config?.graySubtractionBusinessGroup ??
+        defaultGraySubtractionBusinessGroup;
 
-      const customerCardCountSpecialBusinessGroup =
-        ctx.db.customerCard.count({
-          where: {
-            businessGroup: graySubtractionBusinessGroup,
-          }
-        });
+      const customerCardCountSpecialBusinessGroup = ctx.db.customerCard.count({
+        where: {
+          businessGroup: graySubtractionBusinessGroup,
+        },
+      });
 
-      return { count: customerCardCountSpecialBusinessGroup, graySubtractionBusinessGroup };
-    }),
+      return {
+        count: customerCardCountSpecialBusinessGroup,
+        graySubtractionBusinessGroup,
+      };
+    },
+  ),
 
   get: protectedProcedure.query(async ({ ctx }) => {
     const isAdmin = ctx.session.user.role === 'admin';

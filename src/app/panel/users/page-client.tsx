@@ -148,8 +148,21 @@ export function UsersPageClient() {
             onUpdate={(updatedUser) => {
               setSelectedUser(updatedUser);
               utils.user.get.setData(
-                { page: pagination.pageIndex + 1, itemsPerPage: pagination.pageSize, filter: { search, searchScope }, sorting },
-                (old) => old ? { ...old, data: old.data.map((u) => u.id === updatedUser.id ? updatedUser : u) } : old,
+                {
+                  page: pagination.pageIndex + 1,
+                  itemsPerPage: pagination.pageSize,
+                  filter: { search, searchScope },
+                  sorting,
+                },
+                (old) =>
+                  old
+                    ? {
+                        ...old,
+                        data: old.data.map((u) =>
+                          u.id === updatedUser.id ? updatedUser : u,
+                        ),
+                      }
+                    : old,
               );
             }}
             open={viewDialogOpen}

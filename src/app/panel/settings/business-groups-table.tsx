@@ -92,9 +92,12 @@ export default function BusinessGroupsTable() {
           onOpenChange={setViewDialogOpen}
           onUpdate={(updatedBusinessGroup) => {
             setSelectedBusinessGroup(updatedBusinessGroup);
-            utils.businessGroup.get.setData(
-              undefined,
-              (old) => old ? old.map((g) => g.id === updatedBusinessGroup.id ? updatedBusinessGroup : g) : old,
+            utils.businessGroup.get.setData(undefined, (old) =>
+              old
+                ? old.map((g) =>
+                    g.id === updatedBusinessGroup.id ? updatedBusinessGroup : g,
+                  )
+                : old,
             );
           }}
           open={viewDialogOpen}

@@ -1,11 +1,10 @@
-import { z } from "zod";
-import { createTRPCRouter, adminProcedure, protectedProcedure } from "../trpc";
+import { z } from 'zod';
+import { adminProcedure, createTRPCRouter, protectedProcedure } from '../trpc';
 
 export const dashboardConfigRouter = createTRPCRouter({
-
   get: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.dashboardConfig.findUnique({
-      where: { id: "singleton" },
+      where: { id: 'singleton' },
     });
   }),
 
@@ -13,9 +12,9 @@ export const dashboardConfigRouter = createTRPCRouter({
     .input(z.object({ graySubtractionBusinessGroup: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.dashboardConfig.upsert({
-        where: { id: "singleton" },
+        where: { id: 'singleton' },
         update: input,
-        create: { id: "singleton", ...input },
+        create: { id: 'singleton', ...input },
       });
     }),
 });

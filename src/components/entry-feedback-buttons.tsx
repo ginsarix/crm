@@ -193,7 +193,10 @@ export function EntryFeedbackButtons({
         type="button"
         variant="ghost"
       >
-        <ThumbsUp className={vote === 'like' ? 'fill-green-500' : ''} width={12} />
+        <ThumbsUp
+          className={vote === 'like' ? 'fill-green-500' : ''}
+          width={12}
+        />
       </Button>
 
       <Popover
@@ -228,7 +231,9 @@ export function EntryFeedbackButtons({
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-72 p-3">
-          <p className="mb-0.5 font-medium text-[12.5px]">Ne geliştirebiliriz?</p>
+          <p className="mb-0.5 font-medium text-[12.5px]">
+            Ne geliştirebiliriz?
+          </p>
           <p className="mb-2 text-[11.5px] text-muted-foreground">
             Görüşünüz kaydedildi. Öneri eklemek ister misiniz?
           </p>
@@ -245,7 +250,8 @@ export function EntryFeedbackButtons({
               onClick={() => {
                 setPopoverOpen(false);
                 setText('');
-                if (vote === 'dislike') toast.success('Geri bildiriminiz alındı');
+                if (vote === 'dislike')
+                  toast.success('Geri bildiriminiz alındı');
               }}
               type="button"
               variant="outline"

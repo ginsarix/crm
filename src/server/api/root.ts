@@ -21,7 +21,7 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   visit: visitRouter,
   salesRepresentative: salesRepresentativeRouter,
-  dashboardConfig: dashboardConfigRouter
+  dashboardConfig: dashboardConfigRouter,
 });
 
 // export type definition of API

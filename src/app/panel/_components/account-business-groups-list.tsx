@@ -29,7 +29,7 @@ export function AccountBusinessGroupsList({
       <div className="divide-y rounded-lg border">
         {businessGroups.length === 0 && (
           <p className="p-4 text-center text-muted-foreground text-sm">
-            Atanmış iş grubu yok
+            Atanmış meslek grubu yok
           </p>
         )}
         {businessGroups.map((group) => (

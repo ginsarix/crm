@@ -21,6 +21,37 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-20',
+    version: '1.20',
+    date: '2 Temmuz 2026',
+    changes: [
+      {
+        type: 'announcement',
+        title: 'Haziran ayı üye listeleri güncellenmiştir.',
+      },
+      {
+        type: 'announcement',
+        title:
+          'Carilerde en başta İlçelerin Manuel olarak seçilmesi, boş alanları doldurulması rica olunur.',
+      },
+      {
+        type: 'fix',
+        title: 'Türkçe karakterlerle arama düzeltildi',
+        desc: 'Ş, Ç, Ğ, Ö, Ü, I, İ gibi Türkçe karakterler içeren aramalarda büyük/küçük harf duyarlılığından dolayı eşleşmeyen sonuçlar düzeltildi.',
+      },
+      {
+        type: 'new',
+        title: 'Hesap Ayarları paneli',
+        desc: 'Kenar çubuğundaki kullanıcı menüsünden profilinizi görüntüleyip adınızı güncelleyebilir, şifrenizi değiştirebilir, aktif oturumlarınızı ve size ait cari kart/ziyaret kayıtlarını inceleyebilirsiniz.',
+      },
+      {
+        type: 'new',
+        title: 'Sürüm notlarında duyuru türü',
+        desc: 'Sürüm notları sayfasına, önemli duyuruların öne çıkarıldığı yeni bir "Duyuru" değişiklik türü eklendi.',
+      },
+    ],
+  },
+  {
     id: 'v1-19',
     version: '1.19',
     date: '26 Haziran 2026',

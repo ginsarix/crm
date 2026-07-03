@@ -42,7 +42,7 @@ export const createColumns = (
               Cariyi Düzenle
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href={`/panel/visits/${customerCard.id}`}>
+              <Link href={`/panel/visits?customerCardId=${customerCard.id}`}>
                 Ziyaretleri Görüntüle
               </Link>
             </DropdownMenuItem>

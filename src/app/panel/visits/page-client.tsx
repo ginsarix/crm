@@ -6,7 +6,7 @@ import type {
   SortingState,
 } from '@tanstack/react-table';
 import { Trash2 } from 'lucide-react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
@@ -132,8 +132,7 @@ export function VisitsPageClient() {
     }
   };
 
-  const pathname = useParams();
-  const customerCardId = pathname.slug?.[0];
+  const customerCardId = searchParams.get('customerCardId');
 
   const relatedVisits = useMemo(
     () =>
@@ -258,7 +257,13 @@ export function VisitsPageClient() {
         )}
 
         {customerCardId && relatedVisits.length > 0 && (
-          <RelatedVisitsDialog visits={relatedVisits} />
+          <RelatedVisitsDialog
+            onOpenChange={(next) => {
+              if (!next) updateParam('customerCardId', '');
+            }}
+            open={true}
+            visits={relatedVisits}
+          />
         )}
 
         <Dialog onOpenChange={setDeleteConfirmOpen} open={deleteConfirmOpen}>

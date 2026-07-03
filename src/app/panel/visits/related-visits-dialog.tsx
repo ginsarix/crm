@@ -17,8 +17,12 @@ type VisitWithCustomerCard = RouterOutputs['visit']['get']['data'][number];
 
 export default function RelatedVisitsDialog({
   visits,
+  open,
+  onOpenChange,
 }: {
   visits: VisitWithCustomerCard[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedVisit, setSelectedVisit] =
@@ -31,7 +35,7 @@ export default function RelatedVisitsDialog({
 
   return (
     <>
-      <Dialog defaultOpen={true}>
+      <Dialog onOpenChange={onOpenChange} open={open}>
         <DialogContent
           aria-describedby="İlişkili ziyaretler"
           className="max-h-[99vh] overflow-y-auto"

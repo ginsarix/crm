@@ -22,6 +22,9 @@ next-env.d.ts
 # production
 /build
 
+# user-uploaded files (persistent server disk, not committed)
+/public/uploads
+
 # misc
 .DS_Store
 *.pem

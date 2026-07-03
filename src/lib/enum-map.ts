@@ -40,6 +40,11 @@ export const auditAction = {
   SALES_REPRESENTATIVE_CREATED: 'Satış Temsilcisi Oluşturuldu',
   SALES_REPRESENTATIVE_UPDATED: 'Satış Temsilcisi Güncellendi',
   SALES_REPRESENTATIVE_DELETED: 'Satış Temsilcisi Silindi',
+  ANNOUNCEMENT_CREATED: 'Duyuru Oluşturuldu',
+  ANNOUNCEMENT_UPDATED: 'Duyuru Güncellendi',
+  ANNOUNCEMENT_RESCHEDULED: 'Duyuru Zamanlaması Değiştirildi',
+  ANNOUNCEMENT_PUBLISHED: 'Duyuru Yayınlandı',
+  ANNOUNCEMENT_DELETED: 'Duyuru Silindi',
 } as const;
 
 export const resourceType = {
@@ -52,4 +57,5 @@ export const resourceType = {
   ROLE: 'Rol',
   BUSINESS_GROUP: 'Meslek Grubu',
   SALES_REPRESENTATIVE: 'Satış Temsilcisi',
+  ANNOUNCEMENT: 'Duyuru',
 } as const;

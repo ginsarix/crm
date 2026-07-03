@@ -1,3 +1,4 @@
+import { announcementRouter } from '~/server/api/routers/announcement';
 import { auditLogRouter } from '~/server/api/routers/audit-log';
 import { businessGroupRouter } from '~/server/api/routers/business-group';
 import { customerCardRouter } from '~/server/api/routers/customer-card';
@@ -14,6 +15,7 @@ import { dashboardConfigRouter } from './routers/dashboard-config';
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  announcement: announcementRouter,
   auditLog: auditLogRouter,
   businessGroup: businessGroupRouter,
   customerCard: customerCardRouter,

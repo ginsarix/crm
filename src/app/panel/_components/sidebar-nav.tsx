@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Home,
   LogOut,
+  Megaphone,
   Settings,
   Sparkles,
   UserCog,
@@ -64,6 +65,11 @@ const adminItems = [
     title: 'Kullanıcılar',
     icon: Users,
     href: '/panel/users',
+  },
+  {
+    title: 'Duyurular',
+    icon: Megaphone,
+    href: '/panel/announcements',
   },
   {
     title: 'Denetim Kayıtları',

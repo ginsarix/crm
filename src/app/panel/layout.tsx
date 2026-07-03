@@ -1,5 +1,7 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { AnnouncementsNudgeDialog } from '~/components/announcements-nudge-dialog';
+import { HeaderAnnouncementsButton } from '~/components/header-announcements-button';
 import { HeaderFeedbackButton } from '~/components/header-feedback-button';
 import { NewVersionDialog } from '~/components/new-version-dialog';
 import { ThemeToggle } from '~/components/theme-toggle';
@@ -26,6 +28,8 @@ export default async function PanelLayout({
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <Separator className="h-4" orientation="vertical" />
             <div className="flex-1" />
+            <HeaderAnnouncementsButton />
+            <Separator className="h-4" orientation="vertical" />
             <HeaderFeedbackButton />
             <Separator className="h-4" orientation="vertical" />
             <ThemeToggle />
@@ -42,6 +46,7 @@ export default async function PanelLayout({
       </div>
       <Toaster />
       <NewVersionDialog />
+      <AnnouncementsNudgeDialog />
     </SidebarProvider>
   );
 }

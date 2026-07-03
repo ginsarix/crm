@@ -175,6 +175,26 @@ enum Via {
   sms      @map("SMS")
 }
 
+model Announcement {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title     String
+  body      String?
+  imagePath String?
+
+  // Status is derived from these two fields against "now" — never stored directly.
+  // See src/lib/announcement-status.ts for the resolution order.
+  start DateTime?
+  end   DateTime?
+
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdById String?
+
+  @@index([createdById])
+}
+
 model Feedback {
   id          String   @id @default(cuid())
   version     String
@@ -209,7 +229,8 @@ model User {
   createdVisits          Visit[]
   assignedBusinessGroups BusinessGroup[]
 
-  audits AuditLog[]
+  audits        AuditLog[]
+  announcements Announcement[]
 
   role       String?
   banned     Boolean?   @default(false)

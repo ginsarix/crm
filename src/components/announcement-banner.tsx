@@ -25,6 +25,7 @@ export function AnnouncementBanner({
           fill
           sizes="(min-width: 1024px) 33vw, 100vw"
           src={imagePath}
+          unoptimized
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-muted-foreground">

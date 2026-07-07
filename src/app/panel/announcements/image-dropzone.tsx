@@ -75,6 +75,7 @@ export function ImageDropzone({
             fill
             sizes="560px"
             src={imagePath}
+            unoptimized
           />
           <div className="absolute right-2 bottom-2 rounded bg-black/70 px-2.5 py-1 font-medium text-white text-xs">
             Görseli değiştir

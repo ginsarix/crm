@@ -68,6 +68,8 @@ interface DataTableProps<TData, TValue> {
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
   bulkActionsBar?: ReactNode;
   getRowId?: (row: TData) => string;
+  /** Rows for which this returns true render with a neutral "restricted" style instead of their color-coding. */
+  getRowRestricted?: (row: TData) => boolean;
 }
 
 function getVisibilityKey(tableId: string) {
@@ -260,6 +262,7 @@ export function DataTable<TData, TValue>({
   onRowSelectionChange,
   bulkActionsBar,
   getRowId,
+  getRowRestricted,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     () => loadColumnVisibility(tableId, defaultColumnVisibility),
@@ -521,21 +524,26 @@ export function DataTable<TData, TValue>({
                   | 'purple'
                   | null
                   | undefined;
+                const restricted = getRowRestricted?.(row.original) ?? false;
                 return (
                   <TableRow
                     className={cn(
-                      color === 'green' &&
-                        'bg-green-200 hover:bg-green-300 dark:bg-green-900/80 dark:hover:bg-green-900/90',
-                      color === 'blue' &&
-                        'bg-blue-200 hover:bg-blue-300 dark:bg-blue-900/80 dark:hover:bg-blue-900/90',
-                      color === 'orange' &&
-                        'bg-orange-200 hover:bg-orange-300 dark:bg-orange-900/80 dark:hover:bg-orange-900/90',
-                      color === 'yellow' &&
-                        'bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-900/80 dark:hover:bg-yellow-900/90',
-                      color === 'gray' &&
-                        'bg-gray-200 hover:bg-gray-300 dark:bg-gray-500/80 dark:hover:bg-gray-500/90',
-                      color === 'purple' &&
-                        'bg-purple-200 hover:bg-purple-300 dark:bg-purple-900/80 dark:hover:bg-purple-900/90',
+                      restricted
+                        ? 'bg-muted/70 text-muted-foreground opacity-70 hover:bg-muted/90 dark:bg-muted/40 dark:hover:bg-muted/60'
+                        : cn(
+                            color === 'green' &&
+                              'bg-green-200 hover:bg-green-300 dark:bg-green-900/80 dark:hover:bg-green-900/90',
+                            color === 'blue' &&
+                              'bg-blue-200 hover:bg-blue-300 dark:bg-blue-900/80 dark:hover:bg-blue-900/90',
+                            color === 'orange' &&
+                              'bg-orange-200 hover:bg-orange-300 dark:bg-orange-900/80 dark:hover:bg-orange-900/90',
+                            color === 'yellow' &&
+                              'bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-900/80 dark:hover:bg-yellow-900/90',
+                            color === 'gray' &&
+                              'bg-gray-200 hover:bg-gray-300 dark:bg-gray-500/80 dark:hover:bg-gray-500/90',
+                            color === 'purple' &&
+                              'bg-purple-200 hover:bg-purple-300 dark:bg-purple-900/80 dark:hover:bg-purple-900/90',
+                          ),
                     )}
                     data-state={row.getIsSelected() && 'selected'}
                     key={row.id}

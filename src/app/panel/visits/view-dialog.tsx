@@ -73,6 +73,7 @@ export function ViewVisitDialog({
     filter: {
       search: customerCardSearch,
     },
+    includeRestricted: true,
   });
 
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
@@ -119,7 +120,11 @@ export function ViewVisitDialog({
       utils.visit.get.invalidate(undefined, { refetchType: 'none' });
       toast.success('Ziyaret başarıyla güncellendi');
 
-      onUpdate?.(updatedVisit);
+      onUpdate?.({
+        ...visit,
+        ...updatedVisit,
+        customerCard: { ...visit.customerCard, ...updatedVisit.customerCard },
+      });
       handleOpenChange(false);
     },
     onError: (error) => {

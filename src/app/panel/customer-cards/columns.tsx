@@ -15,9 +15,11 @@ import {
 } from '~/components/ui/dropdown-menu';
 import { DISTRICTS } from '~/shared/constants';
 
+export type CustomerCardRow = CustomerCard & { isRestricted?: boolean };
+
 export const createColumns = (
-  onViewCustomerCard: (customerCard: CustomerCard) => void,
-): ColumnDef<CustomerCard>[] => [
+  onViewCustomerCard: (customerCard: CustomerCardRow) => void,
+): ColumnDef<CustomerCardRow>[] => [
   {
     id: 'actions',
     size: 60,
@@ -39,7 +41,9 @@ export const createColumns = (
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onViewCustomerCard(customerCard)}>
-              Cariyi Düzenle
+              {customerCard.isRestricted
+                ? 'Cari Kartı Görüntüle'
+                : 'Cariyi Düzenle'}
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Link href={`/panel/visits?customerCardId=${customerCard.id}`}>

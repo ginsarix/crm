@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server';
 import type { Prisma } from 'generated/prisma';
 import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
@@ -123,6 +124,10 @@ export const customerCardRouter = createTRPCRouter({
         sorting: z.array(sortingSchema).optional(),
         page: z.number().min(1).default(1),
         itemsPerPage: z.number().min(0).default(25),
+        // When true, non-admins receive cards outside their assigned business
+        // groups too (flagged via isRestricted) instead of having them filtered
+        // out — used by the customer-cards list so it can gray those rows out.
+        includeRestricted: z.boolean().default(false),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -222,10 +227,14 @@ export const customerCardRouter = createTRPCRouter({
         orderBy.push({ createdAt: 'desc' });
       }
 
-      // Apply non-admin group restriction (await the in-flight query)
-      if (assignedGroupsPromise) {
-        const assignedGroups = await assignedGroupsPromise;
-        const allowedNames = assignedGroups.map((g) => g.name);
+      // Await the in-flight assigned-groups lookup (used below either to
+      // restrict the query, or to flag out-of-scope rows as restricted)
+      const assignedGroups = assignedGroupsPromise
+        ? await assignedGroupsPromise
+        : null;
+      const allowedNames = assignedGroups?.map((g) => g.name) ?? null;
+
+      if (allowedNames && !input.includeRestricted) {
         const requestedGroup = input.filter?.businessGroup;
         if (requestedGroup && requestedGroup !== '') {
           whereClause.businessGroup = allowedNames.includes(requestedGroup)
@@ -252,7 +261,12 @@ export const customerCardRouter = createTRPCRouter({
         : Math.ceil(totalItems / input.itemsPerPage);
 
       return {
-        data,
+        data: data.map((card) => ({
+          ...card,
+          isRestricted: allowedNames
+            ? !card.businessGroup || !allowedNames.includes(card.businessGroup)
+            : false,
+        })),
         pagination: {
           totalItems,
           totalPages,
@@ -267,21 +281,20 @@ export const customerCardRouter = createTRPCRouter({
       });
       if (!customerCard) return null;
 
-      if (ctx.session.user.role !== 'admin') {
-        const assignedGroups = await ctx.db.businessGroup.findMany({
-          where: { assignedUsers: { some: { id: ctx.session.user.id } } },
-          select: { name: true },
-        });
-        const allowedNames = assignedGroups.map((g) => g.name);
-        if (
-          !customerCard.businessGroup ||
-          !allowedNames.includes(customerCard.businessGroup)
-        ) {
-          return null;
-        }
+      if (ctx.session.user.role === 'admin') {
+        return { ...customerCard, isRestricted: false };
       }
 
-      return customerCard;
+      const assignedGroups = await ctx.db.businessGroup.findMany({
+        where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+        select: { name: true },
+      });
+      const allowedNames = assignedGroups.map((g) => g.name);
+      const isRestricted =
+        !customerCard.businessGroup ||
+        !allowedNames.includes(customerCard.businessGroup);
+
+      return { ...customerCard, isRestricted };
     }),
   create: protectedProcedure
     .input(CustomerCardCreateSchema)
@@ -323,6 +336,26 @@ export const customerCardRouter = createTRPCRouter({
   update: protectedProcedure
     .input(CustomerCardCreateSchema.extend({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user.role !== 'admin') {
+        const [existing, assignedGroups] = await Promise.all([
+          ctx.db.customerCard.findUnique({
+            where: { id: input.id },
+            select: { businessGroup: true },
+          }),
+          ctx.db.businessGroup.findMany({
+            where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+            select: { name: true },
+          }),
+        ]);
+        const allowedNames = assignedGroups.map((g) => g.name);
+        if (
+          !existing?.businessGroup ||
+          !allowedNames.includes(existing.businessGroup)
+        ) {
+          throw new TRPCError({ code: 'FORBIDDEN' });
+        }
+      }
+
       try {
         const result = await ctx.db.customerCard.update({
           where: { id: input.id },

@@ -54,6 +54,7 @@ export function CreateVisitDialog() {
     filter: {
       search: customerCardSearch,
     },
+    includeRestricted: true,
   });
 
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();

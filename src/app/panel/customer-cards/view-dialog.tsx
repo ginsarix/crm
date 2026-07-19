@@ -1,7 +1,6 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { CustomerCard } from 'generated/prisma';
 import { Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -31,6 +30,7 @@ import { authClient } from '~/server/better-auth/client';
 import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { api } from '~/trpc/react';
 import ColorControl from './color-control';
+import type { CustomerCardRow } from './columns';
 
 const DISTRICTS = [
   { value: 'merkez', label: 'MERKEZ' },
@@ -44,10 +44,10 @@ const DISTRICTS = [
 ] as const;
 
 interface ViewCustomerCardDialogProps {
-  customerCard: CustomerCard;
+  customerCard: CustomerCardRow;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdate: (customerCard: CustomerCard) => void;
+  onUpdate: (customerCard: CustomerCardRow) => void;
 }
 
 export function ViewCustomerCardDialog({
@@ -60,6 +60,7 @@ export function ViewCustomerCardDialog({
   const utils = api.useUtils();
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === 'admin';
+  const canEdit = isAdmin || !customerCard.isRestricted;
 
   const { data: businessGroups } = api.businessGroup.get.useQuery();
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
@@ -78,7 +79,7 @@ export function ViewCustomerCardDialog({
     onOpenChange(newOpen);
   };
 
-  const constructDefaultValues = (customerCard: CustomerCard) => {
+  const constructDefaultValues = (customerCard: CustomerCardRow) => {
     return {
       sira: customerCard.sira ?? '',
       name: customerCard.name ?? '',
@@ -146,6 +147,8 @@ export function ViewCustomerCardDialog({
   });
 
   const onSubmit = async (data: z.infer<typeof CustomerCardCreateSchema>) => {
+    if (!canEdit) return;
+
     await updateMutation.mutateAsync({
       id: customerCard.id,
       ...data,
@@ -174,7 +177,9 @@ export function ViewCustomerCardDialog({
       >
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>Cari Kartı Düzenle</span>
+            <span>
+              {canEdit ? 'Cari Kartı Düzenle' : 'Cari Kartı Görüntüle'}
+            </span>
             {!showDeleteConfirm && isAdmin && (
               <Button
                 className="me-4 cursor-pointer"
@@ -214,87 +219,224 @@ export function ViewCustomerCardDialog({
           </div>
         ) : (
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-            {/* Basic Information */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="sira">Sıra</Label>
-                <Input {...register('sira')} id="sira" placeholder="Sıra no" />
+            <fieldset
+              className="m-0 space-y-4 border-0 p-0"
+              disabled={!canEdit}
+            >
+              {/* Basic Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sira">Sıra</Label>
+                  <Input
+                    {...register('sira')}
+                    id="sira"
+                    placeholder="Sıra no"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="name">Ünvan *</Label>
+                  <Input
+                    {...register('name')}
+                    className={errors.name ? 'border-red-500' : ''}
+                    id="name"
+                    placeholder="Ünvan"
+                  />
+                  {errors.name && (
+                    <p className="text-red-500 text-sm">
+                      {errors.name.message}
+                    </p>
+                  )}
+                </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sicil">Sicil</Label>
+                  <Input
+                    {...register('sicil')}
+                    id="sicil"
+                    placeholder="Sicil no"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="businessGroup">Meslek Grubu</Label>
+                  <Controller
+                    control={control}
+                    name="businessGroup"
+                    render={({ field }) => (
+                      <Combobox
+                        label="Meslek grubu seçin"
+                        onChange={field.onChange}
+                        options={businessGroupOptions}
+                        selectedKey={field.value ?? ''}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Address Information */}
               <div className="space-y-2">
-                <Label htmlFor="name">Ünvan *</Label>
+                <Label htmlFor="address">Adres</Label>
                 <Input
-                  {...register('name')}
-                  className={errors.name ? 'border-red-500' : ''}
-                  id="name"
-                  placeholder="Ünvan"
+                  {...register('address')}
+                  id="address"
+                  placeholder="Adres"
                 />
-                {errors.name && (
-                  <p className="text-red-500 text-sm">{errors.name.message}</p>
-                )}
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="district">İlçe</Label>
+                  <Controller
+                    control={control}
+                    name="district"
+                    render={({ field }) => (
+                      <Select
+                        defaultValue={field.value ?? undefined}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full" id="district">
+                          <SelectValue placeholder="İlçe seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DISTRICTS.map((district) => (
+                            <SelectItem
+                              key={district.value}
+                              value={district.value}
+                            >
+                              {district.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="region">Bölge</Label>
+                  <Input
+                    {...register('region')}
+                    id="region"
+                    placeholder="Bölge"
+                  />
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className="space-y-3 rounded-lg border p-3">
+                <h4 className="font-medium text-sm">İletişim Bilgileri</h4>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="gsm1">GSM 1</Label>
+                    <Input
+                      {...register('gsm1')}
+                      id="gsm1"
+                      placeholder="GSM 1"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="contact1">İletişim 1</Label>
+                    <Input
+                      {...register('contact1')}
+                      id="contact1"
+                      placeholder="İletişim kişisi"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="gsm2">GSM 2</Label>
+                    <Input
+                      {...register('gsm2')}
+                      id="gsm2"
+                      placeholder="GSM 2"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="contact2">İletişim 2</Label>
+                    <Input
+                      {...register('contact2')}
+                      id="contact2"
+                      placeholder="İletişim kişisi"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="gsm3">GSM 3</Label>
+                    <Input
+                      {...register('gsm3')}
+                      id="gsm3"
+                      placeholder="GSM 3"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="contact3">İletişim 3</Label>
+                    <Input
+                      {...register('contact3')}
+                      id="contact3"
+                      placeholder="İletişim kişisi"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Information */}
               <div className="space-y-2">
-                <Label htmlFor="sicil">Sicil</Label>
+                <Label htmlFor="authorities">Yetkililer</Label>
                 <Input
-                  {...register('sicil')}
-                  id="sicil"
-                  placeholder="Sicil no"
+                  {...register('authorities')}
+                  id="authorities"
+                  placeholder="Yetkililer"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="businessGroup">Meslek Grubu</Label>
+                <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
                 <Controller
                   control={control}
-                  name="businessGroup"
+                  name="salesRepresentative"
                   render={({ field }) => (
                     <Combobox
-                      label="Meslek grubu seçin"
+                      className="w-full"
+                      label="Satış temsilcisi seçin"
                       onChange={field.onChange}
-                      options={businessGroupOptions}
+                      options={salesRepresentativeOptions}
                       selectedKey={field.value ?? ''}
                     />
                   )}
                 />
               </div>
-            </div>
 
-            {/* Address Information */}
-            <div className="space-y-2">
-              <Label htmlFor="address">Adres</Label>
-              <Input
-                {...register('address')}
-                id="address"
-                placeholder="Adres"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="district">İlçe</Label>
+                <Label htmlFor="status">Durum</Label>
                 <Controller
                   control={control}
-                  name="district"
+                  name="status"
                   render={({ field }) => (
                     <Select
-                      defaultValue={field.value ?? undefined}
-                      onValueChange={field.onChange}
+                      onValueChange={(v) =>
+                        field.onChange(v === '__null__' ? null : v)
+                      }
+                      value={field.value ?? undefined}
                     >
-                      <SelectTrigger className="w-full" id="district">
-                        <SelectValue placeholder="İlçe seçin" />
+                      <SelectTrigger className="w-full" id="status">
+                        <SelectValue placeholder="Durum Seçiniz" />
                       </SelectTrigger>
                       <SelectContent>
-                        {DISTRICTS.map((district) => (
-                          <SelectItem
-                            key={district.value}
-                            value={district.value}
-                          >
-                            {district.label}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="__null__">Boş</SelectItem>
+                        <SelectItem value="geldi">Geldi</SelectItem>
+                        <SelectItem value="gelmedi">Gelmedi</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -302,199 +444,85 @@ export function ViewCustomerCardDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="region">Bölge</Label>
-                <Input
-                  {...register('region')}
-                  id="region"
-                  placeholder="Bölge"
+                <Label htmlFor="authorizationDocument">Yetki Belge</Label>
+                <Controller
+                  control={control}
+                  name="authorizationDocument"
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={(v) =>
+                        field.onChange(v === '__null__' ? null : v)
+                      }
+                      value={field.value ?? undefined}
+                    >
+                      <SelectTrigger
+                        className="w-full"
+                        id="authorizationDocument"
+                      >
+                        <SelectValue placeholder="Durum Seçiniz" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__null__">Boş</SelectItem>
+                        <SelectItem value="aldi">Aldı</SelectItem>
+                        <SelectItem value="almadi">Almadı</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
               </div>
-            </div>
 
-            {/* Contact Information */}
-            <div className="space-y-3 rounded-lg border p-3">
-              <h4 className="font-medium text-sm">İletişim Bilgileri</h4>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="gsm1">GSM 1</Label>
-                  <Input {...register('gsm1')} id="gsm1" placeholder="GSM 1" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contact1">İletişim 1</Label>
-                  <Input
-                    {...register('contact1')}
-                    id="contact1"
-                    placeholder="İletişim kişisi"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="gsm2">GSM 2</Label>
-                  <Input {...register('gsm2')} id="gsm2" placeholder="GSM 2" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contact2">İletişim 2</Label>
-                  <Input
-                    {...register('contact2')}
-                    id="contact2"
-                    placeholder="İletişim kişisi"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="gsm3">GSM 3</Label>
-                  <Input {...register('gsm3')} id="gsm3" placeholder="GSM 3" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contact3">İletişim 3</Label>
-                  <Input
-                    {...register('contact3')}
-                    id="contact3"
-                    placeholder="İletişim kişisi"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Information */}
-            <div className="space-y-2">
-              <Label htmlFor="authorities">Yetkililer</Label>
-              <Input
-                {...register('authorities')}
-                id="authorities"
-                placeholder="Yetkililer"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
-              <Controller
-                control={control}
-                name="salesRepresentative"
-                render={({ field }) => (
-                  <Combobox
-                    className="w-full"
-                    label="Satış temsilcisi seçin"
-                    onChange={field.onChange}
-                    options={salesRepresentativeOptions}
-                    selectedKey={field.value ?? ''}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">Durum</Label>
-              <Controller
-                control={control}
-                name="status"
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(v) =>
-                      field.onChange(v === '__null__' ? null : v)
-                    }
-                    value={field.value ?? undefined}
-                  >
-                    <SelectTrigger className="w-full" id="status">
-                      <SelectValue placeholder="Durum Seçiniz" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__null__">Boş</SelectItem>
-                      <SelectItem value="geldi">Geldi</SelectItem>
-                      <SelectItem value="gelmedi">Gelmedi</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="authorizationDocument">Yetki Belge</Label>
-              <Controller
-                control={control}
-                name="authorizationDocument"
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(v) =>
-                      field.onChange(v === '__null__' ? null : v)
-                    }
-                    value={field.value ?? undefined}
-                  >
-                    <SelectTrigger
-                      className="w-full"
-                      id="authorizationDocument"
+              <div className="space-y-2">
+                <Label htmlFor="vote">Oy</Label>
+                <Controller
+                  control={control}
+                  name="vote"
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={(v) =>
+                        field.onChange(v === '__null__' ? null : v)
+                      }
+                      value={field.value ?? undefined}
                     >
-                      <SelectValue placeholder="Durum Seçiniz" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__null__">Boş</SelectItem>
-                      <SelectItem value="aldi">Aldı</SelectItem>
-                      <SelectItem value="almadi">Almadı</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
+                      <SelectTrigger className="w-full" id="vote">
+                        <SelectValue placeholder="Durum Seçiniz" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__null__">Boş</SelectItem>
+                        <SelectItem value="geldi">Geldi</SelectItem>
+                        <SelectItem value="gelmedi">Gelmedi</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="vote">Oy</Label>
-              <Controller
-                control={control}
-                name="vote"
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(v) =>
-                      field.onChange(v === '__null__' ? null : v)
-                    }
-                    value={field.value ?? undefined}
-                  >
-                    <SelectTrigger className="w-full" id="vote">
-                      <SelectValue placeholder="Durum Seçiniz" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__null__">Boş</SelectItem>
-                      <SelectItem value="geldi">Geldi</SelectItem>
-                      <SelectItem value="gelmedi">Gelmedi</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label className="cursor-pointer" htmlFor="color">
+                  Renk
+                </Label>
+                <Controller
+                  control={control}
+                  name="color"
+                  render={({ field }) => (
+                    <ColorControl
+                      color={field.value ?? 'gray'}
+                      id="color"
+                      setColor={field.onChange}
+                    />
+                  )}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label className="cursor-pointer" htmlFor="color">
-                Renk
-              </Label>
-              <Controller
-                control={control}
-                name="color"
-                render={({ field }) => (
-                  <ColorControl
-                    color={field.value ?? 'gray'}
-                    id="color"
-                    setColor={field.onChange}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="note">Not</Label>
-              <Textarea
-                {...register('note')}
-                id="note"
-                placeholder="Not"
-                rows={3}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="note">Not</Label>
+                <Textarea
+                  {...register('note')}
+                  id="note"
+                  placeholder="Not"
+                  rows={3}
+                />
+              </div>
+            </fieldset>
 
             <DialogFooter>
               <Button
@@ -503,15 +531,17 @@ export function ViewCustomerCardDialog({
                 type="button"
                 variant="outline"
               >
-                İptal
+                {canEdit ? 'İptal' : 'Kapat'}
               </Button>
-              <Button
-                className="cursor-pointer"
-                disabled={updateMutation.isPending}
-                type="submit"
-              >
-                {updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
-              </Button>
+              {canEdit && (
+                <Button
+                  className="cursor-pointer"
+                  disabled={updateMutation.isPending}
+                  type="submit"
+                >
+                  {updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
+                </Button>
+              )}
             </DialogFooter>
           </form>
         )}

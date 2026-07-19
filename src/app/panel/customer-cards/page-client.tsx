@@ -33,7 +33,7 @@ import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { BulkActionsBar } from '../_components/bulk-actions-bar';
 import ColorControl from './color-control';
-import { createColumns } from './columns';
+import { type CustomerCardRow, createColumns } from './columns';
 import { CreateCustomerCardDialog } from './create-dialog';
 import { FilterControls } from './filter-controls';
 import { ViewCustomerCardDialog } from './view-dialog';
@@ -58,7 +58,7 @@ export function CustomerCardsPageClient() {
     pageSize: 25,
   });
   const [selectedCustomerCard, setSelectedCustomerCard] =
-    useState<CustomerCard | null>(null);
+    useState<CustomerCardRow | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   type BulkColor = 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'purple';
@@ -216,11 +216,12 @@ export function CustomerCardsPageClient() {
         vote,
       },
       sorting,
+      includeRestricted: true,
     },
     { placeholderData: keepPreviousData },
   );
 
-  const handleViewCustomerCard = (customerCard: CustomerCard) => {
+  const handleViewCustomerCard = (customerCard: CustomerCardRow) => {
     setSelectedCustomerCard(customerCard);
     setViewDialogOpen(true);
   };
@@ -370,6 +371,7 @@ export function CustomerCardsPageClient() {
                 color: false,
               }}
               exportFilename="cari_kartlar"
+              getRowRestricted={(row) => row.isRestricted === true}
               onRowSelectionChange={setRowSelection}
               pageCount={data?.pagination?.totalPages ?? -1}
               pagination={pagination}
@@ -405,6 +407,7 @@ export function CustomerCardsPageClient() {
                     vote,
                   },
                   sorting,
+                  includeRestricted: true,
                 },
                 (old) =>
                   old
@@ -412,7 +415,7 @@ export function CustomerCardsPageClient() {
                         ...old,
                         data: old.data.map((c) =>
                           c.id === updatedCustomerCard.id
-                            ? updatedCustomerCard
+                            ? { ...c, ...updatedCustomerCard }
                             : c,
                         ),
                       }

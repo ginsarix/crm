@@ -136,6 +136,10 @@ export const visitRouter = createTRPCRouter({
         sorting: z.array(sortingSchema).optional(),
         page: z.number().min(1).default(1),
         itemsPerPage: z.number().min(0).default(25),
+        // When true, non-admins receive visits for customer cards outside their
+        // assigned business groups too (flagged via isRestricted) instead of
+        // having them filtered out — used by the visits list to gray them out.
+        includeRestricted: z.boolean().default(false),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -206,11 +210,13 @@ export const visitRouter = createTRPCRouter({
         orderBy.push({ date: 'desc' }, { time: 'desc' });
       }
 
-      if (assignedGroupsPromise) {
-        const assignedGroups = await assignedGroupsPromise;
-        whereClause.customerCard = {
-          businessGroup: { in: assignedGroups.map((g) => g.name) },
-        };
+      const assignedGroups = assignedGroupsPromise
+        ? await assignedGroupsPromise
+        : null;
+      const allowedNames = assignedGroups?.map((g) => g.name) ?? null;
+
+      if (allowedNames && !input.includeRestricted) {
+        whereClause.customerCard = { businessGroup: { in: allowedNames } };
       }
 
       const fetchAll = input.itemsPerPage === 0;
@@ -226,6 +232,7 @@ export const visitRouter = createTRPCRouter({
               select: {
                 name: true,
                 gsm1: true,
+                businessGroup: true,
               },
             },
             salesRepresentative: {
@@ -242,7 +249,13 @@ export const visitRouter = createTRPCRouter({
         : Math.ceil(totalItems / input.itemsPerPage);
 
       return {
-        data,
+        data: data.map((visit) => ({
+          ...visit,
+          isRestricted: allowedNames
+            ? !visit.customerCard?.businessGroup ||
+              !allowedNames.includes(visit.customerCard.businessGroup)
+            : false,
+        })),
         pagination: {
           totalItems,
           totalPages,
@@ -265,21 +278,20 @@ export const visitRouter = createTRPCRouter({
       });
       if (!visit) return null;
 
-      if (ctx.session.user.role !== 'admin') {
-        const assignedGroups = await ctx.db.businessGroup.findMany({
-          where: { assignedUsers: { some: { id: ctx.session.user.id } } },
-          select: { name: true },
-        });
-        const allowedNames = assignedGroups.map((g) => g.name);
-        if (
-          !visit.customerCard.businessGroup ||
-          !allowedNames.includes(visit.customerCard.businessGroup)
-        ) {
-          return null;
-        }
+      if (ctx.session.user.role === 'admin') {
+        return { ...visit, isRestricted: false };
       }
 
-      return visit;
+      const assignedGroups = await ctx.db.businessGroup.findMany({
+        where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+        select: { name: true },
+      });
+      const allowedNames = assignedGroups.map((g) => g.name);
+      const isRestricted =
+        !visit.customerCard.businessGroup ||
+        !allowedNames.includes(visit.customerCard.businessGroup);
+
+      return { ...visit, isRestricted };
     }),
   create: protectedProcedure
     .input(VisitCreateSchema)

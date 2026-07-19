@@ -21,6 +21,18 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-21',
+    version: '1.21',
+    date: '20 Temmuz 2026',
+    changes: [
+      {
+        type: 'changed',
+        title: 'Tüm cari kartlar artık herkese görünür',
+        desc: 'Meslek grubunuza ait olmayan cari kartlar artık listeden gizlenmek yerine soluk (düşük opaklıkta) gösteriliyor.',
+      },
+    ],
+  },
+  {
     id: 'v1-20',
     version: '1.20',
     date: '2 Temmuz 2026',

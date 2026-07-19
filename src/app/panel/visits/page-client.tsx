@@ -102,6 +102,7 @@ export function VisitsPageClient() {
       salesRepresentativeId: salesRepresentativeId || undefined,
     },
     sorting,
+    includeRestricted: true,
   });
 
   const handleViewVisit = (visit: VisitWithCustomerCard) => {
@@ -210,6 +211,7 @@ export function VisitsPageClient() {
               columns={columns}
               data={data?.data ?? []}
               exportFilename="ziyaretler"
+              getRowRestricted={(row) => row.isRestricted === true}
               onRowSelectionChange={setRowSelection}
               pageCount={data?.pagination?.totalPages ?? -1}
               pagination={pagination}
@@ -239,13 +241,16 @@ export function VisitsPageClient() {
                     salesRepresentativeId: salesRepresentativeId || undefined,
                   },
                   sorting,
+                  includeRestricted: true,
                 },
                 (old) =>
                   old
                     ? {
                         ...old,
                         data: old.data.map((v) =>
-                          v.id === updatedVisit.id ? updatedVisit : v,
+                          v.id === updatedVisit.id
+                            ? { ...v, ...updatedVisit }
+                            : v,
                         ),
                       }
                     : old,

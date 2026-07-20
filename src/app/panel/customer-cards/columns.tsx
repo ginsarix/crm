@@ -13,7 +13,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
-import { COLOR_DISPLAY_NAME_MAP, DISTRICTS_SELECT_MAP } from '~/shared/constants';
+import {
+  COLOR_DISPLAY_NAME_MAP,
+  DISTRICTS_SELECT_MAP,
+} from '~/shared/constants';
 
 export type CustomerCardRow = CustomerCard & { isRestricted?: boolean };
 

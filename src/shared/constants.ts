@@ -25,10 +25,10 @@ export const DISTRICTS_SELECT_MAP = [
 ] as const;
 
 export const COLOR_DISPLAY_NAME_MAP = {
-    green: 'Yeşil',
-    blue: 'Mavi',
-    orange: 'Turuncu',
-    yellow: 'Sarı',
-    gray: 'Gri',
-    purple: 'Mor',
+  green: 'Yeşil',
+  blue: 'Mavi',
+  orange: 'Turuncu',
+  yellow: 'Sarı',
+  gray: 'Gri',
+  purple: 'Mor',
 } as const;

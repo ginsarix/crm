@@ -2,6 +2,7 @@ import { TRPCError } from '@trpc/server';
 import type { Prisma } from 'generated/prisma';
 import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
+import { COLOR_DISPLAY_NAME_MAP } from '~/shared/constants';
 import {
   CustomerCardCreateSchema,
   CustomerCardFindManySelectSchema,
@@ -508,7 +509,7 @@ export const customerCardRouter = createTRPCRouter({
           '',
           'SUCCESS',
           undefined,
-          `${result.count} cari kartın rengi "${input.color}" olarak güncellendi (toplu)`,
+          `${result.count} cari kartın rengi "${COLOR_DISPLAY_NAME_MAP[input.color]}" olarak güncellendi (toplu)`,
         );
         return result;
       } catch (error) {

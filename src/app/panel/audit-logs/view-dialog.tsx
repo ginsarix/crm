@@ -122,9 +122,14 @@ export function ViewAuditLogDialog({
               <Label className="mb-2 block text-muted-foreground">
                 Kaynak ID
               </Label>
-              <p className="font-mono text-muted-foreground text-xs">
-                {auditLog.resourceId ?? '-'}
-              </p>
+              <div className="font-mono text-muted-foreground text-xs">
+                {auditLog.resourceId
+                  ? auditLog.resourceId.split(',').map((id, i) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: resourceId might contain duplicate IDs, so index is used to keep keys unique
+                      <p key={`${id}-${i}`}>{id.trim()}</p>
+                    ))
+                  : '-'}
+              </div>
             </div>
           </div>
 

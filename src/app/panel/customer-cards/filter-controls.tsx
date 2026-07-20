@@ -13,10 +13,10 @@ import {
 import { columnMap } from '~/lib/column-map';
 import { createLocaleSorter } from '~/lib/utils';
 import {
-  AUTHORIZATION_DOCUMENTS,
-  DISTRICTS,
-  STATUSES,
-  VOTES,
+  AUTHORIZATION_DOCUMENTS_SELECT_MAP,
+  DISTRICTS_SELECT_MAP,
+  STATUSES_SELECT_MAP,
+  VOTES_SELECT_MAP,
 } from '~/shared/constants';
 import ColorControl from './color-control';
 
@@ -107,7 +107,7 @@ export function FilterControls({
 
   const districtComboboxOptions = [
     { value: '', label: 'Tümü' },
-    ...DISTRICTS,
+    ...DISTRICTS_SELECT_MAP,
   ].map(({ value, label }) => {
     return { key: value, label: label };
   });
@@ -115,13 +115,13 @@ export function FilterControls({
   const statusComboboxOptions = [
     { key: '', label: 'Tümü' },
     { key: '__null__', label: 'Boş' },
-    ...STATUSES.map(({ value, label }) => ({ key: value, label })),
+    ...STATUSES_SELECT_MAP.map(({ value, label }) => ({ key: value, label })),
   ];
 
   const authorizationDocumentComboboxOptions = [
     { key: '', label: 'Tümü' },
     { key: '__null__', label: 'Boş' },
-    ...AUTHORIZATION_DOCUMENTS.map(({ value, label }) => ({
+    ...AUTHORIZATION_DOCUMENTS_SELECT_MAP.map(({ value, label }) => ({
       key: value,
       label,
     })),
@@ -130,7 +130,7 @@ export function FilterControls({
   const voteComboboxOptions = [
     { key: '', label: 'Tümü' },
     { key: '__null__', label: 'Boş' },
-    ...VOTES.map(({ value, label }) => ({ key: value, label })),
+    ...VOTES_SELECT_MAP.map(({ value, label }) => ({ key: value, label })),
   ];
 
   return (

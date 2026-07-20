@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
-import { DISTRICTS } from '~/shared/constants';
+import { DISTRICTS_SELECT_MAP } from '~/shared/constants';
 
 export type CustomerCardRow = CustomerCard & { isRestricted?: boolean };
 
@@ -97,7 +97,7 @@ export const createColumns = (
     cell: ({ row }) => {
       const district = row.getValue('district') as $Enums.District;
       return district
-        ? DISTRICTS.find((d) => d.value === district)?.label
+        ? DISTRICTS_SELECT_MAP.find((d) => d.value === district)?.label
         : '-';
     },
   },

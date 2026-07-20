@@ -29,7 +29,7 @@ import {
 } from '~/components/ui/select';
 import { Textarea } from '~/components/ui/textarea';
 import { createLocaleSorter } from '~/lib/utils';
-import { DISTRICTS } from '~/shared/constants';
+import { DISTRICTS_SELECT_MAP } from '~/shared/constants';
 import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { api } from '~/trpc/react';
 import ColorControl from './color-control';
@@ -164,7 +164,7 @@ export function CreateCustomerCardDialog() {
                       <SelectValue placeholder="İlçe seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      {DISTRICTS.map((district) => (
+                      {DISTRICTS_SELECT_MAP.map((district) => (
                         <SelectItem key={district.value} value={district.value}>
                           {district.label}
                         </SelectItem>

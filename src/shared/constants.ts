@@ -1,19 +1,19 @@
-export const STATUSES = [
+export const STATUSES_SELECT_MAP = [
   { value: 'geldi', label: 'Geldi' },
   { value: 'gelmedi', label: 'Gelmedi' },
 ] as const;
 
-export const AUTHORIZATION_DOCUMENTS = [
+export const AUTHORIZATION_DOCUMENTS_SELECT_MAP = [
   { value: 'aldi', label: 'Aldı' },
   { value: 'almadi', label: 'Almadı' },
 ] as const;
 
-export const VOTES = [
+export const VOTES_SELECT_MAP = [
   { value: 'geldi', label: 'Geldi' },
   { value: 'gelmedi', label: 'Gelmedi' },
 ] as const;
 
-export const DISTRICTS = [
+export const DISTRICTS_SELECT_MAP = [
   { value: 'merkez', label: 'MERKEZ' },
   { value: 'avanos', label: 'AVANOS' },
   { value: 'urgup', label: 'ÜRGÜP' },

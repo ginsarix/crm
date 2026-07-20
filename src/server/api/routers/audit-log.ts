@@ -205,7 +205,7 @@ export const auditLogRouter = createTRPCRouter({
         ctx.session.user.id,
         'AUDIT_LOG_DELETED',
         'AUDIT_LOG',
-        '',
+        input.ids.join(','),
         'SUCCESS',
         undefined,
         `${result.count} denetim kaydı silindi (toplu)`,

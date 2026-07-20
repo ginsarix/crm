@@ -23,3 +23,12 @@ export const DISTRICTS_SELECT_MAP = [
   { value: 'derinkuyu', label: 'DERİNKUYU' },
   { value: 'gulsehir', label: 'GÜLŞEHİR' },
 ] as const;
+
+export const COLOR_DISPLAY_NAME_MAP = {
+    green: 'Yeşil',
+    blue: 'Mavi',
+    orange: 'Turuncu',
+    yellow: 'Sarı',
+    gray: 'Gri',
+    purple: 'Mor',
+} as const;

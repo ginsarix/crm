@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
-import { DISTRICTS_SELECT_MAP } from '~/shared/constants';
+import { COLOR_DISPLAY_NAME_MAP, DISTRICTS_SELECT_MAP } from '~/shared/constants';
 
 export type CustomerCardRow = CustomerCard & { isRestricted?: boolean };
 
@@ -138,16 +138,7 @@ export const createColumns = (
 
     // using an accessorFn instead of the `cell` here so that excel exporting gets the display text and not the internal values
     accessorFn: ({ color }) => {
-      const colorLabels = {
-        green: 'Yeşil',
-        blue: 'Mavi',
-        orange: 'Turuncu',
-        yellow: 'Sarı',
-        gray: 'Gri',
-        purple: 'Mor',
-      };
-
-      return colorLabels[color] ?? '-';
+      return COLOR_DISPLAY_NAME_MAP[color] ?? '-';
     },
   },
   {

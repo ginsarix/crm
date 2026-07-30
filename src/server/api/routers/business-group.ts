@@ -182,8 +182,14 @@ export const businessGroupRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const result = await ctx.db.businessGroup.create({
-          data: { name: input.name },
+        const result = await ctx.db.$transaction(async (tx) => {
+          const group = await tx.businessGroup.create({
+            data: { name: input.name },
+          });
+          await tx.businessGroupCard.create({
+            data: { businessGroupId: group.id },
+          });
+          return group;
         });
 
         await createAuditLog(

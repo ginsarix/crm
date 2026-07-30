@@ -37,6 +37,7 @@ export const auditAction = {
   BUSINESS_GROUP_CREATED: 'Meslek Grubu Oluşturuldu',
   BUSINESS_GROUP_UPDATED: 'Meslek Grubu Güncellendi',
   BUSINESS_GROUP_DELETED: 'Meslek Grubu Silindi',
+  BUSINESS_GROUP_CARD_UPDATED: 'Meslek Grubu Kartı Güncellendi',
   SALES_REPRESENTATIVE_CREATED: 'Satış Temsilcisi Oluşturuldu',
   SALES_REPRESENTATIVE_UPDATED: 'Satış Temsilcisi Güncellendi',
   SALES_REPRESENTATIVE_DELETED: 'Satış Temsilcisi Silindi',
@@ -56,6 +57,7 @@ export const resourceType = {
   EMAIL: 'E-posta',
   ROLE: 'Rol',
   BUSINESS_GROUP: 'Meslek Grubu',
+  BUSINESS_GROUP_CARD: 'Meslek Grubu Kartı',
   SALES_REPRESENTATIVE: 'Satış Temsilcisi',
   ANNOUNCEMENT: 'Duyuru',
 } as const;

@@ -53,6 +53,22 @@ export const columnMap = {
     createdAt: 'Oluşturulma Tarihi',
     updatedAt: 'Güncellenme Tarihi',
   },
+  businessGroupCard: {
+    id: 'ID',
+    businessGroupName: 'Meslek Grubu',
+    meclis1: 'Meclis 1',
+    meclis2: 'Meclis 2',
+    meclis3: 'Meclis 3',
+    baskan: 'Meslek Grubu Başkanı',
+    baskanYardimcisi: 'Meslek Grubu Başkan Yardımcısı',
+    uye1: 'Meslek Grubu Üye 1',
+    uye2: 'Meslek Grubu Üye 2',
+    uye3: 'Meslek Grubu Üye 3',
+    yedekUye1: 'Yedek Üye 1',
+    yedekUye2: 'Yedek Üye 2',
+    createdAt: 'Oluşturulma Tarihi',
+    updatedAt: 'Güncellenme Tarihi',
+  },
 } as const;
 
 export const getColumnName = <T extends keyof typeof columnMap>(

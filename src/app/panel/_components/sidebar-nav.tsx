@@ -2,6 +2,7 @@
 
 import {
   BookUser,
+  Building2,
   Calendar,
   ChevronUp,
   ClipboardList,
@@ -57,6 +58,12 @@ const navigationItems = [
     title: 'Ziyaretler',
     icon: Calendar,
     href: '/panel/visits',
+  },
+  {
+    title: 'Meslek Grubu Kartları',
+    icon: Building2,
+    href: '/panel/business-group-cards',
+    adminOnly: true,
   },
 ];
 
@@ -148,20 +155,22 @@ export function SidebarNav() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.href}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navigationItems
+                .filter((item) => !item.adminOnly || isAdmin)
+                .map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                      tooltip={item.title}
+                    >
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

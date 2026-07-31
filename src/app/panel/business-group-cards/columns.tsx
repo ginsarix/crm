@@ -26,8 +26,13 @@ function committeeFieldColumn(
     | 'uye1'
     | 'uye2'
     | 'uye3'
+    | 'uye4'
+    | 'uye5'
     | 'yedekUye1'
-    | 'yedekUye2',
+    | 'yedekUye2'
+    | 'yedekUye3'
+    | 'yedekUye4'
+    | 'yedekUye5',
   header: string,
 ): ColumnDef<BusinessGroupCardRow> {
   return {
@@ -79,16 +84,21 @@ export const createColumns = (
     header: 'Meslek Grubu',
     enableSorting: true,
   },
-    committeeFieldColumn('meclis1', 'Meclis 1'),
-    committeeFieldColumn('meclis2', 'Meclis 2'),
-    committeeFieldColumn('meclis3', 'Meclis 3'),
+  committeeFieldColumn('meclis1', 'Meclis 1'),
+  committeeFieldColumn('meclis2', 'Meclis 2'),
+  committeeFieldColumn('meclis3', 'Meclis 3'),
   committeeFieldColumn('baskan', 'Meslek Grubu Başkanı'),
   committeeFieldColumn('baskanYardimcisi', 'Meslek Grubu Başkan Yardımcısı'),
   committeeFieldColumn('uye1', 'Meslek Grubu Üye 1'),
   committeeFieldColumn('yedekUye1', 'Yedek Üye 1'),
   committeeFieldColumn('uye2', 'Meslek Grubu Üye 2'),
   committeeFieldColumn('uye3', 'Meslek Grubu Üye 3'),
+  committeeFieldColumn('uye4', 'Meslek Grubu Üye 4'),
+  committeeFieldColumn('uye5', 'Meslek Grubu Üye 5'),
   committeeFieldColumn('yedekUye2', 'Yedek Üye 2'),
+  committeeFieldColumn('yedekUye3', 'Yedek Üye 3'),
+  committeeFieldColumn('yedekUye4', 'Yedek Üye 4'),
+  committeeFieldColumn('yedekUye5', 'Yedek Üye 5'),
   {
     accessorKey: 'updatedAt',
     header: 'Güncellenme Tarihi',

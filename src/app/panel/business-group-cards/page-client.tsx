@@ -77,10 +77,15 @@ export function BusinessGroupCardsPageClient() {
               defaultColumnVisibility={{
                 uye2: false,
                 uye3: false,
+                uye4: false,
+                uye5: false,
                 yedekUye1: false,
                 yedekUye2: false,
+                yedekUye3: false,
+                yedekUye4: false,
+                yedekUye5: false,
                 createdAt: false,
-                updatedAt: false
+                updatedAt: false,
               }}
               exportFilename="meslek_grubu_kartlari"
               pageCount={data?.pagination?.totalPages ?? -1}

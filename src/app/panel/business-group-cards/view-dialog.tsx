@@ -23,8 +23,11 @@ const FIELD_GROUPS: { title: string; fields: (keyof Committee)[] }[] = [
     title: 'Yönetim',
     fields: ['baskan', 'baskanYardimcisi'],
   },
-  { title: 'Üyeler', fields: ['uye1', 'uye2', 'uye3'] },
-  { title: 'Yedek Üyeler', fields: ['yedekUye1', 'yedekUye2'] },
+  { title: 'Üyeler', fields: ['uye1', 'uye2', 'uye3', 'uye4', 'uye5'] },
+  {
+    title: 'Yedek Üyeler',
+    fields: ['yedekUye1', 'yedekUye2', 'yedekUye3', 'yedekUye4', 'yedekUye5'],
+  },
 ];
 
 const FIELD_LABELS: Record<keyof Committee, string> = {
@@ -36,8 +39,13 @@ const FIELD_LABELS: Record<keyof Committee, string> = {
   uye1: 'Meslek Grubu Üye 1',
   uye2: 'Meslek Grubu Üye 2',
   uye3: 'Meslek Grubu Üye 3',
+  uye4: 'Meslek Grubu Üye 4',
+  uye5: 'Meslek Grubu Üye 5',
   yedekUye1: 'Yedek Üye 1',
   yedekUye2: 'Yedek Üye 2',
+  yedekUye3: 'Yedek Üye 3',
+  yedekUye4: 'Yedek Üye 4',
+  yedekUye5: 'Yedek Üye 5',
 };
 
 function toCommittee(row: BusinessGroupCardRow): Committee {
@@ -109,8 +117,9 @@ export function ViewBusinessGroupCardDialog({
         </DialogHeader>
 
         <p className="text-muted-foreground text-sm">
-          Alanlara isim yazıp Enter’a veya artı butonuna basarak ekleyebilirsiniz. Satış temsilcileri listesinde olmayan
-          isimler de girilebilir.
+          Alanlara isim yazıp Enter’a veya artı butonuna basarak
+          ekleyebilirsiniz. Satış temsilcileri listesinde olmayan isimler de
+          girilebilir.
         </p>
 
         <div className="space-y-4">

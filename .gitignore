@@ -53,3 +53,6 @@ yarn-error.log*
 start-database.sh
 
 scripts/
+
+# playwright mcp test artifacts
+.playwright-mcp/

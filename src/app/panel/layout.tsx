@@ -9,6 +9,7 @@ import { Separator } from '~/components/ui/separator';
 import { SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
 import { APP_VERSION } from '~/constants/app-version';
+import { CommandPalette } from './_components/command-palette';
 import { SidebarNav } from './_components/sidebar-nav';
 
 export default async function PanelLayout({
@@ -27,6 +28,7 @@ export default async function PanelLayout({
           <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur-sm sm:px-6">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <Separator className="h-4" orientation="vertical" />
+            <CommandPalette />
             <div className="flex-1" />
             <HeaderAnnouncementsButton />
             <Separator className="h-4" orientation="vertical" />

@@ -21,7 +21,7 @@ import {
   Columns3,
   Download,
 } from 'lucide-react';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import XLSX from 'xlsx-js-style';
 
 import { Button } from '~/components/ui/button';
@@ -272,7 +272,12 @@ export function DataTable<TData, TValue>({
     loadColumnSizing(tableId),
   );
 
+  const skipVisibilitySave = useRef(true);
   useEffect(() => {
+    if (skipVisibilitySave.current) {
+      skipVisibilitySave.current = false;
+      return;
+    }
     saveColumnVisibility(tableId, columnVisibility);
   }, [tableId, columnVisibility]);
 

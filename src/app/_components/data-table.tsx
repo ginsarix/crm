@@ -272,12 +272,9 @@ export function DataTable<TData, TValue>({
     loadColumnSizing(tableId),
   );
 
-  const skipVisibilitySave = useRef(true);
+  const initialColumnVisibility = useRef(columnVisibility);
   useEffect(() => {
-    if (skipVisibilitySave.current) {
-      skipVisibilitySave.current = false;
-      return;
-    }
+    if (columnVisibility === initialColumnVisibility.current) return;
     saveColumnVisibility(tableId, columnVisibility);
   }, [tableId, columnVisibility]);
 

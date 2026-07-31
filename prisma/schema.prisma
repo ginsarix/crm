@@ -245,6 +245,7 @@ model User {
 
   audits        AuditLog[]
   announcements Announcement[]
+  savedFilters  SavedFilter[]
 
   role       String?
   banned     Boolean?   @default(false)
@@ -254,6 +255,28 @@ model User {
 
   @@unique([email])
   @@map("user")
+}
+
+model SavedFilter {
+  id      String          @id @default(cuid())
+  name    String
+  page    SavedFilterPage
+  // Flat string map of the page's filter fields at save time — same shape
+  // the page already keeps in URL params / component state
+  filters Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, page])
+}
+
+enum SavedFilterPage {
+  customerCard
+  visit
 }
 
 model Session {

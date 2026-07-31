@@ -129,6 +129,32 @@ export function CustomerCardsPageClient() {
     [router, searchParams],
   );
 
+  // Flat filter snapshot for saving as a preset, and the reverse — applying a
+  // saved preset by replacing the URL wholesale with its stored params
+  const currentFilters: Record<string, string> = {
+    search: urlSearch,
+    color: color === 'all' ? '' : color,
+    search_scope: searchScope === 'all' ? '' : searchScope,
+    business_group: businessGroup,
+    sales_representative: salesRepresentative,
+    district,
+    status,
+    authorization_document: authorizationDocument,
+    vote,
+    empty_field: emptyField,
+  };
+
+  const handleApplyPreset = useCallback(
+    (filters: Record<string, string>) => {
+      const params = new URLSearchParams();
+      for (const [key, value] of Object.entries(filters)) {
+        if (value) params.set(key, value);
+      }
+      router.replace(`?${params.toString()}`);
+    },
+    [router],
+  );
+
   // Stable ref so the debounce effect doesn't re-fire when searchParams changes
   const updateParamRef = useRef(updateParam);
   useEffect(() => {
@@ -317,8 +343,10 @@ export function CustomerCardsPageClient() {
               ) ?? []
             }
             color={color}
+            currentFilters={currentFilters}
             district={district}
             emptyField={emptyField}
+            onApplyPreset={handleApplyPreset}
             onAuthorizationDocument={(v) =>
               updateParam('authorization_document', v)
             }

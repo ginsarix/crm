@@ -10,6 +10,7 @@ import {
 } from '~/components/ui/input-group';
 import { columnMap } from '~/lib/column-map';
 import { api } from '~/trpc/react';
+import { SavedFilters } from '../_components/saved-filters';
 import ViaControl from './via-control';
 
 type VisitSearchScope = 'all' | keyof typeof columnMap.visit;
@@ -22,11 +23,13 @@ export function FilterControls({
   searchScope,
   salesRepresentativeId,
   emptyField,
+  currentFilters,
   onSearch,
   onVia,
   onSearchScope,
   onSalesRepresentativeId,
   onEmptyField,
+  onApplyPreset,
 }: {
   search: string;
   onSearch: (search: string) => void;
@@ -38,6 +41,8 @@ export function FilterControls({
   onSalesRepresentativeId: (id: string) => void;
   emptyField: VisitEmptyField;
   onEmptyField: (emptyField: VisitEmptyField) => void;
+  currentFilters: Record<string, string>;
+  onApplyPreset: (filters: Record<string, string>) => void;
 }) {
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
   const comboboxOptions = [
@@ -116,6 +121,11 @@ export function FilterControls({
           onChange={(v) => onEmptyField(v as VisitEmptyField)}
           options={emptyFieldComboboxOptions}
           selectedKey={emptyField}
+        />
+        <SavedFilters
+          currentFilters={currentFilters}
+          onApply={onApplyPreset}
+          page="visit"
         />
       </CardContent>
     </Card>

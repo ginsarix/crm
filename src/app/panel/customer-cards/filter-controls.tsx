@@ -18,6 +18,7 @@ import {
   STATUSES_SELECT_MAP,
   VOTES_SELECT_MAP,
 } from '~/shared/constants';
+import { SavedFilters } from '../_components/saved-filters';
 import ColorControl from './color-control';
 
 export function FilterControls({
@@ -43,6 +44,8 @@ export function FilterControls({
   onVote,
   emptyField,
   onEmptyField,
+  currentFilters,
+  onApplyPreset,
   onReset,
 }: {
   search: string;
@@ -71,6 +74,8 @@ export function FilterControls({
   onVote: (vote: '' | '__null__' | $Enums.Vote) => void;
   emptyField: '' | keyof CustomerCard;
   onEmptyField: (emptyField: '' | keyof CustomerCard) => void;
+  currentFilters: Record<string, string>;
+  onApplyPreset: (filters: Record<string, string>) => void;
   onReset: () => void;
 }) {
   const searchScopeComboboxOptions = [
@@ -227,6 +232,11 @@ export function FilterControls({
             onChange={(v) => onEmptyField(v as '' | keyof CustomerCard)}
             options={emptyFieldComboboxOptions}
             selectedKey={emptyField}
+          />
+          <SavedFilters
+            currentFilters={currentFilters}
+            onApply={onApplyPreset}
+            page="customerCard"
           />
           <Button
             className="self-end"

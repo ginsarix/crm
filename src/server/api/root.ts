@@ -5,6 +5,7 @@ import { businessGroupCardRouter } from '~/server/api/routers/business-group-car
 import { customerCardRouter } from '~/server/api/routers/customer-card';
 import { feedbackRouter } from '~/server/api/routers/feedback';
 import { salesRepresentativeRouter } from '~/server/api/routers/sales-representative';
+import { savedFilterRouter } from '~/server/api/routers/saved-filter';
 import { userRouter } from '~/server/api/routers/user';
 import { visitRouter } from '~/server/api/routers/visit';
 import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc';
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   visit: visitRouter,
   salesRepresentative: salesRepresentativeRouter,
   dashboardConfig: dashboardConfigRouter,
+  savedFilter: savedFilterRouter,
 });
 
 // export type definition of API

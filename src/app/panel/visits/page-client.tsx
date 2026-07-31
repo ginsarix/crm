@@ -79,6 +79,24 @@ export function VisitsPageClient() {
     [router, searchParams],
   );
 
+  // Flat filter snapshot for saving as a preset, and the reverse — applying a
+  // saved preset by writing its stored values back onto local filter state
+  const currentFilters: Record<string, string> = {
+    search,
+    via: via === 'all' ? '' : via,
+    search_scope: searchScope === 'all' ? '' : searchScope,
+    sales_representative: salesRepresentativeId,
+    empty_field: emptyField,
+  };
+
+  const handleApplyPreset = useCallback((filters: Record<string, string>) => {
+    setSearch(filters.search ?? '');
+    setVia((filters.via || 'all') as typeof via);
+    setSearchScope((filters.search_scope || 'all') as VisitSearchScope);
+    setSalesRepresentativeId(filters.sales_representative ?? '');
+    setEmptyField((filters.empty_field ?? '') as typeof emptyField);
+  }, []);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
   useEffect(() => {
     setRowSelection({});
@@ -186,7 +204,9 @@ export function VisitsPageClient() {
       <div className="mx-auto w-full max-w-[1600px]">
         <div className="mb-4">
           <FilterControls
+            currentFilters={currentFilters}
             emptyField={emptyField}
+            onApplyPreset={handleApplyPreset}
             onEmptyField={setEmptyField}
             onSalesRepresentativeId={setSalesRepresentativeId}
             onSearch={setSearch}

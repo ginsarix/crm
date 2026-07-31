@@ -10,12 +10,20 @@ import {
   protectedProcedure,
 } from '../trpc';
 
+// Fields eligible for the "boş alan" (missing-value) filter — every visit
+// column except id/createdAt/updatedAt (technical fields) and date (always
+// required on create, so "empty" is meaningless)
+const emptyFields = Object.keys(columnMap.visit).filter(
+  (key) => !['id', 'createdAt', 'updatedAt', 'date'].includes(key),
+);
+
 const filterSchema = z.object({
   search: z.string().optional(),
   via: z.enum(['phone', 'inPerson', 'email', 'sms', 'all']).default('all'),
   searchScope: z.enum(['all', ...Object.keys(columnMap.visit)]).default('all'),
   customerCardId: z.string().optional(),
   salesRepresentativeId: z.string().optional(),
+  emptyField: z.enum(['', ...emptyFields]).default(''),
 });
 
 const sortingSchema = z.object({
@@ -190,6 +198,16 @@ export const visitRouter = createTRPCRouter({
       // Filter by salesRepresentativeId if provided
       if (input.filter?.salesRepresentativeId) {
         whereClause.salesRepresentativeId = input.filter.salesRepresentativeId;
+      }
+
+      // Build "boş alan" (empty field) filter
+      if (input.filter?.emptyField) {
+        const field = input.filter.emptyField;
+        if (field === 'via') {
+          whereClause.via = null;
+        } else {
+          whereClause.OR = [{ [field]: null }, { [field]: '' }];
+        }
       }
 
       // Build orderBy clause

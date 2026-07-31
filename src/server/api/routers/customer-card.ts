@@ -15,6 +15,16 @@ import {
   protectedProcedure,
 } from '../trpc';
 
+// Fields eligible for the "boş alan" (missing-value) filter — every
+// customerCard column except id/createdAt/updatedAt (technical fields) and
+// color (always has a value via its DB default, so "empty" is meaningless)
+const emptyFields = Object.keys(columnMap.customerCard).filter(
+  (key) => !['id', 'createdAt', 'updatedAt', 'color'].includes(key),
+);
+
+// Enum fields have no empty-string variant — "empty" means null for these
+const emptyEnumFields = ['district', 'status', 'authorizationDocument', 'vote'];
+
 const filterSchema = z.object({
   search: z.string().optional(),
   color: z
@@ -41,6 +51,7 @@ const filterSchema = z.object({
   status: z.enum(['', 'geldi', 'gelmedi', '__null__']).default(''),
   authorizationDocument: z.enum(['', 'aldi', 'almadi', '__null__']).default(''),
   vote: z.enum(['', 'geldi', 'gelmedi', '__null__']).default(''),
+  emptyField: z.enum(['', ...emptyFields]).default(''),
 });
 
 const sortingSchema = z.object({
@@ -208,6 +219,20 @@ export const customerCardRouter = createTRPCRouter({
           input.filter.vote === '__null__' ? null : input.filter.vote;
       }
 
+      // Conditions that need to combine with each other via AND without
+      // clobbering one another's use of the top-level OR key
+      const andConditions: Prisma.CustomerCardWhereInput[] = [];
+
+      // Build "boş alan" (empty field) filter
+      if (input.filter?.emptyField) {
+        const field = input.filter.emptyField;
+        andConditions.push(
+          emptyEnumFields.includes(field)
+            ? { [field]: null }
+            : { OR: [{ [field]: null }, { [field]: '' }] },
+        );
+      }
+
       // Build orderBy clause
       const orderBy: Prisma.CustomerCardOrderByWithRelationInput[] = [];
 
@@ -251,15 +276,17 @@ export const customerCardRouter = createTRPCRouter({
           // treated as gray — matching how it's rendered (faded, not by its
           // real color).
           if (requestedColor === 'gray') {
-            whereClause.OR = [
-              { color: 'gray', businessGroup: { in: allowedNames } },
-              {
-                OR: [
-                  { businessGroup: null },
-                  { businessGroup: { notIn: allowedNames } },
-                ],
-              },
-            ];
+            andConditions.push({
+              OR: [
+                { color: 'gray', businessGroup: { in: allowedNames } },
+                {
+                  OR: [
+                    { businessGroup: null },
+                    { businessGroup: { notIn: allowedNames } },
+                  ],
+                },
+              ],
+            });
           } else {
             whereClause.color = requestedColor;
             if (!whereClause.businessGroup) {
@@ -269,6 +296,10 @@ export const customerCardRouter = createTRPCRouter({
         } else {
           whereClause.color = requestedColor;
         }
+      }
+
+      if (andConditions.length > 0) {
+        whereClause.AND = andConditions;
       }
 
       const fetchAll = input.itemsPerPage === 0;

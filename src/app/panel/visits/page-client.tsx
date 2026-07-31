@@ -56,6 +56,9 @@ export function VisitsPageClient() {
   >('all');
   const [searchScope, setSearchScope] = useState<VisitSearchScope>('all');
   const [salesRepresentativeId, setSalesRepresentativeId] = useState('');
+  const [emptyField, setEmptyField] = useState<
+    '' | keyof typeof columnMap.visit
+  >('');
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
@@ -100,6 +103,7 @@ export function VisitsPageClient() {
       via,
       searchScope,
       salesRepresentativeId: salesRepresentativeId || undefined,
+      emptyField,
     },
     sorting,
     includeRestricted: true,
@@ -182,6 +186,8 @@ export function VisitsPageClient() {
       <div className="mx-auto w-full max-w-[1600px]">
         <div className="mb-4">
           <FilterControls
+            emptyField={emptyField}
+            onEmptyField={setEmptyField}
             onSalesRepresentativeId={setSalesRepresentativeId}
             onSearch={setSearch}
             onSearchScope={setSearchScope}
@@ -239,6 +245,7 @@ export function VisitsPageClient() {
                     via,
                     searchScope,
                     salesRepresentativeId: salesRepresentativeId || undefined,
+                    emptyField,
                   },
                   sorting,
                   includeRestricted: true,

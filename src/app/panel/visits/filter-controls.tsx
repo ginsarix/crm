@@ -14,15 +14,19 @@ import ViaControl from './via-control';
 
 type VisitSearchScope = 'all' | keyof typeof columnMap.visit;
 
+type VisitEmptyField = '' | keyof typeof columnMap.visit;
+
 export function FilterControls({
   search,
   via,
   searchScope,
   salesRepresentativeId,
+  emptyField,
   onSearch,
   onVia,
   onSearchScope,
   onSalesRepresentativeId,
+  onEmptyField,
 }: {
   search: string;
   onSearch: (search: string) => void;
@@ -32,6 +36,8 @@ export function FilterControls({
   onSearchScope: (searchScope: VisitSearchScope) => void;
   salesRepresentativeId: string;
   onSalesRepresentativeId: (id: string) => void;
+  emptyField: VisitEmptyField;
+  onEmptyField: (emptyField: VisitEmptyField) => void;
 }) {
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
   const comboboxOptions = [
@@ -49,6 +55,19 @@ export function FilterControls({
       .map(([key, label]) => {
         return { key, label };
       }),
+  ];
+
+  const emptyFieldComboboxOptions = [
+    { key: '', label: 'Kapalı' },
+    ...Object.entries(columnMap.visit)
+      .filter(
+        ([key]) =>
+          key !== 'id' &&
+          key !== 'date' &&
+          key !== 'createdAt' &&
+          key !== 'updatedAt',
+      )
+      .map(([key, label]) => ({ key, label })),
   ];
 
   return (
@@ -90,6 +109,13 @@ export function FilterControls({
             })) ?? []),
           ]}
           selectedKey={salesRepresentativeId}
+        />
+        <Combobox
+          className="sm:w-40"
+          label="Boş Alan"
+          onChange={(v) => onEmptyField(v as VisitEmptyField)}
+          options={emptyFieldComboboxOptions}
+          selectedKey={emptyField}
         />
       </CardContent>
     </Card>

@@ -112,6 +112,9 @@ export function CustomerCardsPageClient() {
       ? '__null__'
       : (VoteValidation.safeParse(rawVote).data ?? '')
   ) as '' | '__null__' | $Enums.Vote;
+  const emptyField = (searchParams.get('empty_field') ?? '') as
+    | ''
+    | keyof CustomerCard;
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -149,6 +152,7 @@ export function CustomerCardsPageClient() {
     status,
     authorizationDocument,
     vote,
+    emptyField,
   ].join('|');
   const prevFilterKeyRef = useRef(filterKey);
   useEffect(() => {
@@ -214,6 +218,7 @@ export function CustomerCardsPageClient() {
         status,
         authorizationDocument,
         vote,
+        emptyField,
       },
       sorting,
       includeRestricted: true,
@@ -313,12 +318,14 @@ export function CustomerCardsPageClient() {
             }
             color={color}
             district={district}
+            emptyField={emptyField}
             onAuthorizationDocument={(v) =>
               updateParam('authorization_document', v)
             }
             onBusinessGroup={(v) => updateParam('business_group', v)}
             onColor={(v) => updateParam('color', v === 'all' ? '' : v)}
             onDistrict={(v) => updateParam('district', v)}
+            onEmptyField={(v) => updateParam('empty_field', v)}
             onReset={handleReset}
             onSalesRepresentative={(v) =>
               updateParam('sales_representative', v)

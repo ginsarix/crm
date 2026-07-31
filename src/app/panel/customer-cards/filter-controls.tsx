@@ -41,6 +41,8 @@ export function FilterControls({
   onAuthorizationDocument,
   vote,
   onVote,
+  emptyField,
+  onEmptyField,
   onReset,
 }: {
   search: string;
@@ -67,6 +69,8 @@ export function FilterControls({
   ) => void;
   vote: '' | '__null__' | $Enums.Vote;
   onVote: (vote: '' | '__null__' | $Enums.Vote) => void;
+  emptyField: '' | keyof CustomerCard;
+  onEmptyField: (emptyField: '' | keyof CustomerCard) => void;
   onReset: () => void;
 }) {
   const searchScopeComboboxOptions = [
@@ -131,6 +135,19 @@ export function FilterControls({
     { key: '', label: 'Tümü' },
     { key: '__null__', label: 'Boş' },
     ...VOTES_SELECT_MAP.map(({ value, label }) => ({ key: value, label })),
+  ];
+
+  const emptyFieldComboboxOptions = [
+    { key: '', label: 'Kapalı' },
+    ...Object.entries(columnMap.customerCard)
+      .filter(
+        ([key]) =>
+          key !== 'id' &&
+          key !== 'createdAt' &&
+          key !== 'updatedAt' &&
+          key !== 'color',
+      )
+      .map(([key, label]) => ({ key, label })),
   ];
 
   return (
@@ -204,6 +221,12 @@ export function FilterControls({
             onChange={(v) => onVote(v as '' | $Enums.Vote)}
             options={voteComboboxOptions}
             selectedKey={vote}
+          />
+          <Combobox
+            label="Boş Alan"
+            onChange={(v) => onEmptyField(v as '' | keyof CustomerCard)}
+            options={emptyFieldComboboxOptions}
+            selectedKey={emptyField}
           />
           <Button
             className="self-end"

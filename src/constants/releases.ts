@@ -21,6 +21,28 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-22',
+    version: '1.22',
+    date: '2 Ağustos 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Komut paleti (⌘K)',
+        desc: 'Panel başlığındaki yeni butonla veya Ctrl/Cmd+K kısayoluyla açılan komut paletiyle sayfalar arasında hızlıca geçiş yapabilir, cari kartları isim/sicil/GSM/meslek grubuna göre arayıp doğrudan kart görüntüleme ekranına gidebilirsiniz.',
+      },
+      {
+        type: 'new',
+        title: '"Boş Alan" filtresi',
+        desc: 'Cari kartlar ve ziyaretler sayfalarında, seçilen alanı boş olan kayıtları gösteren yeni bir filtre eklendi.',
+      },
+      {
+        type: 'new',
+        title: 'Kayıtlı filtreler',
+        desc: 'Cari kartlar ve ziyaretler sayfalarında, sık kullanılan filtre kombinasyonlarını isimlendirip kaydedebilir, daha sonra tek tıkla yeniden uygulayabilirsiniz.',
+      },
+    ],
+  },
+  {
     id: 'v1-21',
     version: '1.21',
     date: '20 Temmuz 2026',

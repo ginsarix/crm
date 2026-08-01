@@ -31,7 +31,7 @@ pnpm db:studio    # Open Prisma Studio
   - `publicProcedure` — no auth
   - `protectedProcedure` — session required
   - `adminProcedure` — session + `role === 'admin'`
-- All mutations that write data call `createAuditLog()` (defined in `trpc.ts`) for the audit trail
+- Most mutations that write data call `createAuditLog()` (defined in `trpc.ts`) for the audit trail — `feedback`, `dashboard-config`, and `saved-filter` routers are current exceptions that don't audit-log
 - The timing middleware adds ~100ms artificial delay in dev — intentional, do not remove
 
 ### Authentication
@@ -41,7 +41,7 @@ Configured in `src/server/better-auth/`. Uses email/password with the Prisma ada
 ### Role-based access
 
 - `User.role` is either `'admin'` or `'user'` (null treated as user)
-- Admins see all business groups and customer cards; non-admins see only their assigned business groups and the customer cards whose `businessGroup` string matches those group names
+- Admins see all business groups, customer cards, and visits. Non-admin scoping depends on the query: aggregate queries (`getStats`, `getTotal`) hard-filter to the user's assigned business groups; the main list queries (`customerCard.get`, `visit.get`) instead return every record and flag out-of-scope ones with `isRestricted: true` so the UI grays them out rather than hiding them (controlled by the `includeRestricted` input flag)
 - Admin-only pages (`/panel/users`, `/panel/audit-logs`) redirect non-admins server-side
 - The settings page is accessible to all; the BusinessGroupsTable is conditionally rendered for admins only
 

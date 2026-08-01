@@ -27,11 +27,6 @@ export const RELEASES: Release[] = [
     changes: [
       {
         type: 'new',
-        title: 'Komut paleti (⌘K)',
-        desc: 'Panel başlığındaki yeni butonla veya Ctrl/Cmd+K kısayoluyla açılan komut paletiyle sayfalar arasında hızlıca geçiş yapabilir, cari kartları isim/sicil/GSM/meslek grubuna göre arayıp doğrudan kart görüntüleme ekranına gidebilirsiniz.',
-      },
-      {
-        type: 'new',
         title: '"Boş Alan" filtresi',
         desc: 'Cari kartlar ve ziyaretler sayfalarında, seçilen alanı boş olan kayıtları gösteren yeni bir filtre eklendi.',
       },
@@ -39,6 +34,11 @@ export const RELEASES: Release[] = [
         type: 'new',
         title: 'Kayıtlı filtreler',
         desc: 'Cari kartlar ve ziyaretler sayfalarında, sık kullanılan filtre kombinasyonlarını isimlendirip kaydedebilir, daha sonra tek tıkla yeniden uygulayabilirsiniz.',
+      },
+      {
+        type: 'new',
+        title: 'Komut paleti',
+        desc: 'Panel başlığındaki yeni arama barı ile veya Ctrl/Cmd+K kısayoluyla açılan komut paletiyle sayfalar arasında hızlıca geçiş yapabilir, cari kartları isim/sicil/GSM 1-2-3/meslek grubuna göre arayıp doğrudan kart görüntüleme ekranına gidebilirsiniz.',
       },
     ],
   },

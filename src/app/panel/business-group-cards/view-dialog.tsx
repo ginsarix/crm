@@ -84,9 +84,7 @@ export function ViewBusinessGroupCardDialog({
 
   const updateMutation = api.businessGroupCard.update.useMutation({
     onSuccess: (updated) => {
-      utils.businessGroupCard.get.invalidate(undefined, {
-        refetchType: 'none',
-      });
+      utils.businessGroupCard.get.cancel();
       toast.success('Meslek grubu kartı başarıyla güncellendi');
       onUpdate(updated);
       onOpenChange(false);

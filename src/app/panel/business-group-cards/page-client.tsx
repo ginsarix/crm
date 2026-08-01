@@ -35,12 +35,16 @@ export function BusinessGroupCardsPageClient() {
 
   const utils = api.useUtils();
 
-  const { data, isLoading } = api.businessGroupCard.get.useQuery({
+  const businessGroupCardQueryInput = {
     page: pagination.pageIndex + 1,
     itemsPerPage: pagination.pageSize,
     filter: { search, searchScope },
     sorting,
-  });
+  };
+
+  const { data, isLoading } = api.businessGroupCard.get.useQuery(
+    businessGroupCardQueryInput,
+  );
 
   const handleView = (row: BusinessGroupCardRow) => {
     setSelectedRow(row);
@@ -105,23 +109,26 @@ export function BusinessGroupCardsPageClient() {
             onOpenChange={setViewDialogOpen}
             onUpdate={(updated) => {
               setSelectedRow(updated);
-              utils.businessGroupCard.get.setData(
-                {
-                  page: pagination.pageIndex + 1,
-                  itemsPerPage: pagination.pageSize,
-                  filter: { search, searchScope },
-                  sorting,
-                },
-                (old) =>
-                  old
-                    ? {
-                        ...old,
-                        data: old.data.map((row) =>
-                          row.id === updated.id ? { ...row, ...updated } : row,
-                        ),
-                      }
-                    : old,
-              );
+              if (pagination.pageSize === 0) {
+                // "Tümü" (fetch-all) mode — avoid re-fetching the whole
+                // table on every save, patch the already-cancelled cache instead
+                utils.businessGroupCard.get.setData(
+                  businessGroupCardQueryInput,
+                  (old) =>
+                    old
+                      ? {
+                          ...old,
+                          data: old.data.map((row) =>
+                            row.id === updated.id
+                              ? { ...row, ...updated }
+                              : row,
+                          ),
+                        }
+                      : old,
+                );
+              } else {
+                utils.businessGroupCard.get.invalidate();
+              }
             }}
             open={viewDialogOpen}
           />

@@ -113,7 +113,7 @@ export function VisitsPageClient() {
     onError: () => toast.error('Silme işlemi sırasında hata oluştu'),
   });
 
-  const { data, isLoading } = api.visit.get.useQuery({
+  const visitQueryInput = {
     page: pagination.pageIndex + 1, // Convert 0-based to 1-based for API
     itemsPerPage: pagination.pageSize,
     filter: {
@@ -125,7 +125,9 @@ export function VisitsPageClient() {
     },
     sorting,
     includeRestricted: true,
-  });
+  };
+
+  const { data, isLoading } = api.visit.get.useQuery(visitQueryInput);
 
   const handleViewVisit = (visit: VisitWithCustomerCard) => {
     setSelectedVisit(visit);
@@ -256,21 +258,10 @@ export function VisitsPageClient() {
             onOpenChange={handleViewDialogOpenChange}
             onUpdate={(updatedVisit) => {
               setSelectedVisit(updatedVisit);
-              utils.visit.get.setData(
-                {
-                  page: pagination.pageIndex + 1,
-                  itemsPerPage: pagination.pageSize,
-                  filter: {
-                    search,
-                    via,
-                    searchScope,
-                    salesRepresentativeId: salesRepresentativeId || undefined,
-                    emptyField,
-                  },
-                  sorting,
-                  includeRestricted: true,
-                },
-                (old) =>
+              if (pagination.pageSize === 0) {
+                // "Tümü" (fetch-all) mode — avoid re-fetching the whole
+                // table on every save, patch the already-cancelled cache instead
+                utils.visit.get.setData(visitQueryInput, (old) =>
                   old
                     ? {
                         ...old,
@@ -281,7 +272,10 @@ export function VisitsPageClient() {
                         ),
                       }
                     : old,
-              );
+                );
+              } else {
+                utils.visit.get.invalidate();
+              }
             }}
             open={viewDialogOpen}
             visit={selectedVisit}

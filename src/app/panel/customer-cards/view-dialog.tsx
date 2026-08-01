@@ -123,7 +123,7 @@ export function ViewCustomerCardDialog({
 
   const updateMutation = api.customerCard.update.useMutation({
     onSuccess: (updatedCustomerCard) => {
-      utils.customerCard.get.invalidate(undefined, { refetchType: 'none' });
+      utils.customerCard.get.cancel();
       toast.success('Cari kart başarıyla güncellendi');
       onUpdate(updatedCustomerCard);
       handleOpenChange(false);

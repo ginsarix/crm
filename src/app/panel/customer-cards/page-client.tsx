@@ -230,25 +230,27 @@ export function CustomerCardsPageClient() {
   const { data: salesRepresentativeOptions } =
     api.salesRepresentative.get.useQuery();
 
-  const { data, isLoading } = api.customerCard.get.useQuery(
-    {
-      page: pagination.pageIndex + 1,
-      itemsPerPage: pagination.pageSize,
-      filter: {
-        search: urlSearch,
-        color,
-        searchScope,
-        businessGroup,
-        salesRepresentative,
-        district,
-        status,
-        authorizationDocument,
-        vote,
-        emptyField,
-      },
-      sorting,
-      includeRestricted: true,
+  const customerCardQueryInput = {
+    page: pagination.pageIndex + 1,
+    itemsPerPage: pagination.pageSize,
+    filter: {
+      search: urlSearch,
+      color,
+      searchScope,
+      businessGroup,
+      salesRepresentative,
+      district,
+      status,
+      authorizationDocument,
+      vote,
+      emptyField,
     },
+    sorting,
+    includeRestricted: true,
+  };
+
+  const { data, isLoading } = api.customerCard.get.useQuery(
+    customerCardQueryInput,
     { placeholderData: keepPreviousData },
   );
 
@@ -426,25 +428,10 @@ export function CustomerCardsPageClient() {
             onOpenChange={handleViewDialogOpenChange}
             onUpdate={(updatedCustomerCard) => {
               setSelectedCustomerCard(updatedCustomerCard);
-              utils.customerCard.get.setData(
-                {
-                  page: pagination.pageIndex + 1,
-                  itemsPerPage: pagination.pageSize,
-                  filter: {
-                    search: urlSearch,
-                    color,
-                    searchScope,
-                    businessGroup,
-                    salesRepresentative,
-                    district,
-                    status,
-                    authorizationDocument,
-                    vote,
-                  },
-                  sorting,
-                  includeRestricted: true,
-                },
-                (old) =>
+              if (pagination.pageSize === 0) {
+                // "Tümü" (fetch-all) mode — avoid re-fetching the whole
+                // table on every save, patch the already-cancelled cache instead
+                utils.customerCard.get.setData(customerCardQueryInput, (old) =>
                   old
                     ? {
                         ...old,
@@ -455,7 +442,10 @@ export function CustomerCardsPageClient() {
                         ),
                       }
                     : old,
-              );
+                );
+              } else {
+                utils.customerCard.get.invalidate();
+              }
             }}
             open={viewDialogOpen}
           />

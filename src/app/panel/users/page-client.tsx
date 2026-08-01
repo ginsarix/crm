@@ -64,7 +64,7 @@ export function UsersPageClient() {
     onError: () => toast.error('Silme işlemi sırasında hata oluştu'),
   });
 
-  const { data, isLoading } = api.user.get.useQuery({
+  const userQueryInput = {
     page: pagination.pageIndex + 1, // Convert 0-based to 1-based for API
     itemsPerPage: pagination.pageSize,
     filter: {
@@ -72,7 +72,9 @@ export function UsersPageClient() {
       searchScope,
     },
     sorting,
-  });
+  };
+
+  const { data, isLoading } = api.user.get.useQuery(userQueryInput);
 
   const handleViewUser = (user: User) => {
     setSelectedUser(user);
@@ -147,14 +149,10 @@ export function UsersPageClient() {
             onOpenChange={setViewDialogOpen}
             onUpdate={(updatedUser) => {
               setSelectedUser(updatedUser);
-              utils.user.get.setData(
-                {
-                  page: pagination.pageIndex + 1,
-                  itemsPerPage: pagination.pageSize,
-                  filter: { search, searchScope },
-                  sorting,
-                },
-                (old) =>
+              if (pagination.pageSize === 0) {
+                // "Tümü" (fetch-all) mode — avoid re-fetching the whole
+                // table on every save, patch the already-cancelled cache instead
+                utils.user.get.setData(userQueryInput, (old) =>
                   old
                     ? {
                         ...old,
@@ -163,7 +161,10 @@ export function UsersPageClient() {
                         ),
                       }
                     : old,
-              );
+                );
+              } else {
+                utils.user.get.invalidate();
+              }
             }}
             open={viewDialogOpen}
             user={selectedUser}

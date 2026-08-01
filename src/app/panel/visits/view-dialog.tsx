@@ -117,7 +117,7 @@ export function ViewVisitDialog({
 
   const updateMutation = api.visit.update.useMutation({
     onSuccess: (updatedVisit) => {
-      utils.visit.get.invalidate(undefined, { refetchType: 'none' });
+      utils.visit.get.cancel();
       toast.success('Ziyaret başarıyla güncellendi');
 
       onUpdate?.({

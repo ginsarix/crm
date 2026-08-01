@@ -73,9 +73,8 @@ export function ViewSaleRepresentativeDialog({
 
   const updateMutation = api.salesRepresentative.update.useMutation({
     onSuccess: (updatedSalesRepresentative) => {
-      utils.salesRepresentative.get.invalidate(undefined, {
-        refetchType: 'none',
-      });
+      utils.salesRepresentative.get.cancel();
+      utils.salesRepresentative.get.invalidate();
       toast.success('Satış temsilcisi başarıyla güncellendi');
       onUpdate(updatedSalesRepresentative);
       handleOpenChange(false);

@@ -11,8 +11,8 @@ import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import type { BusinessGroupCardRow } from './columns';
 import { createColumns } from './columns';
+import { EditBusinessGroupCardDialog } from './edit-dialog';
 import { FilterControls } from './filter-controls';
-import { ViewBusinessGroupCardDialog } from './view-dialog';
 
 type BusinessGroupCardSearchScope =
   | 'all'
@@ -31,7 +31,7 @@ export function BusinessGroupCardsPageClient() {
   const [selectedRow, setSelectedRow] = useState<BusinessGroupCardRow | null>(
     null,
   );
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const utils = api.useUtils();
 
@@ -46,12 +46,12 @@ export function BusinessGroupCardsPageClient() {
     businessGroupCardQueryInput,
   );
 
-  const handleView = (row: BusinessGroupCardRow) => {
+  const handleEdit = (row: BusinessGroupCardRow) => {
     setSelectedRow(row);
-    setViewDialogOpen(true);
+    setEditDialogOpen(true);
   };
 
-  const columns = createColumns(handleView);
+  const columns = createColumns(handleEdit);
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
@@ -104,9 +104,9 @@ export function BusinessGroupCardsPageClient() {
         )}
 
         {selectedRow && (
-          <ViewBusinessGroupCardDialog
+          <EditBusinessGroupCardDialog
             businessGroupCard={selectedRow}
-            onOpenChange={setViewDialogOpen}
+            onOpenChange={setEditDialogOpen}
             onUpdate={(updated) => {
               setSelectedRow(updated);
               if (pagination.pageSize === 0) {
@@ -130,7 +130,7 @@ export function BusinessGroupCardsPageClient() {
                 utils.businessGroupCard.get.invalidate();
               }
             }}
-            open={viewDialogOpen}
+            open={editDialogOpen}
           />
         )}
       </div>

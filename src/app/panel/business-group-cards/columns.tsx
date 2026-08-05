@@ -60,7 +60,7 @@ function committeeFieldColumn(
 }
 
 export const createColumns = (
-  onViewBusinessGroupCard: (row: BusinessGroupCardRow) => void,
+  onEditBusinessGroupCard: (row: BusinessGroupCardRow) => void,
 ): ColumnDef<BusinessGroupCardRow>[] => [
   {
     id: 'actions',
@@ -82,7 +82,7 @@ export const createColumns = (
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => onViewBusinessGroupCard(businessGroupCard)}
+              onClick={() => onEditBusinessGroupCard(businessGroupCard)}
             >
               Düzenle
             </DropdownMenuItem>

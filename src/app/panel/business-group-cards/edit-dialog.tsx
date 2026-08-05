@@ -60,19 +60,19 @@ function toCommittee(row: BusinessGroupCardRow): Committee {
   return result;
 }
 
-interface ViewBusinessGroupCardDialogProps {
+interface EditBusinessGroupCardDialogProps {
   businessGroupCard: BusinessGroupCardRow;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdate: (row: BusinessGroupCardRow) => void;
 }
 
-export function ViewBusinessGroupCardDialog({
+export function EditBusinessGroupCardDialog({
   businessGroupCard,
   open,
   onOpenChange,
   onUpdate,
-}: ViewBusinessGroupCardDialogProps) {
+}: EditBusinessGroupCardDialogProps) {
   const utils = api.useUtils();
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
   const suggestions = salesRepresentatives?.map((sr) => sr.name) ?? [];

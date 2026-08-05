@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
 import {
@@ -13,7 +13,10 @@ import {
 import { Label } from '~/components/ui/label';
 import { TagAutocomplete } from '~/components/ui/tag-autocomplete';
 import type { Committee } from '~/shared/zod-schemas/business-group-card';
-import { committeeFieldKeys } from '~/shared/zod-schemas/business-group-card';
+import {
+  committeeFieldKeys,
+  getDuplicateCommitteeNames,
+} from '~/shared/zod-schemas/business-group-card';
 import { api } from '~/trpc/react';
 import type { BusinessGroupCardRow } from './columns';
 
@@ -82,6 +85,11 @@ export function ViewBusinessGroupCardDialog({
     setCommittee(toCommittee(businessGroupCard));
   }, [businessGroupCard]);
 
+  const duplicateNames = useMemo(
+    () => getDuplicateCommitteeNames(committee),
+    [committee],
+  );
+
   const updateMutation = api.businessGroupCard.update.useMutation({
     onSuccess: (updated) => {
       utils.businessGroupCard.get.cancel();
@@ -128,6 +136,7 @@ export function ViewBusinessGroupCardDialog({
                 <div className="space-y-2" key={field}>
                   <Label htmlFor={field}>{FIELD_LABELS[field]}</Label>
                   <TagAutocomplete
+                    duplicateValues={duplicateNames}
                     id={field}
                     onChange={(values) =>
                       setCommittee((prev) => ({ ...prev, [field]: values }))

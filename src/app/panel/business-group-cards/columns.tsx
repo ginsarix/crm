@@ -2,6 +2,7 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
+import { Fragment } from 'react';
 import { Button } from '~/components/ui/button';
 import {
   DropdownMenu,
@@ -11,28 +12,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
+import { cn } from '~/lib/utils';
+import type { CommitteeFieldKey } from '~/shared/zod-schemas/business-group-card';
+import { getDuplicateCommitteeNames } from '~/shared/zod-schemas/business-group-card';
 import type { RouterOutputs } from '~/trpc/types';
 
 export type BusinessGroupCardRow =
   RouterOutputs['businessGroupCard']['get']['data'][number];
 
 function committeeFieldColumn(
-  key:
-    | 'meclis1'
-    | 'meclis2'
-    | 'meclis3'
-    | 'baskan'
-    | 'baskanYardimcisi'
-    | 'uye1'
-    | 'uye2'
-    | 'uye3'
-    | 'uye4'
-    | 'uye5'
-    | 'yedekUye1'
-    | 'yedekUye2'
-    | 'yedekUye3'
-    | 'yedekUye4'
-    | 'yedekUye5',
+  key: CommitteeFieldKey,
   header: string,
 ): ColumnDef<BusinessGroupCardRow> {
   return {
@@ -43,6 +32,29 @@ function committeeFieldColumn(
       const committee = row.committee as Record<string, string[]> | null;
       const values = committee?.[key] ?? [];
       return values.length > 0 ? values.join(', ') : '-';
+    },
+    cell: ({ row }) => {
+      const committee = row.original.committee as Record<
+        string,
+        string[]
+      > | null;
+      const values = committee?.[key] ?? [];
+      if (values.length === 0) return '-';
+
+      const duplicateNames = getDuplicateCommitteeNames(committee);
+      return values.map((value, index) => (
+        <Fragment key={value}>
+          {index > 0 && ', '}
+          <span
+            className={cn(
+              duplicateNames.has(value) &&
+                'font-medium text-purple-600 dark:text-purple-400',
+            )}
+          >
+            {value}
+          </span>
+        </Fragment>
+      ));
     },
   };
 }

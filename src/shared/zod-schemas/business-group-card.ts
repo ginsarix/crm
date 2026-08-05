@@ -40,6 +40,25 @@ export const CommitteeSchema = z.object({
 
 export type Committee = z.infer<typeof CommitteeSchema>;
 
+export function getDuplicateCommitteeNames(
+  committee: Partial<Record<CommitteeFieldKey, string[] | undefined>> | null,
+): Set<string> {
+  const fieldsByName = new Map<string, Set<CommitteeFieldKey>>();
+  for (const key of committeeFieldKeys) {
+    for (const name of committee?.[key] ?? []) {
+      const fields = fieldsByName.get(name) ?? new Set<CommitteeFieldKey>();
+      fields.add(key);
+      fieldsByName.set(name, fields);
+    }
+  }
+
+  const duplicates = new Set<string>();
+  for (const [name, fields] of fieldsByName) {
+    if (fields.size > 1) duplicates.add(name);
+  }
+  return duplicates;
+}
+
 export const BusinessGroupCardUpdateSchema = z.object({
   id: z.string(),
   committee: CommitteeSchema,

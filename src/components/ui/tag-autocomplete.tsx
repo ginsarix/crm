@@ -12,6 +12,7 @@ export function TagAutocomplete({
   suggestions,
   placeholder = 'İsim yazın, eklemek için Enter’a basın',
   className,
+  duplicateValues,
 }: {
   id?: string;
   values: string[];
@@ -19,6 +20,7 @@ export function TagAutocomplete({
   suggestions: string[];
   placeholder?: string;
   className?: string;
+  duplicateValues?: Set<string>;
 }) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
@@ -56,7 +58,15 @@ export function TagAutocomplete({
         )}
       >
         {values.map((value) => (
-          <Badge className="gap-1 pr-1" key={value} variant="secondary">
+          <Badge
+            className={cn(
+              'gap-1 pr-1',
+              duplicateValues?.has(value) &&
+                'border-purple-500/20 bg-purple-500/10 text-purple-700 dark:text-purple-400',
+            )}
+            key={value}
+            variant="secondary"
+          >
             <span className="max-w-40 truncate">{value}</span>
             <button
               aria-label={`${value} kaldır`}

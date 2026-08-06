@@ -13,6 +13,7 @@ export function TagAutocomplete({
   placeholder = 'İsim yazın, eklemek için Enter’a basın',
   className,
   duplicateValues,
+  disabled,
 }: {
   id?: string;
   values: string[];
@@ -21,6 +22,7 @@ export function TagAutocomplete({
   placeholder?: string;
   className?: string;
   duplicateValues?: Set<string>;
+  disabled?: boolean;
 }) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
@@ -55,6 +57,7 @@ export function TagAutocomplete({
       <div
         className={cn(
           'flex min-h-9 w-full flex-wrap items-center gap-1.5 rounded-md border border-input bg-transparent px-2 py-1.5 shadow-xs transition-[color,box-shadow] has-focus-visible:border-ring has-focus-visible:ring-[3px] has-focus-visible:ring-ring/50 dark:bg-input/30',
+          disabled && 'cursor-not-allowed opacity-50',
         )}
       >
         {values.map((value) => (
@@ -68,57 +71,63 @@ export function TagAutocomplete({
             variant="secondary"
           >
             <span className="max-w-40 truncate">{value}</span>
-            <button
-              aria-label={`${value} kaldır`}
-              className="cursor-pointer rounded-sm p-0.5 hover:bg-muted-foreground/20"
-              onClick={() => removeValue(value)}
-              type="button"
-            >
-              <XIcon className="size-3" />
-            </button>
+            {!disabled && (
+              <button
+                aria-label={`${value} kaldır`}
+                className="cursor-pointer rounded-sm p-0.5 hover:bg-muted-foreground/20"
+                onClick={() => removeValue(value)}
+                type="button"
+              >
+                <XIcon className="size-3" />
+              </button>
+            )}
           </Badge>
         ))}
-        <input
-          className="h-6 min-w-24 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          id={inputId}
-          onBlur={() => setOpen(false)}
-          onChange={(e) => {
-            setInputValue(e.target.value);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
+        {!disabled && (
+          <input
+            className="h-6 min-w-24 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            id={inputId}
+            onBlur={() => setOpen(false)}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addValue(inputValue);
+              } else if (
+                e.key === 'Backspace' &&
+                inputValue === '' &&
+                values.length > 0
+              ) {
+                removeValue(values[values.length - 1] as string);
+              }
+            }}
+            placeholder={values.length === 0 ? placeholder : undefined}
+            ref={inputRef}
+            value={inputValue}
+          />
+        )}
+        {!disabled && (
+          <button
+            aria-label="Ekle"
+            className="shrink-0 cursor-pointer rounded-sm p-1 text-muted-foreground hover:bg-muted-foreground/20 hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+            disabled={inputValue.trim() === ''}
+            onClick={() => {
               addValue(inputValue);
-            } else if (
-              e.key === 'Backspace' &&
-              inputValue === '' &&
-              values.length > 0
-            ) {
-              removeValue(values[values.length - 1] as string);
-            }
-          }}
-          placeholder={values.length === 0 ? placeholder : undefined}
-          ref={inputRef}
-          value={inputValue}
-        />
-        <button
-          aria-label="Ekle"
-          className="shrink-0 cursor-pointer rounded-sm p-1 text-muted-foreground hover:bg-muted-foreground/20 hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
-          disabled={inputValue.trim() === ''}
-          onClick={() => {
-            addValue(inputValue);
-            inputRef.current?.focus();
-          }}
-          onMouseDown={(e) => e.preventDefault()}
-          type="button"
-        >
-          <PlusIcon className="size-4" />
-        </button>
+              inputRef.current?.focus();
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            type="button"
+          >
+            <PlusIcon className="size-4" />
+          </button>
+        )}
       </div>
 
-      {open && filteredSuggestions.length > 0 && (
+      {!disabled && open && filteredSuggestions.length > 0 && (
         <div className="absolute top-full z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
           {filteredSuggestions.map((suggestion) => (
             <button

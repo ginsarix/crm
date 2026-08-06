@@ -132,7 +132,8 @@ export function EditBusinessGroupCardDialog({
   const handleSubmit = async () => {
     await updateMutation.mutateAsync({
       id: businessGroupCard.id,
-      committee,
+      committee:
+        meclisSayisi === 2 ? { ...committee, meclis3: [] } : committee,
       meclisSayisi: meclisSayisi ?? null,
       uyeSayisi: uyeSayisi === '' ? null : uyeSayisi,
     });

@@ -28,6 +28,13 @@ function committeeFieldColumn(
     id: key,
     header,
     enableSorting: false,
+    meta:
+      key === 'meclis3'
+        ? {
+            cellClassName: (row) =>
+              row.meclisSayisi === 2 ? 'bg-muted dark:bg-muted/40' : undefined,
+          }
+        : undefined,
     accessorFn: (row) => {
       const committee = row.committee as Record<string, string[]> | null;
       const values = committee?.[key] ?? [];
@@ -39,27 +46,23 @@ function committeeFieldColumn(
         string[]
       > | null;
       const values = committee?.[key] ?? [];
-      if (values.length === 0) return '-';
-
       const isGreyedOut = key === 'meclis3' && row.original.meclisSayisi === 2;
+      if (values.length === 0) return isGreyedOut ? '' : '-';
+
       const duplicateNames = getDuplicateCommitteeNames(committee);
-      return (
-        <span className={cn(isGreyedOut && 'line-through opacity-25')}>
-          {values.map((value, index) => (
-            <Fragment key={value}>
-              {index > 0 && ', '}
-              <span
-                className={cn(
-                  duplicateNames.has(value) &&
-                    'font-medium text-purple-600 dark:text-purple-400',
-                )}
-              >
-                {value}
-              </span>
-            </Fragment>
-          ))}
-        </span>
-      );
+      return values.map((value, index) => (
+        <Fragment key={value}>
+          {index > 0 && ', '}
+          <span
+            className={cn(
+              duplicateNames.has(value) &&
+                'font-medium text-purple-600 dark:text-purple-400',
+            )}
+          >
+            {value}
+          </span>
+        </Fragment>
+      ));
     },
   };
 }

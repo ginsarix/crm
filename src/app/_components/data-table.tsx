@@ -7,6 +7,7 @@ import {
   getCoreRowModel,
   type OnChangeFn,
   type PaginationState,
+  type RowData,
   type RowSelectionState,
   type SortingState,
   useReactTable,
@@ -50,6 +51,13 @@ import {
   TableRow,
 } from '~/components/ui/table';
 import { cn } from '~/lib/utils';
+
+declare module '@tanstack/react-table' {
+  interface ColumnMeta<TData extends RowData, TValue> {
+    /** Extra className applied to this column's <TableCell>, computed per row. */
+    cellClassName?: (row: TData) => string | undefined;
+  }
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -552,7 +560,12 @@ export function DataTable<TData, TValue>({
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
-                        className="overflow-hidden text-ellipsis"
+                        className={cn(
+                          'overflow-hidden text-ellipsis',
+                          cell.column.columnDef.meta?.cellClassName?.(
+                            row.original,
+                          ),
+                        )}
                         key={cell.id}
                         style={{
                           width: `${(cell.column.getSize() / table.getTotalSize()) * 100}%`,

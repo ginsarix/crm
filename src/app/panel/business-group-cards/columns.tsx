@@ -32,7 +32,7 @@ function committeeFieldColumn(
       key === 'meclis3'
         ? {
             cellClassName: (row) =>
-              row.meclisSayisi === 2 ? 'bg-muted dark:bg-muted/40' : undefined,
+              row.meclisSayisi === 2 ? 'bg-muted dark:bg-muted-foreground/20' : undefined,
           }
         : undefined,
     accessorFn: (row) => {

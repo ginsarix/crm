@@ -57,17 +57,23 @@ export const businessGroupCardRouter = createTRPCRouter({
           scope === 'all'
             ? [
                 Prisma.raw('bg.name'),
+                Prisma.raw('bgc."uyeSayisi"'),
+                Prisma.raw('bgc."meclisSayisi"::text'),
                 ...committeeFieldKeys.map((key) =>
                   Prisma.raw(`(bgc."committee"->>'${key}')`),
                 ),
               ]
             : scope === 'businessGroupName'
               ? [Prisma.raw('bg.name')]
-              : committeeFieldKeys.includes(
-                    scope as (typeof committeeFieldKeys)[number],
-                  )
-                ? [Prisma.raw(`(bgc."committee"->>'${scope}')`)]
-                : [];
+              : scope === 'uyeSayisi'
+                ? [Prisma.raw('bgc."uyeSayisi"')]
+                : scope === 'meclisSayisi'
+                  ? [Prisma.raw('bgc."meclisSayisi"::text')]
+                  : committeeFieldKeys.includes(
+                        scope as (typeof committeeFieldKeys)[number],
+                      )
+                    ? [Prisma.raw(`(bgc."committee"->>'${scope}')`)]
+                    : [];
 
         if (columns.length > 0) {
           whereClause.id = {
@@ -151,7 +157,11 @@ export const businessGroupCardRouter = createTRPCRouter({
       try {
         const result = await ctx.db.businessGroupCard.update({
           where: { id: input.id },
-          data: { committee },
+          data: {
+            committee,
+            meclisSayisi: input.meclisSayisi ?? null,
+            uyeSayisi: input.uyeSayisi ?? null,
+          },
           include: { businessGroup: { select: { name: true } } },
         });
 

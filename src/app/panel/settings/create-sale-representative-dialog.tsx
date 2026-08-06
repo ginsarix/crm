@@ -42,6 +42,7 @@ export function CreateSaleRepresentativeDialog() {
   const createMutation = api.salesRepresentative.create.useMutation({
     onSuccess: () => {
       utils.salesRepresentative.get.invalidate();
+      utils.salesRepresentative.getPaginated.invalidate();
     },
   });
 

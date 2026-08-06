@@ -1,8 +1,12 @@
 'use client';
-import type { RowSelectionState } from '@tanstack/react-table';
+import type {
+  PaginationState,
+  RowSelectionState,
+  SortingState,
+} from '@tanstack/react-table';
 import type { SalesRepresentative } from 'generated/prisma';
-import { Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { SearchIcon, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { DataTable } from '~/app/_components/data-table';
 import { BulkActionsBar } from '~/app/panel/_components/bulk-actions-bar';
@@ -16,6 +20,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '~/components/ui/input-group';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import { CreateSaleRepresentativeDialog } from './create-sale-representative-dialog';
@@ -23,18 +32,45 @@ import { createColumns } from './sale-representatives-columns';
 import { ViewSaleRepresentativeDialog } from './view-sale-representative-dialog';
 
 export default function SaleRepresentativesTable() {
-  const { data, isLoading } = api.salesRepresentative.get.useQuery();
-  const utils = api.useUtils();
-
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 25,
+  });
   const [selectedSalesRepresentative, setSelectedSalesRepresentative] =
     useState<SalesRepresentative | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const utils = api.useUtils();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
+  useEffect(() => {
+    setRowSelection({});
+  }, [pagination.pageIndex, pagination.pageSize]);
+
+  const { data, isLoading } = api.salesRepresentative.getPaginated.useQuery({
+    page: pagination.pageIndex + 1,
+    itemsPerPage: pagination.pageSize,
+    filter: { search: debouncedSearch },
+    sorting,
+  });
 
   const bulkDeleteMutation = api.salesRepresentative.bulkDelete.useMutation({
     onSuccess: (result) => {
       utils.salesRepresentative.get.invalidate();
+      utils.salesRepresentative.getPaginated.invalidate();
       toast.success(`${result.count} satış temsilcisi silindi`);
       setRowSelection({});
       setDeleteConfirmOpen(false);
@@ -71,21 +107,36 @@ export default function SaleRepresentativesTable() {
   return (
     <div>
       <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
-        <CardHeader className="flex flex-row items-center">
-          <CardTitle className="mr-auto">Satış Temsilcileri</CardTitle>
-          <div className="ml-auto">
-            <CreateSaleRepresentativeDialog />
-          </div>
+        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <CardTitle className="sm:mr-auto">Satış Temsilcileri</CardTitle>
+          <InputGroup className="sm:w-64">
+            <InputGroupInput
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Ara"
+              type="search"
+              value={search}
+            />
+            <InputGroupAddon>
+              <SearchIcon />
+            </InputGroupAddon>
+          </InputGroup>
+          <CreateSaleRepresentativeDialog />
         </CardHeader>
       </Card>
       <DataTable
         bulkActionsBar={bulkActionsBar}
         columns={columns}
-        data={data ?? []}
+        data={data?.data ?? []}
         exportFilename="satis_temsilcileri"
         onRowSelectionChange={setRowSelection}
+        pageCount={data?.pagination?.totalPages ?? -1}
+        pagination={pagination}
         rowSelection={rowSelection}
+        setPagination={setPagination}
+        setSorting={setSorting}
+        sorting={sorting}
         tableId="sale-representatives"
+        totalCount={data?.pagination?.totalItems}
       />
 
       {selectedSalesRepresentative && (

@@ -1,10 +1,24 @@
+import type { Prisma } from 'generated/prisma';
 import { z } from 'zod';
+import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
 import {
   adminProcedure,
   createAuditLog,
   createTRPCRouter,
   protectedProcedure,
 } from '../trpc';
+
+const filterSchema = z.object({
+  search: z.string().optional(),
+});
+
+const sortingSchema = z.object({
+  id: z.string(),
+  desc: z.boolean(),
+});
+
+const sortableFields = ['name', 'createdAt', 'updatedAt'] as const;
+type SortableField = (typeof sortableFields)[number];
 
 export const salesRepresentativeRouter = createTRPCRouter({
   getTotal: protectedProcedure.query(async ({ ctx }) => {
@@ -13,6 +27,68 @@ export const salesRepresentativeRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.salesRepresentative.findMany();
   }),
+  getPaginated: protectedProcedure
+    .input(
+      z.object({
+        filter: filterSchema.optional(),
+        sorting: z.array(sortingSchema).optional(),
+        page: z.number().min(1).default(1),
+        itemsPerPage: z.number().min(0).default(25),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const whereClause: Prisma.SalesRepresentativeWhereInput = {};
+
+      if (input.filter?.search) {
+        whereClause.id = {
+          in: await findTurkishSearchMatchesInTable(
+            ctx.db,
+            'SalesRepresentative',
+            ['name'],
+            input.filter.search,
+          ),
+        };
+      }
+
+      const orderBy: Prisma.SalesRepresentativeOrderByWithRelationInput[] = [];
+
+      if (input.sorting && input.sorting.length > 0) {
+        for (const sort of input.sorting) {
+          if (sortableFields.includes(sort.id as SortableField)) {
+            orderBy.push({
+              [sort.id]: sort.desc ? 'desc' : 'asc',
+            });
+          }
+        }
+      }
+
+      if (orderBy.length === 0) {
+        orderBy.push({ name: 'asc' });
+      }
+
+      const fetchAll = input.itemsPerPage === 0;
+      const totalItems = await ctx.db.salesRepresentative.count({
+        where: whereClause,
+      });
+      const totalPages = fetchAll
+        ? 1
+        : Math.ceil(totalItems / input.itemsPerPage);
+
+      const data = await ctx.db.salesRepresentative.findMany({
+        where: whereClause,
+        skip: fetchAll ? 0 : (input.page - 1) * input.itemsPerPage,
+        ...(fetchAll ? {} : { take: input.itemsPerPage }),
+        orderBy,
+      });
+
+      return {
+        data,
+        pagination: {
+          totalItems,
+          totalPages,
+        },
+      };
+    }),
   create: protectedProcedure
     .input(
       z.object({

@@ -8,7 +8,14 @@ export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const isAdmin = session?.user?.role === 'admin';
 
-  const prefetches = [api.salesRepresentative.get.prefetch()];
+  const prefetches = [
+    api.salesRepresentative.getPaginated.prefetch({
+      page: 1,
+      itemsPerPage: 25,
+      filter: { search: '' },
+      sorting: [],
+    }),
+  ];
   if (isAdmin) prefetches.push(api.businessGroup.get.prefetch());
   await Promise.all(prefetches);
 

@@ -75,6 +75,7 @@ export function ViewSaleRepresentativeDialog({
     onSuccess: (updatedSalesRepresentative) => {
       utils.salesRepresentative.get.cancel();
       utils.salesRepresentative.get.invalidate();
+      utils.salesRepresentative.getPaginated.invalidate();
       toast.success('Satış temsilcisi başarıyla güncellendi');
       onUpdate(updatedSalesRepresentative);
       handleOpenChange(false);
@@ -88,6 +89,7 @@ export function ViewSaleRepresentativeDialog({
   const deleteMutation = api.salesRepresentative.delete.useMutation({
     onSuccess: () => {
       utils.salesRepresentative.get.invalidate();
+      utils.salesRepresentative.getPaginated.invalidate();
       toast.success('Satış temsilcisi başarıyla silindi');
       handleOpenChange(false);
     },

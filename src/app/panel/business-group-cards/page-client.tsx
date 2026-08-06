@@ -88,6 +88,8 @@ export function BusinessGroupCardsPageClient() {
                 yedekUye3: false,
                 yedekUye4: false,
                 yedekUye5: false,
+                yedekUye6: false,
+                yedekUye7: false,
                 createdAt: false,
                 updatedAt: false,
               }}

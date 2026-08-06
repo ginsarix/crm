@@ -56,6 +56,8 @@ export const columnMap = {
   businessGroupCard: {
     id: 'ID',
     businessGroupName: 'Meslek Grubu',
+    uyeSayisi: 'Üye Sayısı',
+    meclisSayisi: 'Meclis Sayısı',
     meclis1: 'Meclis 1',
     meclis2: 'Meclis 2',
     meclis3: 'Meclis 3',
@@ -71,6 +73,8 @@ export const columnMap = {
     yedekUye3: 'Yedek Üye 3',
     yedekUye4: 'Yedek Üye 4',
     yedekUye5: 'Yedek Üye 5',
+    yedekUye6: 'Yedek Üye 6',
+    yedekUye7: 'Yedek Üye 7',
     createdAt: 'Oluşturulma Tarihi',
     updatedAt: 'Güncellenme Tarihi',
   },

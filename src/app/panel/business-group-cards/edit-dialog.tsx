@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
 import {
@@ -10,7 +10,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
+import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { TagAutocomplete } from '~/components/ui/tag-autocomplete';
 import type { Committee } from '~/shared/zod-schemas/business-group-card';
 import {
@@ -29,7 +37,15 @@ const FIELD_GROUPS: { title: string; fields: (keyof Committee)[] }[] = [
   { title: 'Üyeler', fields: ['uye1', 'uye2', 'uye3', 'uye4', 'uye5'] },
   {
     title: 'Yedek Üyeler',
-    fields: ['yedekUye1', 'yedekUye2', 'yedekUye3', 'yedekUye4', 'yedekUye5'],
+    fields: [
+      'yedekUye1',
+      'yedekUye2',
+      'yedekUye3',
+      'yedekUye4',
+      'yedekUye5',
+      'yedekUye6',
+      'yedekUye7',
+    ],
   },
 ];
 
@@ -49,6 +65,8 @@ const FIELD_LABELS: Record<keyof Committee, string> = {
   yedekUye3: 'Yedek Üye 3',
   yedekUye4: 'Yedek Üye 4',
   yedekUye5: 'Yedek Üye 5',
+  yedekUye6: 'Yedek Üye 6',
+  yedekUye7: 'Yedek Üye 7',
 };
 
 function toCommittee(row: BusinessGroupCardRow): Committee {
@@ -80,9 +98,17 @@ export function EditBusinessGroupCardDialog({
   const [committee, setCommittee] = useState<Committee>(() =>
     toCommittee(businessGroupCard),
   );
+  const [uyeSayisi, setUyeSayisi] = useState(businessGroupCard.uyeSayisi ?? '');
+  const [meclisSayisi, setMeclisSayisi] = useState<2 | 3 | undefined>(
+    (businessGroupCard.meclisSayisi as 2 | 3 | null) ?? undefined,
+  );
 
   useEffect(() => {
     setCommittee(toCommittee(businessGroupCard));
+    setUyeSayisi(businessGroupCard.uyeSayisi ?? '');
+    setMeclisSayisi(
+      (businessGroupCard.meclisSayisi as 2 | 3 | null) ?? undefined,
+    );
   }, [businessGroupCard]);
 
   const duplicateNames = useMemo(
@@ -107,6 +133,8 @@ export function EditBusinessGroupCardDialog({
     await updateMutation.mutateAsync({
       id: businessGroupCard.id,
       committee,
+      meclisSayisi: meclisSayisi ?? null,
+      uyeSayisi: uyeSayisi === '' ? null : uyeSayisi,
     });
   };
 
@@ -130,23 +158,62 @@ export function EditBusinessGroupCardDialog({
 
         <div className="space-y-4">
           {FIELD_GROUPS.map((group) => (
-            <div className="space-y-3 rounded-lg border p-3" key={group.title}>
-              <h4 className="font-medium text-sm">{group.title}</h4>
-              {group.fields.map((field) => (
-                <div className="space-y-2" key={field}>
-                  <Label htmlFor={field}>{FIELD_LABELS[field]}</Label>
-                  <TagAutocomplete
-                    duplicateValues={duplicateNames}
-                    id={field}
-                    onChange={(values) =>
-                      setCommittee((prev) => ({ ...prev, [field]: values }))
+            <Fragment key={group.title}>
+              {group.title === 'Meclis' && (
+                <div className="space-y-2">
+                  <Label htmlFor="meclisSayisi">Meclis Sayısı</Label>
+                  <Select
+                    onValueChange={(v) =>
+                      setMeclisSayisi(
+                        v === '__null__' ? undefined : (Number(v) as 2 | 3),
+                      )
                     }
-                    suggestions={suggestions}
-                    values={committee[field] ?? []}
+                    value={
+                      meclisSayisi !== undefined
+                        ? String(meclisSayisi)
+                        : undefined
+                    }
+                  >
+                    <SelectTrigger className="w-full" id="meclisSayisi">
+                      <SelectValue placeholder="Seçiniz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__null__">Boş</SelectItem>
+                      <SelectItem value="2">2</SelectItem>
+                      <SelectItem value="3">3</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {group.title === 'Üyeler' && (
+                <div className="space-y-2">
+                  <Label htmlFor="uyeSayisi">Üye Sayısı</Label>
+                  <Input
+                    id="uyeSayisi"
+                    onChange={(e) => setUyeSayisi(e.target.value)}
+                    value={uyeSayisi}
                   />
                 </div>
-              ))}
-            </div>
+              )}
+              <div className="space-y-3 rounded-lg border p-3">
+                <h4 className="font-medium text-sm">{group.title}</h4>
+                {group.fields.map((field) => (
+                  <div className="space-y-2" key={field}>
+                    <Label htmlFor={field}>{FIELD_LABELS[field]}</Label>
+                    <TagAutocomplete
+                      disabled={field === 'meclis3' && meclisSayisi === 2}
+                      duplicateValues={duplicateNames}
+                      id={field}
+                      onChange={(values) =>
+                        setCommittee((prev) => ({ ...prev, [field]: values }))
+                      }
+                      suggestions={suggestions}
+                      values={committee[field] ?? []}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Fragment>
           ))}
         </div>
 

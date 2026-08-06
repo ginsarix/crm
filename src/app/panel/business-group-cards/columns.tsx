@@ -41,20 +41,25 @@ function committeeFieldColumn(
       const values = committee?.[key] ?? [];
       if (values.length === 0) return '-';
 
+      const isGreyedOut = key === 'meclis3' && row.original.meclisSayisi === 2;
       const duplicateNames = getDuplicateCommitteeNames(committee);
-      return values.map((value, index) => (
-        <Fragment key={value}>
-          {index > 0 && ', '}
-          <span
-            className={cn(
-              duplicateNames.has(value) &&
-                'font-medium text-purple-600 dark:text-purple-400',
-            )}
-          >
-            {value}
-          </span>
-        </Fragment>
-      ));
+      return (
+        <span className={cn(isGreyedOut && 'line-through opacity-25')}>
+          {values.map((value, index) => (
+            <Fragment key={value}>
+              {index > 0 && ', '}
+              <span
+                className={cn(
+                  duplicateNames.has(value) &&
+                    'font-medium text-purple-600 dark:text-purple-400',
+                )}
+              >
+                {value}
+              </span>
+            </Fragment>
+          ))}
+        </span>
+      );
     },
   };
 }
@@ -96,6 +101,18 @@ export const createColumns = (
     header: 'Meslek Grubu',
     enableSorting: true,
   },
+  {
+    accessorKey: 'uyeSayisi',
+    header: 'Üye Sayısı',
+    enableSorting: false,
+    cell: ({ row }) => row.original.uyeSayisi ?? '-',
+  },
+  {
+    accessorKey: 'meclisSayisi',
+    header: 'Meclis Sayısı',
+    enableSorting: false,
+    cell: ({ row }) => row.original.meclisSayisi ?? '-',
+  },
   committeeFieldColumn('meclis1', 'Meclis 1'),
   committeeFieldColumn('meclis2', 'Meclis 2'),
   committeeFieldColumn('meclis3', 'Meclis 3'),
@@ -111,6 +128,8 @@ export const createColumns = (
   committeeFieldColumn('yedekUye3', 'Yedek Üye 3'),
   committeeFieldColumn('yedekUye4', 'Yedek Üye 4'),
   committeeFieldColumn('yedekUye5', 'Yedek Üye 5'),
+  committeeFieldColumn('yedekUye6', 'Yedek Üye 6'),
+  committeeFieldColumn('yedekUye7', 'Yedek Üye 7'),
   {
     accessorKey: 'updatedAt',
     header: 'Güncellenme Tarihi',

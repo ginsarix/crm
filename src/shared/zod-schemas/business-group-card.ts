@@ -16,6 +16,8 @@ export const committeeFieldKeys = [
   'yedekUye3',
   'yedekUye4',
   'yedekUye5',
+  'yedekUye6',
+  'yedekUye7',
 ] as const;
 
 export type CommitteeFieldKey = (typeof committeeFieldKeys)[number];
@@ -36,9 +38,13 @@ export const CommitteeSchema = z.object({
   yedekUye3: z.array(z.string()).optional(),
   yedekUye4: z.array(z.string()).optional(),
   yedekUye5: z.array(z.string()).optional(),
+  yedekUye6: z.array(z.string()).optional(),
+  yedekUye7: z.array(z.string()).optional(),
 });
 
 export type Committee = z.infer<typeof CommitteeSchema>;
+
+export const MeclisSayisiValidation = z.union([z.literal(2), z.literal(3)]);
 
 export function getDuplicateCommitteeNames(
   committee: Partial<Record<CommitteeFieldKey, string[] | undefined>> | null,
@@ -62,4 +68,6 @@ export function getDuplicateCommitteeNames(
 export const BusinessGroupCardUpdateSchema = z.object({
   id: z.string(),
   committee: CommitteeSchema,
+  meclisSayisi: MeclisSayisiValidation.nullable().optional(),
+  uyeSayisi: z.string().nullable().optional(),
 });

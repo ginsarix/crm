@@ -156,6 +156,13 @@ export function EditBusinessGroupCardDialog({
           ekleyebilirsiniz. Satış temsilcileri listesinde olmayan isimler de
           girilebilir.
         </p>
+        <p className="text-muted-foreground text-sm">
+          Bir isim bu kartta birden fazla alanda yer alıyorsa{' '}
+          <span className="font-medium text-purple-600 dark:text-purple-400">
+            mor
+          </span>{' '}
+          renkte gösterilir.
+        </p>
 
         <div className="space-y-4">
           {FIELD_GROUPS.map((group) => (

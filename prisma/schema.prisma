@@ -103,6 +103,9 @@ model BusinessGroupCard {
   // names (sales-rep suggestions or free text). Shape: Record<CommitteeFieldKey, string[]>
   committee Json?
 
+  uyeSayisi    String?
+  meclisSayisi Int?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -149,9 +149,9 @@ export function UsersPageClient() {
             onOpenChange={setViewDialogOpen}
             onUpdate={(updatedUser) => {
               setSelectedUser(updatedUser);
-              if (pagination.pageSize === 0) {
-                // "Tümü" (fetch-all) mode — avoid re-fetching the whole
-                // table on every save, patch the already-cancelled cache instead
+              if (pagination.pageSize === 500) {
+                // Largest page size — avoid re-fetching all 500 rows on
+                // every save, patch the already-cached page instead
                 utils.user.get.setData(userQueryInput, (old) =>
                   old
                     ? {

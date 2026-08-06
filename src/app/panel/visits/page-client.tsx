@@ -258,9 +258,9 @@ export function VisitsPageClient() {
             onOpenChange={handleViewDialogOpenChange}
             onUpdate={(updatedVisit) => {
               setSelectedVisit(updatedVisit);
-              if (pagination.pageSize === 0) {
-                // "Tümü" (fetch-all) mode — avoid re-fetching the whole
-                // table on every save, patch the already-cancelled cache instead
+              if (pagination.pageSize === 500) {
+                // Largest page size — avoid re-fetching all 500 rows on
+                // every save, patch the already-cached page instead
                 utils.visit.get.setData(visitQueryInput, (old) =>
                   old
                     ? {

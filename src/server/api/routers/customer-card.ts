@@ -130,7 +130,7 @@ export const customerCardRouter = createTRPCRouter({
         filter: filterSchema.optional(),
         sorting: z.array(sortingSchema).optional(),
         page: z.number().min(1).default(1),
-        itemsPerPage: z.number().min(0).default(25),
+        itemsPerPage: z.number().min(1).max(500).default(25),
         // When true, non-admins receive cards outside their assigned business
         // groups too (flagged via isRestricted) instead of having them filtered
         // out — used by the customer-cards list so it can gray those rows out.
@@ -302,20 +302,17 @@ export const customerCardRouter = createTRPCRouter({
         whereClause.AND = andConditions;
       }
 
-      const fetchAll = input.itemsPerPage === 0;
       const [totalItems, data] = await Promise.all([
         ctx.db.customerCard.count({ where: whereClause }),
         ctx.db.customerCard.findMany({
           select: input.select,
           where: whereClause,
-          skip: fetchAll ? 0 : (input.page - 1) * input.itemsPerPage,
-          ...(fetchAll ? {} : { take: input.itemsPerPage }),
+          skip: (input.page - 1) * input.itemsPerPage,
+          take: input.itemsPerPage,
           orderBy,
         }),
       ]);
-      const totalPages = fetchAll
-        ? 1
-        : Math.ceil(totalItems / input.itemsPerPage);
+      const totalPages = Math.ceil(totalItems / input.itemsPerPage);
 
       return {
         data: data.map((card) => ({

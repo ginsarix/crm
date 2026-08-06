@@ -603,12 +603,11 @@ export function DataTable<TData, TValue>({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {[25, 50, 100].map((size) => (
+                {[25, 50, 100, 500].map((size) => (
                   <SelectItem key={size} value={String(size)}>
                     {size}
                   </SelectItem>
                 ))}
-                <SelectItem value="0">Tümü</SelectItem>
               </SelectContent>
             </Select>
             <span className="text-muted-foreground text-sm">

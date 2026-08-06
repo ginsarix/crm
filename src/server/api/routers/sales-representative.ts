@@ -33,7 +33,7 @@ export const salesRepresentativeRouter = createTRPCRouter({
         filter: filterSchema.optional(),
         sorting: z.array(sortingSchema).optional(),
         page: z.number().min(1).default(1),
-        itemsPerPage: z.number().min(0).default(25),
+        itemsPerPage: z.number().min(1).max(500).default(25),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -66,18 +66,15 @@ export const salesRepresentativeRouter = createTRPCRouter({
         orderBy.push({ name: 'asc' });
       }
 
-      const fetchAll = input.itemsPerPage === 0;
       const totalItems = await ctx.db.salesRepresentative.count({
         where: whereClause,
       });
-      const totalPages = fetchAll
-        ? 1
-        : Math.ceil(totalItems / input.itemsPerPage);
+      const totalPages = Math.ceil(totalItems / input.itemsPerPage);
 
       const data = await ctx.db.salesRepresentative.findMany({
         where: whereClause,
-        skip: fetchAll ? 0 : (input.page - 1) * input.itemsPerPage,
-        ...(fetchAll ? {} : { take: input.itemsPerPage }),
+        skip: (input.page - 1) * input.itemsPerPage,
+        take: input.itemsPerPage,
         orderBy,
       });
 

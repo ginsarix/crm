@@ -106,13 +106,27 @@ export const createColumns = (
   },
   {
     accessorKey: 'uyeSayisi',
-    header: 'Üye Sayısı',
+    header: () => (
+      <span className="block leading-tight">
+        Üye
+        <br />
+        Sayısı
+      </span>
+    ),
+    size: 40,
     enableSorting: false,
     cell: ({ row }) => row.original.uyeSayisi ?? '-',
   },
   {
     accessorKey: 'meclisSayisi',
-    header: 'Meclis Sayısı',
+    header: () => (
+      <span className="block leading-tight">
+        Meclis
+        <br />
+        Sayısı
+      </span>
+    ),
+    size: 40,
     enableSorting: false,
     cell: ({ row }) => row.original.meclisSayisi ?? '-',
   },

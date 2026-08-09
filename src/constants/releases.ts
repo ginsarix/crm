@@ -21,6 +21,23 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-23',
+    version: '1.23',
+    date: '9 Ağustos 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Satış temsilcilerinde sayfalama ve arama',
+        desc: 'Ayarlar sayfasındaki satış temsilcileri tablosu artık diğer tablolar gibi sayfalama ve arama kullanıyor.',
+      },
+      {
+        type: 'changed',
+        title: 'Tablo satır sayısındaki "Tümü" seçeneği 500 ile değiştirildi',
+        desc: 'Tablolardaki sayfa başına satır seçicisinden tüm kayıtları tek seferde getiren "Tümü" seçeneği kaldırıldı; büyük tablolarda bu seçenek sınırsız sayıda kaydı aynı anda çekerek performans sorunlarına yol açabiliyordu. En yüksek seçenek artık 500 olarak sabitlendi.',
+      },
+    ],
+  },
+  {
     id: 'v1-22',
     version: '1.22',
     date: '2 Ağustos 2026',

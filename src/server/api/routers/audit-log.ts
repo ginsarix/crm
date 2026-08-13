@@ -38,7 +38,7 @@ export const auditLogRouter = createTRPCRouter({
   getTotal: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.auditLog.count();
   }),
-  get: protectedProcedure
+  get: adminProcedure
     .input(
       z.object({
         filter: filterSchema.optional(),
@@ -159,12 +159,19 @@ export const auditLogRouter = createTRPCRouter({
         },
       };
     }),
+  // NOT locked to adminProcedure like get/getById below: /panel/dashboard
+  // (accessible to every authenticated user, not just admins) calls this
+  // unconditionally to show the latest audit action. Tightening this to
+  // adminProcedure would throw FORBIDDEN inside that page's server-side
+  // Promise.all for every non-admin user and break the dashboard. This
+  // still leaks the latest row's ipAddress to non-admins — flagged for the
+  // controller rather than fixed here, see final-fix-report.md.
   getLatest: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.auditLog.findFirst({
       orderBy: { createdAt: 'desc' },
     });
   }),
-  getById: protectedProcedure
+  getById: adminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       return await ctx.db.auditLog.findUnique({

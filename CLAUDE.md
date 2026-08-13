@@ -31,7 +31,7 @@ pnpm db:studio    # Open Prisma Studio
   - `publicProcedure` — no auth
   - `protectedProcedure` — session required
   - `adminProcedure` — session + `role === 'admin'`
-- Most mutations that write data call `createAuditLog()` (defined in `trpc.ts`) for the audit trail — `feedback`, `dashboard-config`, and `saved-filter` routers are current exceptions that don't audit-log
+- Most mutations that write data call `createAuditLog()` (defined in `trpc.ts`) for the audit trail — `feedback`, `dashboard-config`, `saved-filter`, and `activity` routers are current exceptions that don't audit-log
 - The timing middleware adds ~100ms artificial delay in dev — intentional, do not remove
 
 ### Authentication

@@ -3,6 +3,9 @@ export async function register() {
 
   const { env } = await import('~/env');
   const { auth } = await import('~/server/better-auth');
+  const { startActivityFlushLoop } = await import('~/server/activity-tracker');
+
+  startActivityFlushLoop();
 
   try {
     await auth.api.createUser({

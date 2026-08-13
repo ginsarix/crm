@@ -175,8 +175,7 @@ export const userRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_UPDATED',
           'USER',
           ctx.session.user.id,
@@ -188,8 +187,7 @@ export const userRouter = createTRPCRouter({
         return { success: true };
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_UPDATED',
           'USER',
           ctx.session.user.id,
@@ -213,8 +211,7 @@ export const userRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'PASSWORD_CHANGED',
           'USER',
           ctx.session.user.id,
@@ -226,8 +223,7 @@ export const userRouter = createTRPCRouter({
         return { success: true };
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'PASSWORD_CHANGED',
           'USER',
           ctx.session.user.id,
@@ -313,8 +309,7 @@ export const userRouter = createTRPCRouter({
         }
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_CREATED',
           'USER',
           result.user.id,
@@ -326,8 +321,7 @@ export const userRouter = createTRPCRouter({
         return result.user;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_CREATED',
           'USER',
           '',
@@ -366,8 +360,7 @@ export const userRouter = createTRPCRouter({
             });
 
           await createAuditLog(
-            ctx.db,
-            ctx.session.user.id,
+            ctx,
             'PASSWORD_CHANGED',
             'USER',
             id,
@@ -378,8 +371,7 @@ export const userRouter = createTRPCRouter({
         }
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_UPDATED',
           'USER',
           id,
@@ -391,8 +383,7 @@ export const userRouter = createTRPCRouter({
         return updatedUser;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_UPDATED',
           'USER',
           id,
@@ -409,8 +400,7 @@ export const userRouter = createTRPCRouter({
       // Check if trying to delete self
       if (ctx.session.user.id === input.id) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_DELETED',
           'USER',
           input.id,
@@ -433,8 +423,7 @@ export const userRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_DELETED',
           'USER',
           input.id,
@@ -446,8 +435,7 @@ export const userRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_DELETED',
           'USER',
           input.id,
@@ -474,8 +462,7 @@ export const userRouter = createTRPCRouter({
           where: { id: { in: idsToDelete } },
         });
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_DELETED',
           'USER',
           idsToDelete.join(','),
@@ -486,8 +473,7 @@ export const userRouter = createTRPCRouter({
         return { ...result, skipped };
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'USER_DELETED',
           'USER',
           idsToDelete.join(','),

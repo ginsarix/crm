@@ -198,8 +198,7 @@ export const auditLogRouter = createTRPCRouter({
         where: { id: { in: input.ids } },
       });
       await createAuditLog(
-        ctx.db,
-        ctx.session.user.id,
+        ctx,
         'AUDIT_LOG_DELETED',
         'AUDIT_LOG',
         input.ids.join(','),

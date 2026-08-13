@@ -103,8 +103,10 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 });
 
 export async function createAuditLog(
-  db: PrismaClient,
-  userId: string | undefined,
+  ctx: {
+    db: PrismaClient;
+    session: { user: { id: string }; session: { ipAddress?: string | null } };
+  },
   action: string,
   resourceType: string,
   resourceId: string,
@@ -113,9 +115,10 @@ export async function createAuditLog(
   details?: string,
 ) {
   try {
-    await db.auditLog.create({
+    await ctx.db.auditLog.create({
       data: {
-        userId,
+        userId: ctx.session.user.id,
+        ipAddress: ctx.session.session.ipAddress ?? 'unknown',
         action,
         resourceType,
         resourceId,

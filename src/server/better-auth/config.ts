@@ -69,6 +69,28 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins: env.CROSS_ORIGIN_URL ? [env.CROSS_ORIGIN_URL] : [],
+  databaseHooks: {
+    session: {
+      create: {
+        // Fires for every session row, including admin impersonation and the
+        // session refresh after a password change. Path-filter to the two
+        // endpoints that represent an actual user login.
+        after: async (session, context) => {
+          if (
+            context?.path !== '/sign-in/email' &&
+            context?.path !== '/verify-email'
+          ) {
+            return;
+          }
+          try {
+            await db.loginEvent.create({ data: { userId: session.userId } });
+          } catch (err) {
+            console.error('Failed to record login event:', err);
+          }
+        },
+      },
+    },
+  },
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
       const path = ctx.path;

@@ -261,8 +261,23 @@ model User {
   totalActiveSeconds Int                 @default(0)
   dailyActivity      UserDailyActivity[]
 
+  loginEvents LoginEvent[]
+
   @@unique([email])
   @@map("user")
+}
+
+// One row per successful login (explicit sign-in or auto-sign-in after email
+// verification). Recorded from a better-auth databaseHooks.session.create
+// hook, filtered by request path — see src/server/better-auth/config.ts.
+model LoginEvent {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model UserDailyActivity {

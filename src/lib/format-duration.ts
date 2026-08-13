@@ -1,4 +1,5 @@
 export function formatDuration(totalSeconds: number): string {
+  if (totalSeconds <= 0) return '0 dk';
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
 

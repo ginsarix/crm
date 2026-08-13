@@ -14,6 +14,7 @@ const filterSchema = z.object({
   resourceType: z.string().optional(),
   result: z.enum(['SUCCESS', 'FAILURE', 'all']).default('all'),
   userId: z.string().optional(),
+  ipAddress: z.string().optional(),
   dateFrom: z.date().optional(),
   dateTo: z.date().optional(),
 });
@@ -93,6 +94,11 @@ export const auditLogRouter = createTRPCRouter({
       // User filter
       if (input.filter?.userId) {
         whereClause.userId = input.filter.userId;
+      }
+
+      // IP address filter
+      if (input.filter?.ipAddress) {
+        whereClause.ipAddress = input.filter.ipAddress;
       }
 
       // Date range filter

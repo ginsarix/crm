@@ -65,7 +65,10 @@ export const auth = betterAuth({
     updateAge: 0, // Every request resets the 15 min clock
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60, // Short cache cookie (5 mins) for perf—refreshes often
+      // Kept short: a longer cache means a session revoked elsewhere (e.g.
+      // by single-session enforcement below) stays valid on this device for
+      // up to this long before the next request re-checks the DB.
+      maxAge: 15,
     },
   },
   trustedOrigins: env.CROSS_ORIGIN_URL ? [env.CROSS_ORIGIN_URL] : [],
@@ -157,6 +160,23 @@ export const auth = betterAuth({
           undefined,
           `Kullanıcı giriş yaptı: ${response.user.name} (${response.user.email})`,
         );
+
+        // Single-session enforcement: a new login ends every other active
+        // session for the user, so signing in on one device signs the user
+        // out everywhere else.
+        const newSessionToken = ctx.context.newSession?.session.token;
+        if (newSessionToken) {
+          const sessions = await ctx.context.internalAdapter.listSessions(
+            response.user.id,
+            { onlyActiveSessions: true },
+          );
+          const otherTokens = sessions
+            .map((s) => s.token)
+            .filter((token) => token !== newSessionToken);
+          if (otherTokens.length > 0) {
+            await ctx.context.internalAdapter.deleteSessions(otherTokens);
+          }
+        }
       }
 
       if (path === '/sign-out' && ctx.context.session?.user) {

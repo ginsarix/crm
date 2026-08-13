@@ -29,7 +29,8 @@ model AuditLog {
   result AuditResult @default(SUCCESS)
   error  String?
 
-  details String?
+  details   String?
+  ipAddress String  @default("unknown")
 
   @@index([userId])
   @@index([createdAt])
@@ -260,6 +261,7 @@ model User {
   // buffer rather than written per-heartbeat. See src/server/activity-tracker.ts.
   totalActiveSeconds Int                 @default(0)
   dailyActivity      UserDailyActivity[]
+  lastLoginAt        DateTime?
 
   loginEvents LoginEvent[]
 
@@ -276,6 +278,7 @@ model LoginEvent {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+  ipAddress String   @default("unknown")
 
   @@index([userId])
 }
@@ -286,11 +289,12 @@ model UserDailyActivity {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   date          DateTime @db.Date
+  ipAddress     String   @default("unknown")
   activeSeconds Int      @default(0)
 
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, date])
+  @@unique([userId, date, ipAddress])
   @@index([date])
 }
 

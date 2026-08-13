@@ -163,12 +163,14 @@ export const auditLogRouter = createTRPCRouter({
   // (accessible to every authenticated user, not just admins) calls this
   // unconditionally to show the latest audit action. Tightening this to
   // adminProcedure would throw FORBIDDEN inside that page's server-side
-  // Promise.all for every non-admin user and break the dashboard. This
-  // still leaks the latest row's ipAddress to non-admins — flagged for the
-  // controller rather than fixed here, see final-fix-report.md.
+  // Promise.all for every non-admin user and break the dashboard. Instead,
+  // the select below narrows the returned fields to just what the dashboard
+  // reads (action, details), keeping ipAddress and everything else PII-free
+  // for non-admin callers.
   getLatest: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.auditLog.findFirst({
       orderBy: { createdAt: 'desc' },
+      select: { action: true, details: true },
     });
   }),
   getById: adminProcedure

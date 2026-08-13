@@ -279,6 +279,7 @@ model LoginEvent {
 
   createdAt DateTime @default(now())
   ipAddress String   @default("unknown")
+  userAgent String?
 
   @@index([userId])
 }

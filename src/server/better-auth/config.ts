@@ -88,7 +88,11 @@ export const auth = betterAuth({
           const ipAddress = normalizeIp(session.ipAddress);
           try {
             await db.loginEvent.create({
-              data: { userId: session.userId, ipAddress },
+              data: {
+                userId: session.userId,
+                ipAddress,
+                userAgent: session.userAgent ?? null,
+              },
             });
             await db.user.update({
               where: { id: session.userId },

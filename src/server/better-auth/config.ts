@@ -11,6 +11,7 @@ import { getVerificationEmailHtml, sendEmail } from './email';
 // Audit log helper for auth events
 async function createAuthAuditLog(
   userId: string | undefined,
+  ipAddress: string | null | undefined,
   action: string,
   resourceType: string,
   resourceId: string,
@@ -22,6 +23,7 @@ async function createAuthAuditLog(
     await db.auditLog.create({
       data: {
         userId,
+        ipAddress: ipAddress ?? 'unknown',
         action,
         resourceType,
         resourceId,
@@ -82,8 +84,15 @@ export const auth = betterAuth({
           ) {
             return;
           }
+          const ipAddress = session.ipAddress ?? 'unknown';
           try {
-            await db.loginEvent.create({ data: { userId: session.userId } });
+            await db.loginEvent.create({
+              data: { userId: session.userId, ipAddress },
+            });
+            await db.user.update({
+              where: { id: session.userId },
+              data: { lastLoginAt: session.createdAt },
+            });
           } catch (err) {
             console.error('Failed to record login event:', err);
           }
@@ -150,6 +159,7 @@ export const auth = betterAuth({
       ) {
         await createAuthAuditLog(
           response.user.id,
+          ctx.context.newSession?.session.ipAddress,
           'USER_LOGIN',
           'USER',
           response.user.id,
@@ -162,6 +172,7 @@ export const auth = betterAuth({
       if (path === '/sign-out' && ctx.context.session?.user) {
         await createAuthAuditLog(
           ctx.context.session.user.id,
+          ctx.context.session.session.ipAddress,
           'USER_LOGOUT',
           'USER',
           ctx.context.session.user.id,

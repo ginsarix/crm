@@ -59,7 +59,9 @@ export function IpBreakdownTable({
         {data.map((row) => (
           <TableRow key={row.ipAddress}>
             <TableCell className="font-mono text-xs">
-              {row.ipAddress === 'unknown' ? 'Bilinmiyor' : row.ipAddress}
+              {!row.ipAddress || row.ipAddress === 'unknown'
+                ? 'Bilinmiyor'
+                : row.ipAddress}
             </TableCell>
             <TableCell>{row.loginCount}</TableCell>
             <TableCell>

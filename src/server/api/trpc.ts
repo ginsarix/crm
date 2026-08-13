@@ -14,6 +14,7 @@ import { ZodError } from 'zod';
 import { auditLogEmitter } from '~/server/audit-log-emitter';
 import { auth } from '~/server/better-auth';
 import { db } from '~/server/db';
+import { normalizeIp } from '~/server/lib/normalize-ip';
 
 /**
  * 1. CONTEXT
@@ -118,7 +119,7 @@ export async function createAuditLog(
     await ctx.db.auditLog.create({
       data: {
         userId: ctx.session.user.id,
-        ipAddress: ctx.session.session.ipAddress ?? 'unknown',
+        ipAddress: normalizeIp(ctx.session.session.ipAddress),
         action,
         resourceType,
         resourceId,

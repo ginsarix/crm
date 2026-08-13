@@ -6,6 +6,7 @@ import { admin } from 'better-auth/plugins';
 import { env } from '~/env';
 import { auditLogEmitter } from '~/server/audit-log-emitter';
 import { db } from '~/server/db';
+import { normalizeIp } from '~/server/lib/normalize-ip';
 import { getVerificationEmailHtml, sendEmail } from './email';
 
 // Audit log helper for auth events
@@ -23,7 +24,7 @@ async function createAuthAuditLog(
     await db.auditLog.create({
       data: {
         userId,
-        ipAddress: ipAddress ?? 'unknown',
+        ipAddress: normalizeIp(ipAddress),
         action,
         resourceType,
         resourceId,
@@ -84,7 +85,7 @@ export const auth = betterAuth({
           ) {
             return;
           }
-          const ipAddress = session.ipAddress ?? 'unknown';
+          const ipAddress = normalizeIp(session.ipAddress);
           try {
             await db.loginEvent.create({
               data: { userId: session.userId, ipAddress },

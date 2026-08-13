@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { ActivityTracker } from '~/components/activity-tracker';
 import { AnnouncementsNudgeDialog } from '~/components/announcements-nudge-dialog';
 import { HeaderAnnouncementsButton } from '~/components/header-announcements-button';
 import { HeaderFeedbackButton } from '~/components/header-feedback-button';
@@ -49,6 +50,7 @@ export default async function PanelLayout({
       <Toaster />
       <NewVersionDialog />
       <AnnouncementsNudgeDialog />
+      <ActivityTracker />
     </SidebarProvider>
   );
 }

@@ -256,8 +256,27 @@ model User {
   banExpires DateTime?
   feedbacks  Feedback[]
 
+  // Cumulative active time in the app, flushed periodically from an in-memory
+  // buffer rather than written per-heartbeat. See src/server/activity-tracker.ts.
+  totalActiveSeconds Int                 @default(0)
+  dailyActivity      UserDailyActivity[]
+
   @@unique([email])
   @@map("user")
+}
+
+model UserDailyActivity {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date          DateTime @db.Date
+  activeSeconds Int      @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([date])
 }
 
 model SavedFilter {

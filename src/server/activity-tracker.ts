@@ -76,9 +76,9 @@ export async function flushActivity() {
             data: { totalActiveSeconds: { increment: pendingSeconds } },
           }),
           db.userDailyActivity.upsert({
-            where: { userId_date_ipAddress: { userId, date, ipAddress: "unknown" } },
+            where: { userId_date: { userId, date } },
             update: { activeSeconds: { increment: pendingSeconds } },
-            create: { userId, date, ipAddress: "unknown", activeSeconds: pendingSeconds },
+            create: { userId, date, activeSeconds: pendingSeconds },
           }),
         ]);
       } catch (error) {

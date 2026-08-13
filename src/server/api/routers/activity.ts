@@ -6,6 +6,9 @@ export const activityRouter = createTRPCRouter({
   // and only ever touches an in-memory buffer (see activity-tracker.ts), so
   // logging it would just relocate the write-volume problem into AuditLog.
   heartbeat: protectedProcedure.mutation(({ ctx }) => {
-    recordHeartbeat(ctx.session.user.id);
+    recordHeartbeat(
+      ctx.session.user.id,
+      ctx.session.session.ipAddress ?? 'unknown',
+    );
   }),
 });

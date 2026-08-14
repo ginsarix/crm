@@ -1,9 +1,20 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Info } from 'lucide-react';
 import { Button } from '~/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip';
 import { formatDuration } from '~/lib/format-duration';
+
+// Date this shipped to prod (LoginEvent, the source of loginCount, was
+// added in commit 3dc472c but only deployed on this date); logins before
+// this date were only ever recorded in the audit log.
+const LOGIN_COUNT_START_DATE = new Date('2026-08-15');
 
 export interface UserReportRow {
   id: string;
@@ -56,7 +67,24 @@ export const createReportColumns = (
   },
   {
     accessorKey: 'loginCount',
-    header: 'Giriş Sayısı',
+    header: () => (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="flex cursor-help items-center gap-1">
+              Giriş Sayısı
+              <Info className="h-3.5 w-3.5 text-muted-foreground" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="text-xs">
+              {LOGIN_COUNT_START_DATE.toLocaleDateString('tr-TR')} tarihinden
+              itibaren kaydedilmektedir
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    ),
     enableSorting: true,
     cell: ({ row }) => row.original.loginCount,
   },

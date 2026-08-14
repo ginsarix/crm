@@ -121,16 +121,23 @@ export const userReportRouter = createTRPCRouter({
   getIpBreakdown: adminProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const [logins, activity, actions] = await Promise.all([
+      const [logins, loginCounts, activity, actions] = await Promise.all([
         // Not a groupBy: we also need the most recent userAgent per IP, and
         // groupBy can only aggregate (count/sum/max) — it can't return a
         // sibling field like userAgent from the row that produced the max.
-        // Ordering desc and taking the first occurrence per IP gives us
-        // count + lastLoginAt + userAgent from a single pass instead.
+        // `distinct: ['ipAddress']` + desc order gives Postgres a
+        // SELECT DISTINCT ON, so this returns exactly one (the freshest)
+        // row per IP instead of the user's entire login history.
         ctx.db.loginEvent.findMany({
           where: { userId: input.userId },
           orderBy: { createdAt: 'desc' },
+          distinct: ['ipAddress'],
           select: { ipAddress: true, createdAt: true, userAgent: true },
+        }),
+        ctx.db.loginEvent.groupBy({
+          by: ['ipAddress'],
+          where: { userId: input.userId },
+          _count: true,
         }),
         ctx.db.userDailyActivity.groupBy({
           by: ['ipAddress'],
@@ -172,16 +179,15 @@ export const userReportRouter = createTRPCRouter({
         return row;
       };
 
-      // logins is ordered createdAt desc, so the first row seen per IP is
-      // that IP's most recent login — exactly the one we want lastLoginAt
-      // and userAgent from.
+      // logins holds one (the freshest, per the desc + distinct query above)
+      // row per IP — exactly the lastLoginAt/userAgent we want.
       for (const l of logins) {
         const row = getRow(l.ipAddress);
-        if (row.loginCount === 0) {
-          row.lastLoginAt = l.createdAt;
-          row.userAgent = l.userAgent;
-        }
-        row.loginCount += 1;
+        row.lastLoginAt = l.createdAt;
+        row.userAgent = l.userAgent;
+      }
+      for (const c of loginCounts) {
+        getRow(c.ipAddress).loginCount = c._count;
       }
       for (const a of activity) {
         getRow(a.ipAddress).activeSeconds = a._sum.activeSeconds ?? 0;

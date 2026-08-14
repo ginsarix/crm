@@ -104,6 +104,7 @@ export function UserReportTab() {
       {actionsTarget && (
         <ReportActionsDialog
           ipAddress={actionsTarget.ipAddress}
+          key={`${actionsTarget.userId}:${actionsTarget.ipAddress ?? ''}`}
           onOpenChange={setActionsOpen}
           open={actionsOpen}
           userId={actionsTarget.userId}

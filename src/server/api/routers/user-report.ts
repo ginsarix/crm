@@ -45,7 +45,8 @@ function buildOrderBy(
     }
   }
 
-  if (orderBy.length === 0) orderBy.push({ lastLoginAt: 'desc' });
+  if (orderBy.length === 0)
+    orderBy.push({ lastLoginAt: { sort: 'desc', nulls: 'last' } });
   return orderBy;
 }
 

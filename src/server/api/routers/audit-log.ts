@@ -14,6 +14,7 @@ const filterSchema = z.object({
   resourceType: z.string().optional(),
   result: z.enum(['SUCCESS', 'FAILURE', 'all']).default('all'),
   userId: z.string().optional(),
+  ipAddress: z.string().optional(),
   dateFrom: z.date().optional(),
   dateTo: z.date().optional(),
 });
@@ -37,7 +38,7 @@ export const auditLogRouter = createTRPCRouter({
   getTotal: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.auditLog.count();
   }),
-  get: protectedProcedure
+  get: adminProcedure
     .input(
       z.object({
         filter: filterSchema.optional(),
@@ -93,6 +94,11 @@ export const auditLogRouter = createTRPCRouter({
       // User filter
       if (input.filter?.userId) {
         whereClause.userId = input.filter.userId;
+      }
+
+      // IP address filter
+      if (input.filter?.ipAddress) {
+        whereClause.ipAddress = input.filter.ipAddress;
       }
 
       // Date range filter
@@ -153,12 +159,20 @@ export const auditLogRouter = createTRPCRouter({
         },
       };
     }),
+  // NOT locked to adminProcedure like get/getById below: /panel/dashboard
+  // (accessible to every authenticated user, not just admins) calls this
+  // unconditionally to show the latest audit action. Tightening this to
+  // adminProcedure would throw FORBIDDEN inside that page's server-side
+  // Promise.all for every non-admin user and break the dashboard. Instead,
+  // the select below narrows the returned fields to just what the dashboard
+  // reads (action, details), keeping ipAddress out for non-admin callers.
   getLatest: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.auditLog.findFirst({
       orderBy: { createdAt: 'desc' },
+      select: { action: true, details: true },
     });
   }),
-  getById: protectedProcedure
+  getById: adminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       return await ctx.db.auditLog.findUnique({
@@ -198,8 +212,7 @@ export const auditLogRouter = createTRPCRouter({
         where: { id: { in: input.ids } },
       });
       await createAuditLog(
-        ctx.db,
-        ctx.session.user.id,
+        ctx,
         'AUDIT_LOG_DELETED',
         'AUDIT_LOG',
         input.ids.join(','),

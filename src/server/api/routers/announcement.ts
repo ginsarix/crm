@@ -61,8 +61,7 @@ export const announcementRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_CREATED',
           'ANNOUNCEMENT',
           result.id,
@@ -74,8 +73,7 @@ export const announcementRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_CREATED',
           'ANNOUNCEMENT',
           '',
@@ -97,8 +95,7 @@ export const announcementRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_UPDATED',
           'ANNOUNCEMENT',
           result.id,
@@ -110,8 +107,7 @@ export const announcementRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_UPDATED',
           'ANNOUNCEMENT',
           input.id,
@@ -133,8 +129,7 @@ export const announcementRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_RESCHEDULED',
           'ANNOUNCEMENT',
           result.id,
@@ -146,8 +141,7 @@ export const announcementRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_RESCHEDULED',
           'ANNOUNCEMENT',
           input.id,
@@ -178,8 +172,7 @@ export const announcementRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_PUBLISHED',
           'ANNOUNCEMENT',
           result.id,
@@ -191,8 +184,7 @@ export const announcementRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_PUBLISHED',
           'ANNOUNCEMENT',
           input.id,
@@ -215,8 +207,7 @@ export const announcementRouter = createTRPCRouter({
         await deleteUploadedFile(result.imagePath);
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_DELETED',
           'ANNOUNCEMENT',
           input.id,
@@ -228,8 +219,7 @@ export const announcementRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'ANNOUNCEMENT_DELETED',
           'ANNOUNCEMENT',
           input.id,

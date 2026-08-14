@@ -343,8 +343,7 @@ export const visitRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'VISIT_CREATED',
           'VISIT',
           result.id,
@@ -356,8 +355,7 @@ export const visitRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'VISIT_CREATED',
           'VISIT',
           '',
@@ -399,8 +397,7 @@ export const visitRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'VISIT_UPDATED',
           'VISIT',
           id,
@@ -412,8 +409,7 @@ export const visitRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'VISIT_UPDATED',
           'VISIT',
           id,
@@ -443,8 +439,7 @@ export const visitRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'VISIT_DELETED',
           'VISIT',
           input.id,
@@ -456,8 +451,7 @@ export const visitRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'VISIT_DELETED',
           'VISIT',
           input.id,
@@ -477,8 +471,7 @@ export const visitRouter = createTRPCRouter({
           where: { id: { in: input.ids } },
         });
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'VISIT_DELETED',
           'VISIT',
           input.ids.join(','),
@@ -489,8 +482,7 @@ export const visitRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'VISIT_DELETED',
           'VISIT',
           input.ids.join(','),

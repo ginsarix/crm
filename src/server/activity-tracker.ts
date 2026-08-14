@@ -23,6 +23,8 @@ const CREDIT_JITTER_MS = 2000;
 const MIN_CREDIT_GAP_MS = HEARTBEAT_INTERVAL_SECONDS * 1000 - CREDIT_JITTER_MS;
 
 interface UserAccumulator {
+  userId: string;
+  ipAddress: string;
   pendingSeconds: number;
   lastCreditedAt: number;
 }
@@ -36,15 +38,22 @@ const accumulator =
   globalThis.__activityAccumulator ?? new Map<string, UserAccumulator>();
 globalThis.__activityAccumulator = accumulator;
 
-export function recordHeartbeat(userId: string) {
+function accumulatorKey(userId: string, ipAddress: string) {
+  return `${userId}:${ipAddress}`;
+}
+
+export function recordHeartbeat(userId: string, ipAddress: string) {
   const now = Date.now();
-  const existing = accumulator.get(userId);
+  const key = accumulatorKey(userId, ipAddress);
+  const existing = accumulator.get(key);
 
   if (existing && now - existing.lastCreditedAt < MIN_CREDIT_GAP_MS) {
     return;
   }
 
-  accumulator.set(userId, {
+  accumulator.set(key, {
+    userId,
+    ipAddress,
     pendingSeconds:
       (existing?.pendingSeconds ?? 0) + HEARTBEAT_INTERVAL_SECONDS,
     lastCreditedAt: now,
@@ -60,13 +69,13 @@ function startOfTodayUtc() {
 export async function flushActivity() {
   if (accumulator.size === 0) return;
 
-  const entries = [...accumulator.entries()];
+  const entries = [...accumulator.values()];
   accumulator.clear();
 
   const date = startOfTodayUtc();
 
   await Promise.all(
-    entries.map(async ([userId, { pendingSeconds }]) => {
+    entries.map(async ({ userId, ipAddress, pendingSeconds }) => {
       if (pendingSeconds <= 0) return;
 
       try {
@@ -76,9 +85,9 @@ export async function flushActivity() {
             data: { totalActiveSeconds: { increment: pendingSeconds } },
           }),
           db.userDailyActivity.upsert({
-            where: { userId_date: { userId, date } },
+            where: { userId_date_ipAddress: { userId, date, ipAddress } },
             update: { activeSeconds: { increment: pendingSeconds } },
-            create: { userId, date, activeSeconds: pendingSeconds },
+            create: { userId, date, ipAddress, activeSeconds: pendingSeconds },
           }),
         ]);
       } catch (error) {

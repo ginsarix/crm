@@ -362,8 +362,7 @@ export const customerCardRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_CREATED',
           'CUSTOMER_CARD',
           result.id,
@@ -375,8 +374,7 @@ export const customerCardRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_CREATED',
           'CUSTOMER_CARD',
           '',
@@ -417,8 +415,7 @@ export const customerCardRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_UPDATED',
           'CUSTOMER_CARD',
           input.id,
@@ -430,8 +427,7 @@ export const customerCardRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_UPDATED',
           'CUSTOMER_CARD',
           input.id,
@@ -457,8 +453,7 @@ export const customerCardRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_DELETED',
           'CUSTOMER_CARD',
           input.id,
@@ -470,8 +465,7 @@ export const customerCardRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_DELETED',
           'CUSTOMER_CARD',
           input.id,
@@ -491,8 +485,7 @@ export const customerCardRouter = createTRPCRouter({
           where: { id: { in: input.ids } },
         });
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_DELETED',
           'CUSTOMER_CARD',
           input.ids.join(','),
@@ -503,8 +496,7 @@ export const customerCardRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_DELETED',
           'CUSTOMER_CARD',
           input.ids.join(','),
@@ -530,8 +522,7 @@ export const customerCardRouter = createTRPCRouter({
           data: { color: input.color },
         });
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_UPDATED',
           'CUSTOMER_CARD',
           input.ids.join(','),
@@ -542,8 +533,7 @@ export const customerCardRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'CUSTOMER_CARD_UPDATED',
           'CUSTOMER_CARD',
           input.ids.join(','),

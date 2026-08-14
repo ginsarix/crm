@@ -6,11 +6,13 @@ import { admin } from 'better-auth/plugins';
 import { env } from '~/env';
 import { auditLogEmitter } from '~/server/audit-log-emitter';
 import { db } from '~/server/db';
+import { normalizeIp } from '~/server/lib/normalize-ip';
 import { getVerificationEmailHtml, sendEmail } from './email';
 
 // Audit log helper for auth events
 async function createAuthAuditLog(
   userId: string | undefined,
+  ipAddress: string | null | undefined,
   action: string,
   resourceType: string,
   resourceId: string,
@@ -22,6 +24,7 @@ async function createAuthAuditLog(
     await db.auditLog.create({
       data: {
         userId,
+        ipAddress: normalizeIp(ipAddress),
         action,
         resourceType,
         resourceId,
@@ -85,8 +88,19 @@ export const auth = betterAuth({
           ) {
             return;
           }
+          const ipAddress = normalizeIp(session.ipAddress);
           try {
-            await db.loginEvent.create({ data: { userId: session.userId } });
+            await db.loginEvent.create({
+              data: {
+                userId: session.userId,
+                ipAddress,
+                userAgent: session.userAgent ?? null,
+              },
+            });
+            await db.user.update({
+              where: { id: session.userId },
+              data: { lastLoginAt: session.createdAt },
+            });
           } catch (err) {
             console.error('Failed to record login event:', err);
           }
@@ -153,6 +167,7 @@ export const auth = betterAuth({
       ) {
         await createAuthAuditLog(
           response.user.id,
+          ctx.context.newSession?.session.ipAddress,
           'USER_LOGIN',
           'USER',
           response.user.id,
@@ -182,6 +197,7 @@ export const auth = betterAuth({
       if (path === '/sign-out' && ctx.context.session?.user) {
         await createAuthAuditLog(
           ctx.context.session.user.id,
+          ctx.context.session.session.ipAddress,
           'USER_LOGOUT',
           'USER',
           ctx.context.session.user.id,

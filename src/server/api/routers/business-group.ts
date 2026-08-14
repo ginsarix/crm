@@ -193,8 +193,7 @@ export const businessGroupRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_CREATED',
           'BUSINESS_GROUP',
           result.id,
@@ -206,8 +205,7 @@ export const businessGroupRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_CREATED',
           'BUSINESS_GROUP',
           '',
@@ -251,8 +249,7 @@ export const businessGroupRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_UPDATED',
           'BUSINESS_GROUP',
           input.id,
@@ -264,8 +261,7 @@ export const businessGroupRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_UPDATED',
           'BUSINESS_GROUP',
           '',
@@ -307,8 +303,7 @@ export const businessGroupRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_DELETED',
           'BUSINESS_GROUP',
           input.id,
@@ -320,8 +315,7 @@ export const businessGroupRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_DELETED',
           'BUSINESS_GROUP',
           '',
@@ -358,8 +352,7 @@ export const businessGroupRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_DELETED',
           'BUSINESS_GROUP',
           input.ids.join(','),
@@ -370,8 +363,7 @@ export const businessGroupRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_DELETED',
           'BUSINESS_GROUP',
           input.ids.join(','),

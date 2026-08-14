@@ -14,6 +14,7 @@ import { ZodError } from 'zod';
 import { auditLogEmitter } from '~/server/audit-log-emitter';
 import { auth } from '~/server/better-auth';
 import { db } from '~/server/db';
+import { normalizeIp } from '~/server/lib/normalize-ip';
 
 /**
  * 1. CONTEXT
@@ -103,8 +104,10 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 });
 
 export async function createAuditLog(
-  db: PrismaClient,
-  userId: string | undefined,
+  ctx: {
+    db: PrismaClient;
+    session: { user: { id: string }; session: { ipAddress?: string | null } };
+  },
   action: string,
   resourceType: string,
   resourceId: string,
@@ -113,9 +116,10 @@ export async function createAuditLog(
   details?: string,
 ) {
   try {
-    await db.auditLog.create({
+    await ctx.db.auditLog.create({
       data: {
-        userId,
+        userId: ctx.session.user.id,
+        ipAddress: normalizeIp(ctx.session.session.ipAddress),
         action,
         resourceType,
         resourceId,

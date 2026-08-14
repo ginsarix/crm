@@ -8,6 +8,7 @@ import { feedbackRouter } from '~/server/api/routers/feedback';
 import { salesRepresentativeRouter } from '~/server/api/routers/sales-representative';
 import { savedFilterRouter } from '~/server/api/routers/saved-filter';
 import { userRouter } from '~/server/api/routers/user';
+import { userReportRouter } from '~/server/api/routers/user-report';
 import { visitRouter } from '~/server/api/routers/visit';
 import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc';
 import { dashboardConfigRouter } from './routers/dashboard-config';
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   customerCard: customerCardRouter,
   feedback: feedbackRouter,
   user: userRouter,
+  userReport: userReportRouter,
   visit: visitRouter,
   salesRepresentative: salesRepresentativeRouter,
   dashboardConfig: dashboardConfigRouter,

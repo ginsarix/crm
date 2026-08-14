@@ -99,8 +99,7 @@ export const salesRepresentativeRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'SALES_REPRESENTATIVE_CREATED',
           'SALES_REPRESENTATIVE',
           result.id,
@@ -112,8 +111,7 @@ export const salesRepresentativeRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'SALES_REPRESENTATIVE_CREATED',
           'SALES_REPRESENTATIVE',
           '',
@@ -140,8 +138,7 @@ export const salesRepresentativeRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'SALES_REPRESENTATIVE_UPDATED',
           'SALES_REPRESENTATIVE',
           input.id,
@@ -153,8 +150,7 @@ export const salesRepresentativeRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'SALES_REPRESENTATIVE_UPDATED',
           'SALES_REPRESENTATIVE',
           input.id,
@@ -185,8 +181,7 @@ export const salesRepresentativeRouter = createTRPCRouter({
           where: { id: input.id },
         });
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'SALES_REPRESENTATIVE_DELETED',
           'SALES_REPRESENTATIVE',
           input.id,
@@ -198,8 +193,7 @@ export const salesRepresentativeRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'SALES_REPRESENTATIVE_DELETED',
           'SALES_REPRESENTATIVE',
           input.id,
@@ -220,8 +214,7 @@ export const salesRepresentativeRouter = createTRPCRouter({
           where: { id: { in: input.ids } },
         });
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'SALES_REPRESENTATIVE_DELETED',
           'SALES_REPRESENTATIVE',
           input.ids.join(','),
@@ -232,8 +225,7 @@ export const salesRepresentativeRouter = createTRPCRouter({
         return result;
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'SALES_REPRESENTATIVE_DELETED',
           'SALES_REPRESENTATIVE',
           input.ids.join(','),

@@ -163,8 +163,7 @@ export const businessGroupCardRouter = createTRPCRouter({
         });
 
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_CARD_UPDATED',
           'BUSINESS_GROUP_CARD',
           result.id,
@@ -177,8 +176,7 @@ export const businessGroupCardRouter = createTRPCRouter({
         return { ...rest, businessGroupName: businessGroup.name };
       } catch (error) {
         await createAuditLog(
-          ctx.db,
-          ctx.session.user.id,
+          ctx,
           'BUSINESS_GROUP_CARD_UPDATED',
           'BUSINESS_GROUP_CARD',
           input.id,

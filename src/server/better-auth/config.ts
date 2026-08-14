@@ -75,6 +75,16 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins: env.CROSS_ORIGIN_URL ? [env.CROSS_ORIGIN_URL] : [],
+  advanced: {
+    ipAddress: {
+      // Plesk's nginx front end sets this to the real client IP
+      // ($remote_addr) unconditionally, unlike x-forwarded-for which is a
+      // multi-hop chain that better-auth (since v1.6.21) refuses to trust
+      // without a configured proxy list — leaving every request resolving
+      // to the "unknown" sentinel otherwise.
+      ipAddressHeaders: ['x-real-ip'],
+    },
+  },
   databaseHooks: {
     session: {
       create: {

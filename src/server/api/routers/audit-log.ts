@@ -165,8 +165,7 @@ export const auditLogRouter = createTRPCRouter({
   // adminProcedure would throw FORBIDDEN inside that page's server-side
   // Promise.all for every non-admin user and break the dashboard. Instead,
   // the select below narrows the returned fields to just what the dashboard
-  // reads (action, details), keeping ipAddress and everything else PII-free
-  // for non-admin callers.
+  // reads (action, details), keeping ipAddress out for non-admin callers.
   getLatest: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.auditLog.findFirst({
       orderBy: { createdAt: 'desc' },

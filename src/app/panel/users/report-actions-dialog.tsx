@@ -64,7 +64,7 @@ export function ReportActionsDialog({
         <DialogHeader>
           <DialogTitle>
             {ipAddress
-              ? `${userName} — ${ipAddress} Eylemleri`
+              ? `${userName} — ${ipAddress === 'unknown' ? 'Bilinmiyor' : ipAddress} Eylemleri`
               : `${userName} — Tüm Eylemler`}
           </DialogTitle>
         </DialogHeader>

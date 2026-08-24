@@ -10,12 +10,13 @@ import { DataTable } from '../../_components/data-table';
 import { FilterControls } from './filter-controls';
 import { ReportActionsDialog } from './report-actions-dialog';
 import { createReportColumns } from './report-columns';
-import { IpBreakdownTable } from './report-ip-breakdown';
+import { DeviceBreakdownTable } from './report-device-breakdown';
 
 interface ActionsTarget {
   userId: string;
   userName: string;
   ipAddress?: string;
+  deviceId?: string | null;
 }
 
 export function UserReportTab() {
@@ -83,9 +84,9 @@ export function UserReportTab() {
             pagination={pagination}
             renderSubRow={(row) =>
               row.id === expandedUserId ? (
-                <IpBreakdownTable
-                  onOpenActions={(userId, userName, ipAddress) =>
-                    openActions({ userId, userName, ipAddress })
+                <DeviceBreakdownTable
+                  onOpenActions={(userId, userName, target) =>
+                    openActions({ userId, userName, ...target })
                   }
                   userId={row.id}
                   userName={row.name}
@@ -103,8 +104,15 @@ export function UserReportTab() {
 
       {actionsTarget && (
         <ReportActionsDialog
+          deviceId={actionsTarget.deviceId}
           ipAddress={actionsTarget.ipAddress}
-          key={`${actionsTarget.userId}:${actionsTarget.ipAddress ?? ''}`}
+          key={`${actionsTarget.userId}:${actionsTarget.ipAddress ?? ''}:${
+            actionsTarget.deviceId === undefined
+              ? ''
+              : actionsTarget.deviceId === null
+                ? 'null'
+                : actionsTarget.deviceId
+          }`}
           onOpenChange={setActionsOpen}
           open={actionsOpen}
           userId={actionsTarget.userId}

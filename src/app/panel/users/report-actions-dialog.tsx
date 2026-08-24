@@ -25,6 +25,7 @@ interface ReportActionsDialogProps {
   userId: string;
   userName: string;
   ipAddress?: string;
+  deviceId?: string | null;
 }
 
 export function ReportActionsDialog({
@@ -33,6 +34,7 @@ export function ReportActionsDialog({
   userId,
   userName,
   ipAddress,
+  deviceId,
 }: ReportActionsDialogProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -47,7 +49,7 @@ export function ReportActionsDialog({
     {
       page: pagination.pageIndex + 1,
       itemsPerPage: pagination.pageSize,
-      filter: { userId, ipAddress },
+      filter: { userId, ipAddress, deviceId },
       sorting,
     },
     { enabled: open },
@@ -65,7 +67,9 @@ export function ReportActionsDialog({
           <DialogTitle>
             {ipAddress
               ? `${userName} — ${ipAddress === 'unknown' ? 'Bilinmiyor' : ipAddress} Eylemleri`
-              : `${userName} — Tüm Eylemler`}
+              : deviceId !== undefined
+                ? `${userName} — ${deviceId === null ? 'Bilinmeyen Cihaz' : 'Cihaz'} Eylemleri`
+                : `${userName} — Tüm Eylemler`}
           </DialogTitle>
         </DialogHeader>
 

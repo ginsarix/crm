@@ -103,16 +103,19 @@ distinct value for the constraint — no collision with pre-existing rows.
 
 ## Cookie mechanism
 
-- `middleware.ts` runs on every request. If the `device_uuid` cookie is
-  absent, mint one (`crypto.randomUUID()`), set it `HttpOnly`, `Secure`
-  in production, `SameSite=Lax`, ~2 year `maxAge`, and forward it on the
-  same pass via a request header so the *current* request already has it
-  — this closes the gap where the very request that mints the cookie also
-  needs to use it (the client won't have stored the `Set-Cookie` yet).
-- Since this project's Next.js version is not assumed to match training
-  data (per `CLAUDE.md`), the exact middleware cookie/header API is
-  confirmed against `node_modules/next/dist/docs/` during implementation,
-  not assumed here.
+- `src/proxy.ts` runs on every request — confirmed against
+  `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md`
+  that in this Next.js version (16.2.11) the `middleware.ts` convention
+  is deprecated and renamed to `proxy.ts`, exporting a `proxy` function
+  (not `middleware`), and defaults to the **Node.js runtime** (not Edge)
+  as of v16 — so no edge-runtime restrictions apply here. If the
+  `device_uuid` cookie is absent, mint one (`crypto.randomUUID()`), set
+  it `HttpOnly`, `Secure` in production, `SameSite=Lax`, ~2 year
+  `maxAge`, and forward it on the same pass via
+  `NextResponse.next({ request: { headers } })` so the *current* request
+  already has it — this closes the gap where the very request that mints
+  the cookie also needs to use it (the client won't have stored the
+  `Set-Cookie` yet).
 - A shared helper, `resolveDeviceId(headers, userId)`
   (`src/server/lib/resolve-device-id.ts`), reads the id (forwarded header,
   falling back to parsing the `Cookie` header directly), `upsert`s the
@@ -270,9 +273,9 @@ indexed join), and loses clean `firstSeenAt`/`lastSeenAt` metadata for a
 device/user pair that isn't `MIN`/`MAX`-able across three differently-
 shaped tables without extra query complexity.
 
-**Capturing `lastUserAgent` at cookie-mint time in `middleware.ts`.**
+**Capturing `lastUserAgent` at cookie-mint time in `proxy.ts`.**
 Would make the field available immediately on first sight of a device.
-Rejected: middleware runs on every request, including anonymous and
+Rejected: proxy runs on every request, including anonymous and
 static-asset ones, and Postgres writes from there are a much hotter and
 messier path than the three existing, already-authenticated write sites.
 

@@ -52,7 +52,8 @@ yarn-error.log*
 
 start-database.sh
 
-scripts/
+scripts/*
+!scripts/backfill-devices.js
 
 # playwright mcp test artifacts
 .playwright-mcp/

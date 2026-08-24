@@ -1,5 +1,6 @@
 import { HEARTBEAT_INTERVAL_SECONDS } from '~/constants/activity';
 import { db } from '~/server/db';
+import { resolveDeviceId } from '~/server/lib/resolve-device-id';
 
 // Heartbeats never touch the DB directly — they just add to an in-memory
 // buffer here, which a periodic job flushes as one batched write per user.
@@ -25,6 +26,8 @@ const MIN_CREDIT_GAP_MS = HEARTBEAT_INTERVAL_SECONDS * 1000 - CREDIT_JITTER_MS;
 interface UserAccumulator {
   userId: string;
   ipAddress: string;
+  deviceUuid: string | null;
+  userAgent: string | null;
   pendingSeconds: number;
   lastCreditedAt: number;
 }
@@ -38,13 +41,22 @@ const accumulator =
   globalThis.__activityAccumulator ?? new Map<string, UserAccumulator>();
 globalThis.__activityAccumulator = accumulator;
 
-function accumulatorKey(userId: string, ipAddress: string) {
-  return `${userId}:${ipAddress}`;
+function accumulatorKey(
+  userId: string,
+  ipAddress: string,
+  deviceUuid: string | null,
+) {
+  return `${userId}:${ipAddress}:${deviceUuid ?? ''}`;
 }
 
-export function recordHeartbeat(userId: string, ipAddress: string) {
+export function recordHeartbeat(
+  userId: string,
+  ipAddress: string,
+  deviceUuid: string | null,
+  userAgent: string | null,
+) {
   const now = Date.now();
-  const key = accumulatorKey(userId, ipAddress);
+  const key = accumulatorKey(userId, ipAddress, deviceUuid);
   const existing = accumulator.get(key);
 
   if (existing && now - existing.lastCreditedAt < MIN_CREDIT_GAP_MS) {
@@ -54,6 +66,8 @@ export function recordHeartbeat(userId: string, ipAddress: string) {
   accumulator.set(key, {
     userId,
     ipAddress,
+    deviceUuid,
+    userAgent,
     pendingSeconds:
       (existing?.pendingSeconds ?? 0) + HEARTBEAT_INTERVAL_SECONDS,
     lastCreditedAt: now,
@@ -75,27 +89,81 @@ export async function flushActivity() {
   const date = startOfTodayUtc();
 
   await Promise.all(
-    entries.map(async ({ userId, ipAddress, pendingSeconds }) => {
-      if (pendingSeconds <= 0) return;
+    entries.map(
+      async ({ userId, ipAddress, deviceUuid, userAgent, pendingSeconds }) => {
+        if (pendingSeconds <= 0) return;
 
-      try {
-        await db.$transaction([
-          db.user.update({
-            where: { id: userId },
-            data: { totalActiveSeconds: { increment: pendingSeconds } },
-          }),
-          db.userDailyActivity.upsert({
-            where: { userId_date_ipAddress: { userId, date, ipAddress } },
-            update: { activeSeconds: { increment: pendingSeconds } },
-            create: { userId, date, ipAddress, activeSeconds: pendingSeconds },
-          }),
-        ]);
-      } catch (error) {
-        // Analytics-grade counter, not billing — drop on failure (e.g. the
-        // user was deleted between heartbeat and flush) rather than retry.
-        console.error(`Activity flush failed for user ${userId}:`, error);
-      }
-    }),
+        try {
+          // Resolving here (once per flush, every ~2 minutes per active
+          // user+ip+device) rather than per-heartbeat (every ~30s) keeps
+          // the heartbeat mutation itself DB-free, matching the batching
+          // this module already does for UserDailyActivity/totalActiveSeconds.
+          const deviceId = await resolveDeviceId(deviceUuid, userId, userAgent);
+
+          await db.$transaction(async (tx) => {
+            await tx.user.update({
+              where: { id: userId },
+              data: { totalActiveSeconds: { increment: pendingSeconds } },
+            });
+
+            if (deviceId === null) {
+              // Prisma's compound-unique `where` requires every key
+              // column to be a concrete value, including deviceId — even
+              // though the column itself is nullable and the @@unique
+              // constraint permits null. Passing null there throws
+              // PrismaClientValidationError at runtime (verified
+              // directly against the generated client), so the null
+              // case can't go through upsert's compound-key `where` and
+              // needs a find-then-branch instead.
+              const existing = await tx.userDailyActivity.findFirst({
+                where: { userId, date, ipAddress, deviceId: null },
+                select: { id: true },
+              });
+              if (existing) {
+                await tx.userDailyActivity.update({
+                  where: { id: existing.id },
+                  data: { activeSeconds: { increment: pendingSeconds } },
+                });
+              } else {
+                await tx.userDailyActivity.create({
+                  data: {
+                    userId,
+                    date,
+                    ipAddress,
+                    deviceId: null,
+                    activeSeconds: pendingSeconds,
+                  },
+                });
+              }
+            } else {
+              await tx.userDailyActivity.upsert({
+                where: {
+                  userId_date_ipAddress_deviceId: {
+                    userId,
+                    date,
+                    ipAddress,
+                    deviceId,
+                  },
+                },
+                update: { activeSeconds: { increment: pendingSeconds } },
+                create: {
+                  userId,
+                  date,
+                  ipAddress,
+                  deviceId,
+                  activeSeconds: pendingSeconds,
+                },
+              });
+            }
+          });
+        } catch (error) {
+          // Analytics-grade counter, not billing — drop on failure (e.g.
+          // the user was deleted between heartbeat and flush) rather
+          // than retry.
+          console.error(`Activity flush failed for user ${userId}:`, error);
+        }
+      },
+    ),
   );
 }
 

@@ -7,12 +7,14 @@ import { env } from '~/env';
 import { auditLogEmitter } from '~/server/audit-log-emitter';
 import { db } from '~/server/db';
 import { normalizeIp } from '~/server/lib/normalize-ip';
+import { getDeviceUuid, resolveDeviceId } from '~/server/lib/resolve-device-id';
 import { getVerificationEmailHtml, sendEmail } from './email';
 
 // Audit log helper for auth events
 async function createAuthAuditLog(
   userId: string | undefined,
   ipAddress: string | null | undefined,
+  deviceId: string | null,
   action: string,
   resourceType: string,
   resourceId: string,
@@ -25,6 +27,7 @@ async function createAuthAuditLog(
       data: {
         userId,
         ipAddress: normalizeIp(ipAddress),
+        deviceId,
         action,
         resourceType,
         resourceId,
@@ -99,12 +102,28 @@ export const auth = betterAuth({
             return;
           }
           const ipAddress = normalizeIp(session.ipAddress);
+          const userAgent = session.userAgent ?? null;
+          const deviceUuid = context?.headers
+            ? getDeviceUuid(context.headers)
+            : null;
           try {
+            const deviceId = await resolveDeviceId(
+              deviceUuid,
+              session.userId,
+              userAgent,
+            );
+            if (deviceId) {
+              await db.device.update({
+                where: { id: deviceId },
+                data: { lastUserAgent: userAgent ?? undefined },
+              });
+            }
             await db.loginEvent.create({
               data: {
                 userId: session.userId,
                 ipAddress,
-                userAgent: session.userAgent ?? null,
+                userAgent,
+                deviceId,
               },
             });
             await db.user.update({
@@ -175,9 +194,15 @@ export const auth = betterAuth({
         'user' in response &&
         response.user
       ) {
+        const loginDeviceId = await resolveDeviceId(
+          ctx.headers ? getDeviceUuid(ctx.headers) : null,
+          response.user.id,
+          ctx.headers?.get('user-agent'),
+        );
         await createAuthAuditLog(
           response.user.id,
           ctx.context.newSession?.session.ipAddress,
+          loginDeviceId,
           'USER_LOGIN',
           'USER',
           response.user.id,
@@ -204,10 +229,23 @@ export const auth = betterAuth({
         }
       }
 
+      // NOTE: this branch is not currently reachable — better-auth's
+      // /sign-out endpoint never populates ctx.context.session (confirmed
+      // by reading node_modules/better-auth/dist/api/routes/sign-out.mjs),
+      // so USER_LOGOUT audit logging never fires today. Pre-existing gap,
+      // unrelated to device tracking — kept correct here in case the
+      // underlying issue is ever fixed upstream or in this app's own auth
+      // config.
       if (path === '/sign-out' && ctx.context.session?.user) {
+        const logoutDeviceId = await resolveDeviceId(
+          ctx.headers ? getDeviceUuid(ctx.headers) : null,
+          ctx.context.session.user.id,
+          ctx.headers?.get('user-agent'),
+        );
         await createAuthAuditLog(
           ctx.context.session.user.id,
           ctx.context.session.session.ipAddress,
+          logoutDeviceId,
           'USER_LOGOUT',
           'USER',
           ctx.context.session.user.id,

@@ -32,10 +32,14 @@ model AuditLog {
   details   String?
   ipAddress String  @default("unknown")
 
+  deviceId String?
+  device   Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
   @@index([userId])
   @@index([createdAt])
   @@index([action])
   @@index([resourceType])
+  @@index([deviceId])
 }
 
 enum AuditResult {
@@ -264,6 +268,7 @@ model User {
   lastLoginAt        DateTime?
 
   loginEvents LoginEvent[]
+  devices     DeviceUser[]
 
   @@unique([email])
   @@map("user")
@@ -281,7 +286,11 @@ model LoginEvent {
   ipAddress String   @default("unknown")
   userAgent String?
 
+  deviceId String?
+  device   Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
   @@index([userId])
+  @@index([deviceId])
 }
 
 model UserDailyActivity {
@@ -293,10 +302,39 @@ model UserDailyActivity {
   ipAddress     String   @default("unknown")
   activeSeconds Int      @default(0)
 
+  deviceId String?
+  device   Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, date, ipAddress])
+  @@unique([userId, date, ipAddress, deviceId])
   @@index([date])
+  @@index([deviceId])
+}
+
+model Device {
+  id            String   @id @default(cuid())
+  deviceUuid    String   @unique
+  lastUserAgent String?
+  createdAt     DateTime @default(now())
+
+  users         DeviceUser[]
+  loginEvents   LoginEvent[]
+  dailyActivity UserDailyActivity[]
+  auditLogs     AuditLog[]
+}
+
+model DeviceUser {
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @updatedAt
+
+  @@id([deviceId, userId])
+  @@index([userId])
 }
 
 model SavedFilter {

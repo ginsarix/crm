@@ -15,6 +15,7 @@ import { auditLogEmitter } from '~/server/audit-log-emitter';
 import { auth } from '~/server/better-auth';
 import { db } from '~/server/db';
 import { normalizeIp } from '~/server/lib/normalize-ip';
+import { getDeviceUuid, resolveDeviceId } from '~/server/lib/resolve-device-id';
 
 /**
  * 1. CONTEXT
@@ -106,6 +107,7 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 export async function createAuditLog(
   ctx: {
     db: PrismaClient;
+    headers: Headers;
     session: { user: { id: string }; session: { ipAddress?: string | null } };
   },
   action: string,
@@ -116,10 +118,16 @@ export async function createAuditLog(
   details?: string,
 ) {
   try {
+    const deviceId = await resolveDeviceId(
+      getDeviceUuid(ctx.headers),
+      ctx.session.user.id,
+      ctx.headers.get('user-agent'),
+    );
     await ctx.db.auditLog.create({
       data: {
         userId: ctx.session.user.id,
         ipAddress: normalizeIp(ctx.session.session.ipAddress),
+        deviceId,
         action,
         resourceType,
         resourceId,

@@ -15,6 +15,7 @@ const filterSchema = z.object({
   result: z.enum(['SUCCESS', 'FAILURE', 'all']).default('all'),
   userId: z.string().optional(),
   ipAddress: z.string().optional(),
+  deviceId: z.string().nullable().optional(),
   dateFrom: z.date().optional(),
   dateTo: z.date().optional(),
 });
@@ -99,6 +100,13 @@ export const auditLogRouter = createTRPCRouter({
       // IP address filter
       if (input.filter?.ipAddress) {
         whereClause.ipAddress = input.filter.ipAddress;
+      }
+
+      // Device filter — checked against undefined (not truthiness) because
+      // an explicit null is a meaningful filter value (the "unknown
+      // device" bucket), distinct from the field being omitted entirely.
+      if (input.filter?.deviceId !== undefined) {
+        whereClause.deviceId = input.filter.deviceId;
       }
 
       // Date range filter

@@ -150,8 +150,22 @@ locking).
 
 ## Backfill script
 
-`scripts/backfill-devices.ts`, run once via `tsx` (new devDependency),
-safe to re-run:
+`scripts/backfill-devices.js` — plain JS (this repo is `"type": "module"`),
+run directly via `node scripts/backfill-devices.js` against
+`generated/prisma`. No new dependency (no `tsx`, no `psql` access path to
+set up) — it runs anywhere `next start` already runs, since it's the same
+Node binary and the same generated Prisma Client.
+
+The entire backfill executes inside one Prisma **interactive
+transaction** — `db.$transaction(async (tx) => { ... }, { timeout: 5 *
+60 * 1000 })` — which issues a real Postgres `BEGIN`, and only `COMMIT`s
+if every step below completes without throwing; any error rolls back
+everything. Same atomicity guarantee a hand-written SQL `BEGIN...COMMIT`
+script would give, and using Prisma's own `create()` for new rows means
+generated ids are real `cuid()`s, consistent with every other row in the
+table — no raw-SQL id-generation workaround needed. The explicit timeout
+override exists because the default (5s) is too short for a bulk pass
+over the full login/audit history.
 
 1. **Synthesize legacy devices from `LoginEvent`.** Group all
    `LoginEvent` rows with `deviceId: null` by `(userId, userAgent)`. For
@@ -170,9 +184,11 @@ safe to re-run:
    `deviceId: null`, look up `(userId, ipAddress)` in the map from step 2
    and assign if found. No match (including `ipAddress: 'unknown'`)
    stays `null`.
-4. **Idempotent by construction.** Every step only selects rows still at
-   `deviceId: null`, so re-running after a partial failure just resumes —
-   no duplicate devices, no double-counting.
+
+Because the whole run is one transaction, there's no partial-completion
+state to design around — either the full backfill lands, or (on any
+error, including a timeout) none of it does and it's safe to fix the
+issue and re-run from scratch.
 
 Run order: `pnpm db:push` (new schema) → deploy code with cookie
 minting + device-aware write paths → run the backfill script once
@@ -259,3 +275,16 @@ Would make the field available immediately on first sight of a device.
 Rejected: middleware runs on every request, including anonymous and
 static-asset ones, and Postgres writes from there are a much hotter and
 messier path than the three existing, already-authenticated write sites.
+
+**Plain `.sql` file for the backfill, run via `psql`.** Considered
+because it's a set-based relational transform (SQL's natural fit) and
+avoids any Node/TS runtime dependency in production. Rejected in favor
+of the plain-JS-via-Prisma-transaction approach above: raw SQL can't
+call Prisma's client-side `cuid()` generator, so new `Device` rows would
+get `gen_random_uuid()`-shaped ids sitting inconsistently next to
+cuid-shaped ids everywhere else in the table. `db.$transaction(async
+(tx) => {...})` gives the identical atomicity guarantee (a real Postgres
+`BEGIN`/`COMMIT`/`ROLLBACK`) while reusing the same id generation as
+every other write path in the app — and a plain-JS script run via `node`
+has the same "needs nothing but what's already installed" property a
+`.sql` file would.

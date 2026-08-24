@@ -1,5 +1,6 @@
 import { HEARTBEAT_INTERVAL_SECONDS } from '~/constants/activity';
 import { db } from '~/server/db';
+import { resolveDeviceId } from '~/server/lib/resolve-device-id';
 
 // Heartbeats never touch the DB directly — they just add to an in-memory
 // buffer here, which a periodic job flushes as one batched write per user.
@@ -25,6 +26,7 @@ const MIN_CREDIT_GAP_MS = HEARTBEAT_INTERVAL_SECONDS * 1000 - CREDIT_JITTER_MS;
 interface UserAccumulator {
   userId: string;
   ipAddress: string;
+  deviceUuid: string | null;
   pendingSeconds: number;
   lastCreditedAt: number;
 }
@@ -38,13 +40,21 @@ const accumulator =
   globalThis.__activityAccumulator ?? new Map<string, UserAccumulator>();
 globalThis.__activityAccumulator = accumulator;
 
-function accumulatorKey(userId: string, ipAddress: string) {
-  return `${userId}:${ipAddress}`;
+function accumulatorKey(
+  userId: string,
+  ipAddress: string,
+  deviceUuid: string | null,
+) {
+  return `${userId}:${ipAddress}:${deviceUuid ?? ''}`;
 }
 
-export function recordHeartbeat(userId: string, ipAddress: string) {
+export function recordHeartbeat(
+  userId: string,
+  ipAddress: string,
+  deviceUuid: string | null,
+) {
   const now = Date.now();
-  const key = accumulatorKey(userId, ipAddress);
+  const key = accumulatorKey(userId, ipAddress, deviceUuid);
   const existing = accumulator.get(key);
 
   if (existing && now - existing.lastCreditedAt < MIN_CREDIT_GAP_MS) {
@@ -54,6 +64,7 @@ export function recordHeartbeat(userId: string, ipAddress: string) {
   accumulator.set(key, {
     userId,
     ipAddress,
+    deviceUuid,
     pendingSeconds:
       (existing?.pendingSeconds ?? 0) + HEARTBEAT_INTERVAL_SECONDS,
     lastCreditedAt: now,
@@ -75,19 +86,43 @@ export async function flushActivity() {
   const date = startOfTodayUtc();
 
   await Promise.all(
-    entries.map(async ({ userId, ipAddress, pendingSeconds }) => {
+    entries.map(async ({ userId, ipAddress, deviceUuid, pendingSeconds }) => {
       if (pendingSeconds <= 0) return;
 
       try {
+        // Resolving here (once per flush, every ~2 minutes per active
+        // user+ip+device) rather than per-heartbeat (every ~30s) keeps the
+        // heartbeat mutation itself DB-free, matching the batching this
+        // module already does for UserDailyActivity/totalActiveSeconds.
+        const deviceId = await resolveDeviceId(deviceUuid, userId);
         await db.$transaction([
           db.user.update({
             where: { id: userId },
             data: { totalActiveSeconds: { increment: pendingSeconds } },
           }),
           db.userDailyActivity.upsert({
-            where: { userId_date_ipAddress_deviceId: { userId, date, ipAddress, deviceId: null as any } },
+            where: {
+              userId_date_ipAddress_deviceId: {
+                userId,
+                date,
+                ipAddress,
+                // Prisma's generated CompoundUniqueInput type requires
+                // `deviceId: string` even though the column is nullable and
+                // the @@unique constraint permits null — the query engine
+                // correctly translates null to "deviceId IS NULL" at
+                // runtime. This narrow cast only satisfies the type; the
+                // resolved value (including null) is passed through as-is.
+                deviceId: deviceId as string,
+              },
+            },
             update: { activeSeconds: { increment: pendingSeconds } },
-            create: { userId, date, ipAddress, activeSeconds: pendingSeconds },
+            create: {
+              userId,
+              date,
+              ipAddress,
+              deviceId,
+              activeSeconds: pendingSeconds,
+            },
           }),
         ]);
       } catch (error) {

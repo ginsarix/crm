@@ -154,15 +154,19 @@ export function DeviceBreakdownTable({
                         {os.name && ` · ${os.name}`}
                       </span>
                     </div>
-                  ) : (
+                  ) : device.deviceId === null ? (
                     <span className="text-muted-foreground">
                       Bilinmeyen cihaz
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">
+                      Tanınmayan cihaz ({device.deviceId.slice(0, 8)})
                     </span>
                   )}
                 </TableCell>
                 <TableCell>
                   {device.firstSeenAt
-                    ? new Date(device.firstSeenAt).toLocaleDateString('tr-TR')
+                    ? new Date(device.firstSeenAt).toLocaleString('tr-TR')
                     : '-'}
                 </TableCell>
                 <TableCell>
@@ -193,7 +197,10 @@ export function DeviceBreakdownTable({
                     <DeviceIpRows
                       deviceId={device.deviceId}
                       onOpenActions={(ip) =>
-                        onOpenActions(userId, userName, { ipAddress: ip })
+                        onOpenActions(userId, userName, {
+                          deviceId: device.deviceId,
+                          ipAddress: ip,
+                        })
                       }
                       userId={userId}
                     />

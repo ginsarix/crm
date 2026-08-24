@@ -71,12 +71,16 @@ async function synthesizeLegacyDevices(tx) {
  * rows, picks the device with the most logins from that IP (tie-break:
  * most recent) — the best guess for "which device used this IP" when
  * backfilling tables that never recorded a userAgent of their own.
+ * 'unknown' is never a real IP (better-auth's own not-resolved sentinel —
+ * see src/server/lib/normalize-ip.ts) so it's excluded here: attributing
+ * "we couldn't determine the IP" to whichever device happened to have the
+ * most such logins would be a false positive, not a best guess.
  *
  * @param {TransactionClient} tx
  */
 async function buildIpDeviceMap(tx) {
   const assigned = await tx.loginEvent.findMany({
-    where: { deviceId: { not: null } },
+    where: { deviceId: { not: null }, ipAddress: { not: 'unknown' } },
     select: { userId: true, ipAddress: true, deviceId: true, createdAt: true },
   });
 
@@ -94,7 +98,8 @@ async function buildIpDeviceMap(tx) {
       });
     } else {
       existing.count += 1;
-      if (row.createdAt > existing.lastSeenAt) existing.lastSeenAt = row.createdAt;
+      if (row.createdAt > existing.lastSeenAt)
+        existing.lastSeenAt = row.createdAt;
     }
   }
 
@@ -119,13 +124,52 @@ async function buildIpDeviceMap(tx) {
 }
 
 /**
+ * AuditLog has no unique constraint touching deviceId, so a batched
+ * updateMany per resolved device is always safe (no unique-constraint
+ * collision possible) and avoids one round trip per row — this table can
+ * be much larger than UserDailyActivity in production.
+ *
  * @param {TransactionClient} tx
- * @param {'userDailyActivity' | 'auditLog'} model
  * @param {Map<string, string>} ipDeviceMap
  */
-async function backfillByIp(tx, model, ipDeviceMap) {
-  const rows = await (/** @type {any} */ (tx[model])).findMany({
-    where: { deviceId: null },
+async function backfillAuditLog(tx, ipDeviceMap) {
+  const rows = await tx.auditLog.findMany({
+    where: { deviceId: null, ipAddress: { not: 'unknown' } },
+    select: { id: true, userId: true, ipAddress: true },
+  });
+
+  const idsByDevice = new Map();
+  for (const row of rows) {
+    const deviceId = ipDeviceMap.get(`${row.userId}:${row.ipAddress}`);
+    if (!deviceId) continue;
+    const ids = idsByDevice.get(deviceId) ?? [];
+    ids.push(row.id);
+    idsByDevice.set(deviceId, ids);
+  }
+
+  let updated = 0;
+  for (const [deviceId, ids] of idsByDevice) {
+    const result = await tx.auditLog.updateMany({
+      where: { id: { in: ids } },
+      data: { deviceId },
+    });
+    updated += result.count;
+  }
+  return updated;
+}
+
+/**
+ * UserDailyActivity IS unique on (userId, date, ipAddress, deviceId), so
+ * unlike AuditLog this can't be safely batched with a blind updateMany —
+ * a per-row update, with a P2002 catch for the rare deploy-day collision
+ * described below, is required.
+ *
+ * @param {TransactionClient} tx
+ * @param {Map<string, string>} ipDeviceMap
+ */
+async function backfillUserDailyActivity(tx, ipDeviceMap) {
+  const rows = await tx.userDailyActivity.findMany({
+    where: { deviceId: null, ipAddress: { not: 'unknown' } },
     select: { id: true, userId: true, ipAddress: true },
   });
 
@@ -134,21 +178,25 @@ async function backfillByIp(tx, model, ipDeviceMap) {
     const deviceId = ipDeviceMap.get(`${row.userId}:${row.ipAddress}`);
     if (!deviceId) continue;
     try {
-      await (/** @type {any} */ (tx[model])).update({
+      await tx.userDailyActivity.update({
         where: { id: row.id },
         data: { deviceId },
       });
       updated += 1;
     } catch (err) {
-      // UserDailyActivity is unique on (userId, date, ipAddress, deviceId).
-      // On deploy day, a legacy (deviceId: null) row and a fresh
-      // real-deviceId row can both exist for the same (userId, date,
-      // ipAddress) if a user was active both before and after the
-      // deploy — updating the legacy row to that same deviceId would
-      // collide. Leave it at deviceId: null (falls into the "unknown
-      // device" bucket) rather than aborting the whole transaction over
-      // one ambiguous row.
-      if (err && typeof err === 'object' && 'code' in err && err.code === 'P2002') {
+      // Unique on (userId, date, ipAddress, deviceId). On deploy day, a
+      // legacy (deviceId: null) row and a fresh real-deviceId row can
+      // both exist for the same (userId, date, ipAddress) if a user was
+      // active both before and after the deploy — updating the legacy
+      // row to that same deviceId would collide. Leave it at
+      // deviceId: null (falls into the "unknown device" bucket) rather
+      // than aborting the whole transaction over one ambiguous row.
+      if (
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        err.code === 'P2002'
+      ) {
         continue;
       }
       throw err;
@@ -160,14 +208,24 @@ async function backfillByIp(tx, model, ipDeviceMap) {
 async function main() {
   const result = await db.$transaction(
     async (tx) => {
+      console.log('Phase 1: synthesizing legacy devices from LoginEvent...');
       const devicesCreated = await synthesizeLegacyDevices(tx);
+      console.log(`  -> ${devicesCreated} device(s) created`);
+
+      console.log('Phase 2: building IP -> device map...');
       const ipDeviceMap = await buildIpDeviceMap(tx);
-      const activityUpdated = await backfillByIp(
-        tx,
-        'userDailyActivity',
-        ipDeviceMap,
+      console.log(
+        `  -> ${ipDeviceMap.size} (userId, ipAddress) pair(s) mapped`,
       );
-      const auditLogUpdated = await backfillByIp(tx, 'auditLog', ipDeviceMap);
+
+      console.log('Phase 3: backfilling UserDailyActivity...');
+      const activityUpdated = await backfillUserDailyActivity(tx, ipDeviceMap);
+      console.log(`  -> ${activityUpdated} row(s) updated`);
+
+      console.log('Phase 4: backfilling AuditLog...');
+      const auditLogUpdated = await backfillAuditLog(tx, ipDeviceMap);
+      console.log(`  -> ${auditLogUpdated} row(s) updated`);
+
       return { devicesCreated, activityUpdated, auditLogUpdated };
     },
     { timeout: 5 * 60 * 1000 },

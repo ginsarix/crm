@@ -10,9 +10,8 @@ export function getDeviceUuid(headers: Headers): string | null {
 }
 
 // Finds-or-creates the Device row for a deviceUuid and records that this
-// user has been seen on it (bumping DeviceUser.lastSeenAt via @updatedAt,
-// even though the update payload itself is empty). Returns null when
-// there's no deviceUuid to resolve (e.g. a request that bypassed the
+// user has been seen on it, bumping DeviceUser.lastSeenAt. Returns null
+// when there's no deviceUuid to resolve (e.g. a request that bypassed the
 // proxy) or if the upserts fail — callers treat a null deviceId as
 // "unknown device", not an error, matching how ipAddress already falls
 // back to an 'unknown' sentinel elsewhere in this codebase rather than
@@ -20,6 +19,7 @@ export function getDeviceUuid(headers: Headers): string | null {
 export async function resolveDeviceId(
   deviceUuid: string | null,
   userId: string,
+  userAgent?: string | null,
 ): Promise<string | null> {
   if (!deviceUuid) return null;
 
@@ -27,12 +27,12 @@ export async function resolveDeviceId(
     const device = await db.device.upsert({
       where: { deviceUuid },
       update: {},
-      create: { deviceUuid },
+      create: { deviceUuid, lastUserAgent: userAgent ?? null },
     });
 
     await db.deviceUser.upsert({
       where: { deviceId_userId: { deviceId: device.id, userId } },
-      update: {},
+      update: { lastSeenAt: new Date() },
       create: { deviceId: device.id, userId },
     });
 

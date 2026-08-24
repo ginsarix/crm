@@ -121,6 +121,7 @@ export async function createAuditLog(
     const deviceId = await resolveDeviceId(
       getDeviceUuid(ctx.headers),
       ctx.session.user.id,
+      ctx.headers.get('user-agent'),
     );
     await ctx.db.auditLog.create({
       data: {

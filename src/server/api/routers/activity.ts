@@ -14,6 +14,7 @@ export const activityRouter = createTRPCRouter({
       ctx.session.user.id,
       normalizeIp(ctx.session.session.ipAddress),
       getDeviceUuid(ctx.headers),
+      ctx.headers.get('user-agent'),
     );
   }),
 });

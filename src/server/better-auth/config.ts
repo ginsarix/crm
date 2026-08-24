@@ -107,11 +107,15 @@ export const auth = betterAuth({
             ? getDeviceUuid(context.headers)
             : null;
           try {
-            const deviceId = await resolveDeviceId(deviceUuid, session.userId);
+            const deviceId = await resolveDeviceId(
+              deviceUuid,
+              session.userId,
+              userAgent,
+            );
             if (deviceId) {
               await db.device.update({
                 where: { id: deviceId },
-                data: { lastUserAgent: userAgent },
+                data: { lastUserAgent: userAgent ?? undefined },
               });
             }
             await db.loginEvent.create({
@@ -193,6 +197,7 @@ export const auth = betterAuth({
         const loginDeviceId = await resolveDeviceId(
           ctx.headers ? getDeviceUuid(ctx.headers) : null,
           response.user.id,
+          ctx.headers?.get('user-agent'),
         );
         await createAuthAuditLog(
           response.user.id,
@@ -224,10 +229,18 @@ export const auth = betterAuth({
         }
       }
 
+      // NOTE: this branch is not currently reachable — better-auth's
+      // /sign-out endpoint never populates ctx.context.session (confirmed
+      // by reading node_modules/better-auth/dist/api/routes/sign-out.mjs),
+      // so USER_LOGOUT audit logging never fires today. Pre-existing gap,
+      // unrelated to device tracking — kept correct here in case the
+      // underlying issue is ever fixed upstream or in this app's own auth
+      // config.
       if (path === '/sign-out' && ctx.context.session?.user) {
         const logoutDeviceId = await resolveDeviceId(
           ctx.headers ? getDeviceUuid(ctx.headers) : null,
           ctx.context.session.user.id,
+          ctx.headers?.get('user-agent'),
         );
         await createAuthAuditLog(
           ctx.context.session.user.id,

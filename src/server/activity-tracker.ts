@@ -27,6 +27,7 @@ interface UserAccumulator {
   userId: string;
   ipAddress: string;
   deviceUuid: string | null;
+  userAgent: string | null;
   pendingSeconds: number;
   lastCreditedAt: number;
 }
@@ -52,6 +53,7 @@ export function recordHeartbeat(
   userId: string,
   ipAddress: string,
   deviceUuid: string | null,
+  userAgent: string | null,
 ) {
   const now = Date.now();
   const key = accumulatorKey(userId, ipAddress, deviceUuid);
@@ -65,6 +67,7 @@ export function recordHeartbeat(
     userId,
     ipAddress,
     deviceUuid,
+    userAgent,
     pendingSeconds:
       (existing?.pendingSeconds ?? 0) + HEARTBEAT_INTERVAL_SECONDS,
     lastCreditedAt: now,
@@ -86,51 +89,81 @@ export async function flushActivity() {
   const date = startOfTodayUtc();
 
   await Promise.all(
-    entries.map(async ({ userId, ipAddress, deviceUuid, pendingSeconds }) => {
-      if (pendingSeconds <= 0) return;
+    entries.map(
+      async ({ userId, ipAddress, deviceUuid, userAgent, pendingSeconds }) => {
+        if (pendingSeconds <= 0) return;
 
-      try {
-        // Resolving here (once per flush, every ~2 minutes per active
-        // user+ip+device) rather than per-heartbeat (every ~30s) keeps the
-        // heartbeat mutation itself DB-free, matching the batching this
-        // module already does for UserDailyActivity/totalActiveSeconds.
-        const deviceId = await resolveDeviceId(deviceUuid, userId);
-        await db.$transaction([
-          db.user.update({
-            where: { id: userId },
-            data: { totalActiveSeconds: { increment: pendingSeconds } },
-          }),
-          db.userDailyActivity.upsert({
-            where: {
-              userId_date_ipAddress_deviceId: {
-                userId,
-                date,
-                ipAddress,
-                // Prisma's generated CompoundUniqueInput type requires
-                // `deviceId: string` even though the column is nullable and
-                // the @@unique constraint permits null — the query engine
-                // correctly translates null to "deviceId IS NULL" at
-                // runtime. This narrow cast only satisfies the type; the
-                // resolved value (including null) is passed through as-is.
-                deviceId: deviceId as string,
-              },
-            },
-            update: { activeSeconds: { increment: pendingSeconds } },
-            create: {
-              userId,
-              date,
-              ipAddress,
-              deviceId,
-              activeSeconds: pendingSeconds,
-            },
-          }),
-        ]);
-      } catch (error) {
-        // Analytics-grade counter, not billing — drop on failure (e.g. the
-        // user was deleted between heartbeat and flush) rather than retry.
-        console.error(`Activity flush failed for user ${userId}:`, error);
-      }
-    }),
+        try {
+          // Resolving here (once per flush, every ~2 minutes per active
+          // user+ip+device) rather than per-heartbeat (every ~30s) keeps
+          // the heartbeat mutation itself DB-free, matching the batching
+          // this module already does for UserDailyActivity/totalActiveSeconds.
+          const deviceId = await resolveDeviceId(deviceUuid, userId, userAgent);
+
+          await db.$transaction(async (tx) => {
+            await tx.user.update({
+              where: { id: userId },
+              data: { totalActiveSeconds: { increment: pendingSeconds } },
+            });
+
+            if (deviceId === null) {
+              // Prisma's compound-unique `where` requires every key
+              // column to be a concrete value, including deviceId — even
+              // though the column itself is nullable and the @@unique
+              // constraint permits null. Passing null there throws
+              // PrismaClientValidationError at runtime (verified
+              // directly against the generated client), so the null
+              // case can't go through upsert's compound-key `where` and
+              // needs a find-then-branch instead.
+              const existing = await tx.userDailyActivity.findFirst({
+                where: { userId, date, ipAddress, deviceId: null },
+                select: { id: true },
+              });
+              if (existing) {
+                await tx.userDailyActivity.update({
+                  where: { id: existing.id },
+                  data: { activeSeconds: { increment: pendingSeconds } },
+                });
+              } else {
+                await tx.userDailyActivity.create({
+                  data: {
+                    userId,
+                    date,
+                    ipAddress,
+                    deviceId: null,
+                    activeSeconds: pendingSeconds,
+                  },
+                });
+              }
+            } else {
+              await tx.userDailyActivity.upsert({
+                where: {
+                  userId_date_ipAddress_deviceId: {
+                    userId,
+                    date,
+                    ipAddress,
+                    deviceId,
+                  },
+                },
+                update: { activeSeconds: { increment: pendingSeconds } },
+                create: {
+                  userId,
+                  date,
+                  ipAddress,
+                  deviceId,
+                  activeSeconds: pendingSeconds,
+                },
+              });
+            }
+          });
+        } catch (error) {
+          // Analytics-grade counter, not billing — drop on failure (e.g.
+          // the user was deleted between heartbeat and flush) rather
+          // than retry.
+          console.error(`Activity flush failed for user ${userId}:`, error);
+        }
+      },
+    ),
   );
 }
 

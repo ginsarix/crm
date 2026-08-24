@@ -1,4 +1,4 @@
-import type { Prisma } from 'generated/prisma';
+import type { Prisma, PrismaClient } from 'generated/prisma';
 import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
 import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
@@ -48,6 +48,94 @@ function buildOrderBy(
   if (orderBy.length === 0)
     orderBy.push({ lastLoginAt: { sort: 'desc', nulls: 'last' } });
   return orderBy;
+}
+
+interface DeviceIpRow {
+  deviceId: string | null;
+  ipAddress: string;
+  loginCount: number;
+  lastLoginAt: Date | null;
+  userAgent: string | null;
+  activeSeconds: number;
+  actionCount: number;
+}
+
+// Shared by getDeviceBreakdown (aggregated up to one row per device) and
+// getDeviceIpBreakdown (filtered down to one device) — both need the same
+// per-(device, IP) union across LoginEvent/UserDailyActivity/AuditLog, the
+// same three-groupBy-merged-in-JS approach the old getIpBreakdown used,
+// just with deviceId added as a second grouping dimension.
+async function getDeviceIpRows(
+  db: PrismaClient,
+  userId: string,
+): Promise<DeviceIpRow[]> {
+  const [logins, loginCounts, activity, actions] = await Promise.all([
+    db.loginEvent.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      distinct: ['deviceId', 'ipAddress'],
+      select: {
+        deviceId: true,
+        ipAddress: true,
+        createdAt: true,
+        userAgent: true,
+      },
+    }),
+    db.loginEvent.groupBy({
+      by: ['deviceId', 'ipAddress'],
+      where: { userId },
+      _count: true,
+    }),
+    db.userDailyActivity.groupBy({
+      by: ['deviceId', 'ipAddress'],
+      where: { userId },
+      _sum: { activeSeconds: true },
+    }),
+    db.auditLog.groupBy({
+      by: ['deviceId', 'ipAddress'],
+      where: { userId },
+      _count: true,
+    }),
+  ]);
+
+  const rows = new Map<string, DeviceIpRow>();
+  const rowKey = (deviceId: string | null, ipAddress: string) =>
+    `${deviceId ?? ''}:${ipAddress}`;
+
+  const getRow = (deviceId: string | null, ipAddress: string) => {
+    const k = rowKey(deviceId, ipAddress);
+    let row = rows.get(k);
+    if (!row) {
+      row = {
+        deviceId,
+        ipAddress,
+        loginCount: 0,
+        lastLoginAt: null,
+        userAgent: null,
+        activeSeconds: 0,
+        actionCount: 0,
+      };
+      rows.set(k, row);
+    }
+    return row;
+  };
+
+  for (const l of logins) {
+    const row = getRow(l.deviceId, l.ipAddress);
+    row.lastLoginAt = l.createdAt;
+    row.userAgent = l.userAgent;
+  }
+  for (const c of loginCounts) {
+    getRow(c.deviceId, c.ipAddress).loginCount = c._count;
+  }
+  for (const a of activity) {
+    getRow(a.deviceId, a.ipAddress).activeSeconds = a._sum.activeSeconds ?? 0;
+  }
+  for (const a of actions) {
+    getRow(a.deviceId, a.ipAddress).actionCount = a._count;
+  }
+
+  return Array.from(rows.values());
 }
 
 export const userReportRouter = createTRPCRouter({
@@ -118,86 +206,78 @@ export const userReportRouter = createTRPCRouter({
         pagination: { totalItems, totalPages },
       };
     }),
-  getIpBreakdown: adminProcedure
+  getDeviceBreakdown: adminProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const [logins, loginCounts, activity, actions] = await Promise.all([
-        // Not a groupBy: we also need the most recent userAgent per IP, and
-        // groupBy can only aggregate (count/sum/max) — it can't return a
-        // sibling field like userAgent from the row that produced the max.
-        // `distinct: ['ipAddress']` + desc order gives Postgres a
-        // SELECT DISTINCT ON, so this returns exactly one (the freshest)
-        // row per IP instead of the user's entire login history.
-        ctx.db.loginEvent.findMany({
+      const [ipRows, deviceUsers] = await Promise.all([
+        getDeviceIpRows(ctx.db, input.userId),
+        ctx.db.deviceUser.findMany({
           where: { userId: input.userId },
-          orderBy: { createdAt: 'desc' },
-          distinct: ['ipAddress'],
-          select: { ipAddress: true, createdAt: true, userAgent: true },
-        }),
-        ctx.db.loginEvent.groupBy({
-          by: ['ipAddress'],
-          where: { userId: input.userId },
-          _count: true,
-        }),
-        ctx.db.userDailyActivity.groupBy({
-          by: ['ipAddress'],
-          where: { userId: input.userId },
-          _sum: { activeSeconds: true },
-        }),
-        ctx.db.auditLog.groupBy({
-          by: ['ipAddress'],
-          where: { userId: input.userId },
-          _count: true,
+          select: {
+            deviceId: true,
+            firstSeenAt: true,
+            lastSeenAt: true,
+            device: { select: { lastUserAgent: true } },
+          },
         }),
       ]);
 
-      const rows = new Map<
-        string,
+      const deviceMeta = new Map(deviceUsers.map((du) => [du.deviceId, du]));
+
+      const devices = new Map<
+        string | null,
         {
-          ipAddress: string;
+          deviceId: string | null;
+          lastUserAgent: string | null;
+          firstSeenAt: Date | null;
+          lastSeenAt: Date | null;
           loginCount: number;
-          lastLoginAt: Date | null;
-          userAgent: string | null;
           activeSeconds: number;
           actionCount: number;
+          ipCount: number;
         }
       >();
 
-      const getRow = (ip: string) => {
-        let row = rows.get(ip);
-        if (!row) {
-          row = {
-            ipAddress: ip,
+      const getDevice = (deviceId: string | null) => {
+        let device = devices.get(deviceId);
+        if (!device) {
+          const meta = deviceId ? deviceMeta.get(deviceId) : undefined;
+          device = {
+            deviceId,
+            lastUserAgent: meta?.device.lastUserAgent ?? null,
+            firstSeenAt: meta?.firstSeenAt ?? null,
+            lastSeenAt: meta?.lastSeenAt ?? null,
             loginCount: 0,
-            lastLoginAt: null,
-            userAgent: null,
             activeSeconds: 0,
             actionCount: 0,
+            ipCount: 0,
           };
-          rows.set(ip, row);
+          devices.set(deviceId, device);
         }
-        return row;
+        return device;
       };
 
-      // logins holds one (the freshest, per the desc + distinct query above)
-      // row per IP — exactly the lastLoginAt/userAgent we want.
-      for (const l of logins) {
-        const row = getRow(l.ipAddress);
-        row.lastLoginAt = l.createdAt;
-        row.userAgent = l.userAgent;
-      }
-      for (const c of loginCounts) {
-        getRow(c.ipAddress).loginCount = c._count;
-      }
-      for (const a of activity) {
-        getRow(a.ipAddress).activeSeconds = a._sum.activeSeconds ?? 0;
-      }
-      for (const a of actions) {
-        getRow(a.ipAddress).actionCount = a._count;
+      // ipRows already has exactly one entry per (deviceId, ipAddress) pair
+      // for this user, so summing across matching rows per device also
+      // gives the correct distinct-IP count (ipCount) for free.
+      for (const row of ipRows) {
+        const device = getDevice(row.deviceId);
+        device.loginCount += row.loginCount;
+        device.activeSeconds += row.activeSeconds;
+        device.actionCount += row.actionCount;
+        device.ipCount += 1;
       }
 
-      return Array.from(rows.values()).sort(
+      return Array.from(devices.values()).sort(
         (a, b) => b.loginCount - a.loginCount,
       );
+    }),
+  getDeviceIpBreakdown: adminProcedure
+    .input(z.object({ userId: z.string(), deviceId: z.string().nullable() }))
+    .query(async ({ ctx, input }) => {
+      const ipRows = await getDeviceIpRows(ctx.db, input.userId);
+      return ipRows
+        .filter((row) => row.deviceId === input.deviceId)
+        .sort((a, b) => b.loginCount - a.loginCount);
     }),
 });

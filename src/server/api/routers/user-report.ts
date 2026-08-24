@@ -99,6 +99,9 @@ async function getDeviceIpRows(
   ]);
 
   const rows = new Map<string, DeviceIpRow>();
+  // Safe delimiter: deviceId is either '' or a Prisma cuid ([a-z0-9] only,
+  // never contains ':'), so this can never collide with an IPv6 address
+  // (which does contain ':').
   const rowKey = (deviceId: string | null, ipAddress: string) =>
     `${deviceId ?? ''}:${ipAddress}`;
 

@@ -21,6 +21,18 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-24',
+    version: '1.24',
+    date: '28 Ağustos 2026',
+    changes: [
+      {
+        type: 'new',
+        title: "Dashboard'da meslek grubu seçici",
+        desc: "Dashboard'a, kendi meslek grubunuzu seçebileceğiniz yeni bir seçici eklendi. Seçtiğiniz gruba göre cari sayısı, ziyaret sayısı ve renk dağılımı gibi istatistikler görüntülenir; seçenekler yalnızca sizin yetkili olduğunuz gruplarla sınırlıdır.",
+      },
+    ],
+  },
+  {
     id: 'v1-23',
     version: '1.23',
     date: '9 Ağustos 2026',

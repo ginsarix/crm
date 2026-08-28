@@ -32,12 +32,21 @@ export const businessGroupRouter = createTRPCRouter({
         allowedGroups = assigned.map((g) => g.name);
       }
 
+      // For non-admins, only honor an explicit businessGroup filter if it's
+      // one of their assigned groups — otherwise fall back to the full
+      // allowed-groups filter rather than trusting the raw input.
+      const requestedGroup =
+        input?.businessGroup &&
+        (!allowedGroups || allowedGroups.includes(input.businessGroup))
+          ? input.businessGroup
+          : undefined;
+
       const rows = await ctx.db.customerCard.groupBy({
         by: ['businessGroup', 'color'],
         _count: true,
         where: {
-          businessGroup: input?.businessGroup
-            ? input.businessGroup
+          businessGroup: requestedGroup
+            ? requestedGroup
             : allowedGroups
               ? { in: allowedGroups }
               : { not: null },

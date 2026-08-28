@@ -22,20 +22,18 @@ export default async function DashboardPage({
   ]);
   const isAdmin = session?.user.role === 'admin';
 
-  const allBusinessGroups = isAdmin ? await api.businessGroup.get() : [];
+  const allBusinessGroups = await api.businessGroup.get();
 
+  const bgParam =
+    typeof resolvedParams.bg === 'string' ? resolvedParams.bg : undefined;
   let selectedGroup: string | null = null;
-  if (isAdmin) {
-    const bgParam =
-      typeof resolvedParams.bg === 'string' ? resolvedParams.bg : undefined;
-    if (bgParam === ALL_KEY) {
-      selectedGroup = null;
-    } else if (bgParam) {
-      selectedGroup = bgParam;
-    } else {
-      const sorted = [...allBusinessGroups].sort(createLocaleSorter('name'));
-      selectedGroup = sorted.find((g) => g.name.startsWith('01'))?.name ?? null;
-    }
+  if (bgParam === ALL_KEY) {
+    selectedGroup = null;
+  } else if (bgParam && allBusinessGroups.some((g) => g.name === bgParam)) {
+    selectedGroup = bgParam;
+  } else {
+    const sorted = [...allBusinessGroups].sort(createLocaleSorter('name'));
+    selectedGroup = sorted.find((g) => g.name.startsWith('01'))?.name ?? null;
   }
 
   const [
@@ -75,7 +73,7 @@ export default async function DashboardPage({
               src="/images/biz-gelecegiz-banner.png"
             />
           </div>
-          {isAdmin && (
+          {allBusinessGroups.length > 0 && (
             <div className="mb-4">
               <p className="mb-1.5 text-muted-foreground text-sm">
                 Meslek Grubu

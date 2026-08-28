@@ -113,14 +113,24 @@ export const customerCardRouter = createTRPCRouter({
     .input(z.object({ businessGroup: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
       const isAdmin = ctx.session.user.role === 'admin';
-      // Non-admins now see every card (out-of-scope ones grayed out), so the
-      // total is no longer restricted to their assigned business groups —
-      // it needs to match what the list/color-count cards add up to.
+      let businessGroup = input?.businessGroup;
+
+      if (businessGroup && !isAdmin) {
+        const assigned = await ctx.db.businessGroup.findMany({
+          where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+          select: { name: true },
+        });
+        if (!assigned.some((g) => g.name === businessGroup)) {
+          businessGroup = undefined;
+        }
+      }
+
+      // With no group selected, non-admins see every card (out-of-scope
+      // ones grayed out), so the total isn't restricted to their assigned
+      // business groups — it needs to match what the list/color-count
+      // cards add up to.
       return ctx.db.customerCard.count({
-        where:
-          isAdmin && input?.businessGroup
-            ? { businessGroup: input.businessGroup }
-            : {},
+        where: businessGroup ? { businessGroup } : {},
       });
     }),
   get: protectedProcedure
@@ -549,7 +559,6 @@ export const customerCardRouter = createTRPCRouter({
     .input(z.object({ businessGroup: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
       const isAdmin = ctx.session.user.role === 'admin';
-      const filterByGroup = input?.businessGroup;
 
       const counts = {
         green: 0,
@@ -566,6 +575,20 @@ export const customerCardRouter = createTRPCRouter({
           select: { name: true },
         });
         const allowedNames = assignedGroups.map((g) => g.name);
+        const filterByGroup =
+          input?.businessGroup && allowedNames.includes(input.businessGroup)
+            ? input.businessGroup
+            : undefined;
+
+        if (filterByGroup) {
+          const rows = await ctx.db.customerCard.groupBy({
+            by: ['color'],
+            _count: true,
+            where: { businessGroup: filterByGroup },
+          });
+          for (const row of rows) counts[row.color] += row._count;
+          return counts;
+        }
 
         // Out-of-scope cards are visible (grayed out) but their real color
         // isn't — bucket them under gray, same as the list's color filter.
@@ -589,6 +612,8 @@ export const customerCardRouter = createTRPCRouter({
         counts.gray += outOfScopeCount;
         return counts;
       }
+
+      const filterByGroup = input?.businessGroup;
 
       const [dashboardConfig, rows] = await Promise.all([
         !filterByGroup

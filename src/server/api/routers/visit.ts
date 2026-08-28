@@ -64,10 +64,16 @@ export const visitRouter = createTRPCRouter({
         where: { assignedUsers: { some: { id: ctx.session.user.id } } },
         select: { name: true },
       });
+      const allowedNames = assignedGroups.map((g) => g.name);
+      const businessGroup =
+        input?.businessGroup && allowedNames.includes(input.businessGroup)
+          ? input.businessGroup
+          : undefined;
+
       return ctx.db.visit.count({
         where: {
           customerCard: {
-            businessGroup: { in: assignedGroups.map((g) => g.name) },
+            businessGroup: businessGroup ?? { in: allowedNames },
           },
         },
       });
@@ -118,7 +124,11 @@ export const visitRouter = createTRPCRouter({
         select: { name: true },
       });
       const groupNames = assignedGroups.map((g) => g.name);
-      if (groupNames.length === 0) return [];
+      const filterNames =
+        input?.businessGroup && groupNames.includes(input.businessGroup)
+          ? [input.businessGroup]
+          : groupNames;
+      if (filterNames.length === 0) return [];
 
       const rows = await ctx.db.$queryRaw<RawRow[]>(
         Prisma.sql`
@@ -126,7 +136,7 @@ export const visitRouter = createTRPCRouter({
           FROM "Visit" v
           JOIN "CustomerCard" cc ON v."customerCardId" = cc.id
           WHERE cc."salesRepresentative" IS NOT NULL AND cc."salesRepresentative" <> ''
-            AND cc."businessGroup" IN (${Prisma.join(groupNames)})
+            AND cc."businessGroup" IN (${Prisma.join(filterNames)})
           GROUP BY cc."salesRepresentative"
           ORDER BY "visitCount" DESC
           LIMIT 5

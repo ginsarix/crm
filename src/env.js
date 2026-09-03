@@ -16,6 +16,7 @@ export const env = createEnv({
     DEFAULT_ADMIN_PASSWORD: z.string().min(8),
     CROSS_ORIGIN_URL: z.string().url().optional(),
     APP_URL: z.string().url().optional(),
+    APP_TITLE: z.string().default('CRM'),
 
     // SMTP configuration for sending emails
     SMTP_HOST: z.string().optional(),
@@ -38,6 +39,7 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_APP_TITLE: z.string().default('CRM'),
   },
 
   /**
@@ -50,6 +52,8 @@ export const env = createEnv({
     DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD,
     CROSS_ORIGIN_URL: process.env.CROSS_ORIGIN_URL,
     APP_URL: process.env.APP_URL,
+    APP_TITLE: process.env.APP_TITLE,
+    NEXT_PUBLIC_APP_TITLE: process.env.APP_TITLE,
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,
     SMTP_USER: process.env.SMTP_USER,

@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '~/components/ui/button';
+import { env } from '~/env';
 
 interface Hero7Props {
   heading?: string;
@@ -14,7 +15,7 @@ interface Hero7Props {
 
 const Hero7 = ({
   heading = 'Profesyonel, Gelişmiş ve Kolay CRM.',
-  description = 'NesbirCRM ile müşterilerinizi pratik ve kolay bir şekilde takip edin ve yönetin.',
+  description = `${env.NEXT_PUBLIC_APP_TITLE} ile müşterilerinizi pratik ve kolay bir şekilde takip edin ve yönetin.`,
   button = {
     text: 'Başla',
     url: '/',

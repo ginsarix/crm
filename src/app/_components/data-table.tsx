@@ -57,6 +57,7 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table';
+import { env } from '~/env';
 import { cn } from '~/lib/utils';
 
 declare module '@tanstack/react-table' {
@@ -259,7 +260,7 @@ function exportToExcel<TData>(
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Sayfa1');
-  XLSX.writeFile(wb, `nesbir_crm_${filename}.xlsx`);
+  XLSX.writeFile(wb, `${env.NEXT_PUBLIC_APP_TITLE}_crm_${filename}.xlsx`);
 }
 
 export function DataTable<TData, TValue>({

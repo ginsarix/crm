@@ -4,10 +4,11 @@ import type { Metadata } from 'next';
 import { Barlow, IBM_Plex_Mono } from 'next/font/google';
 import { ViewTransition } from 'react';
 import { ThemeProvider } from '~/components/theme-provider';
+import { env } from '~/env';
 import { TRPCReactProvider } from '~/trpc/react';
 
 export const metadata: Metadata = {
-  title: 'NesbirCRM',
+  title: env.APP_TITLE,
   description: 'CRM Sistemi',
   icons: [{ rel: 'icon', url: '/favicon.svg', type: 'image/svg+xml' }],
 };

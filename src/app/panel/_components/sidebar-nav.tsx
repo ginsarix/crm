@@ -40,6 +40,7 @@ import {
   SidebarRail,
   useSidebar,
 } from '~/components/ui/sidebar';
+import { env } from '~/env';
 import { authClient } from '~/server/better-auth/client';
 import { AccountSheet } from './account-sheet';
 
@@ -136,7 +137,7 @@ export function SidebarNav() {
                 </div>
                 <div className="grid flex-1 text-left leading-tight">
                   <span className="truncate font-semibold text-sm tracking-wide">
-                    NesbirCRM
+                    {env.NEXT_PUBLIC_APP_TITLE}
                   </span>
                   <span className="truncate font-mono text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
                     Yönetim Paneli

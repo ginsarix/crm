@@ -75,25 +75,7 @@ export function DeviceBreakdownTable({
       <TableHeader>
         <TableRow>
           <TableHead className="w-10" />
-          <TableHead>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="flex cursor-help items-center gap-1">
-                    Cihaz
-                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs text-xs">
-                    device_uuid çerezinden önceki geçmiş veriler, giriş
-                    kayıtlarındaki tarayıcı bilgisine göre en iyi tahminle
-                    cihazlara eşleştirilmiştir; kesin olmayabilir
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </TableHead>
+          <TableHead>Cihaz</TableHead>
           <TableHead>İlk Görülme</TableHead>
           <TableHead>Son Görülme</TableHead>
           <TableHead>Giriş Sayısı</TableHead>

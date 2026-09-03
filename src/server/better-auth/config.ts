@@ -46,7 +46,9 @@ export const auth = betterAuth({
   database: prismaAdapter(db, {
     provider: 'postgresql',
   }),
-  baseURL: env.CROSS_ORIGIN_URL ?? 'http://localhost:3000',
+  // It's either running on our server and the domain is not registered to our server
+  // or It's running on our server and the domain is registered to our server
+  baseURL: env.CROSS_ORIGIN_URL ?? env.APP_URL ?? 'http://localhost:3000',
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,

@@ -1,3 +1,5 @@
+import { existsSync as pathExistsSync } from 'node:fs';
+import { join as pathJoin } from 'node:path';
 import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -64,15 +66,22 @@ export default async function DashboardPage({
     <div className="w-full">
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="mx-auto w-full max-w-400">
-          <div className="relative mx-auto mb-6 flex aspect-2.5/1 w-150 overflow-hidden rounded-lg">
-            <Image
-              alt="Biz Geleceğiz"
-              className="object-cover object-[center_44%]"
-              fill
-              priority
-              src="/images/biz-gelecegiz-banner.png"
-            />
-          </div>
+          {
+            // don't render <Image> if the image file doesn't exist
+            pathExistsSync(
+              pathJoin(process.cwd(), 'public', 'images', 'banner.png'),
+            ) && (
+              <div className="relative mx-auto mb-6 flex aspect-2.5/1 w-150 overflow-hidden rounded-lg">
+                <Image
+                  alt="Panel Afiş Görseli"
+                  className="object-cover object-[center_44%]"
+                  fill
+                  priority
+                  src="/images/banner.png"
+                />
+              </div>
+            )
+          }
           {allBusinessGroups.length > 0 && (
             <div className="mb-4">
               <p className="mb-1.5 text-muted-foreground text-sm">

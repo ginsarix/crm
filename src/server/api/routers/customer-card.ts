@@ -7,6 +7,7 @@ import {
   CustomerCardCreateSchema,
   CustomerCardFindManySelectSchema,
 } from '~/shared/zod-schemas/customer-card';
+import { getActiveGraySubtractionBusinessGroupName } from '../lib/gray-subtraction-business-group';
 import { getPassiveBusinessGroupNames } from '../lib/passive-business-groups';
 import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
 import {
@@ -136,15 +137,25 @@ export const customerCardRouter = createTRPCRouter({
       // business groups — it needs to match what the list/color-count
       // cards add up to. Cards in a passive group stay excluded either way;
       // cards with no group at all must stay included (NOT IN treats NULL
-      // as unknown, so it's paired with an explicit null branch).
+      // as unknown, so it's paired with an explicit null branch). The
+      // configured gray-subtraction group is excluded the same way when no
+      // group is selected, but still counted normally if it's the group
+      // explicitly selected.
+      const graySubtractionGroup = businessGroup
+        ? null
+        : await getActiveGraySubtractionBusinessGroupName(passiveNames);
+      const excludedNames = graySubtractionGroup
+        ? [...passiveNames, graySubtractionGroup]
+        : passiveNames;
+
       return ctx.db.customerCard.count({
         where: businessGroup
           ? { businessGroup }
-          : passiveNames.length > 0
+          : excludedNames.length > 0
             ? {
                 OR: [
                   { businessGroup: null },
-                  { businessGroup: { notIn: passiveNames } },
+                  { businessGroup: { notIn: excludedNames } },
                 ],
               }
             : {},
@@ -612,6 +623,13 @@ export const customerCardRouter = createTRPCRouter({
         return counts;
       }
 
+      // The configured gray-subtraction group's cards are excluded from
+      // every bucket below when no more specific group is selected — it
+      // still shows its real color breakdown if selected directly.
+      const graySubtractionGroup = input?.businessGroup
+        ? null
+        : await getActiveGraySubtractionBusinessGroupName(passiveNames);
+
       if (!isAdmin) {
         const assignedGroups = await ctx.db.businessGroup.findMany({
           where: { assignedUsers: { some: { id: ctx.session.user.id } } },
@@ -637,20 +655,28 @@ export const customerCardRouter = createTRPCRouter({
 
         // Out-of-scope cards are visible (grayed out) but their real color
         // isn't — bucket them under gray, same as the list's color filter.
-        // Passive-group cards are excluded from that bucket entirely (not
-        // even grayed out) by folding passiveNames into the notIn list.
+        // Passive-group and gray-subtraction-group cards are excluded from
+        // that bucket entirely (not even grayed out) by folding them into
+        // the notIn list.
+        const scopedNames = graySubtractionGroup
+          ? allowedNames.filter((name) => name !== graySubtractionGroup)
+          : allowedNames;
+        const excludedNames = graySubtractionGroup
+          ? [...passiveNames, graySubtractionGroup]
+          : passiveNames;
+
         const [inScopeRows, outOfScopeCount] = await Promise.all([
           ctx.db.customerCard.groupBy({
             by: ['color'],
             _count: true,
-            where: { businessGroup: { in: allowedNames } },
+            where: { businessGroup: { in: scopedNames } },
           }),
           ctx.db.customerCard.count({
             where: {
               OR: [
                 { businessGroup: null },
                 {
-                  businessGroup: { notIn: [...allowedNames, ...passiveNames] },
+                  businessGroup: { notIn: [...scopedNames, ...excludedNames] },
                 },
               ],
             },
@@ -667,39 +693,26 @@ export const customerCardRouter = createTRPCRouter({
           ? input.businessGroup
           : undefined;
 
-      const [dashboardConfig, rows] = await Promise.all([
-        !filterByGroup
-          ? ctx.db.dashboardConfig.findUnique({ where: { id: 'singleton' } })
-          : null,
-        ctx.db.customerCard.groupBy({
-          by: ['color'],
-          _count: true,
-          where: filterByGroup
-            ? { businessGroup: filterByGroup }
-            : passiveNames.length > 0
-              ? {
-                  OR: [
-                    { businessGroup: null },
-                    { businessGroup: { notIn: passiveNames } },
-                  ],
-                }
-              : {},
-        }),
-      ]);
+      const excludedNames = graySubtractionGroup
+        ? [...passiveNames, graySubtractionGroup]
+        : passiveNames;
 
-      const graySubtractGroup = !filterByGroup
-        ? dashboardConfig?.graySubtractionBusinessGroup
-        : null;
-
-      const graySubtractCount =
-        graySubtractGroup && !passiveNames.includes(graySubtractGroup)
-          ? await ctx.db.customerCard.count({
-              where: { businessGroup: graySubtractGroup },
-            })
-          : null;
+      const rows = await ctx.db.customerCard.groupBy({
+        by: ['color'],
+        _count: true,
+        where: filterByGroup
+          ? { businessGroup: filterByGroup }
+          : excludedNames.length > 0
+            ? {
+                OR: [
+                  { businessGroup: null },
+                  { businessGroup: { notIn: excludedNames } },
+                ],
+              }
+            : {},
+      });
 
       for (const row of rows) counts[row.color] += row._count;
-      if (graySubtractCount) counts.gray -= graySubtractCount;
       return counts;
     }),
 });

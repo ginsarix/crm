@@ -84,7 +84,7 @@ importers:
         specifier: ^11.18.0
         version: 11.18.0(typescript@5.9.3)
       better-auth:
-        specifier: ^1.6.26
+        specifier: ~1.6.26
         version: 1.6.26(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(next@16.2.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(prisma@6.19.3(typescript@5.9.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       class-variance-authority:
         specifier: ^0.7.1

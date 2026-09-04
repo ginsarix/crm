@@ -7,6 +7,7 @@ import {
   CustomerCardCreateSchema,
   CustomerCardFindManySelectSchema,
 } from '~/shared/zod-schemas/customer-card';
+import { getPassiveBusinessGroupNames } from '../lib/passive-business-groups';
 import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
 import {
   adminProcedure,
@@ -113,7 +114,12 @@ export const customerCardRouter = createTRPCRouter({
     .input(z.object({ businessGroup: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
       const isAdmin = ctx.session.user.role === 'admin';
+      const passiveNames = await getPassiveBusinessGroupNames(ctx.db);
       let businessGroup = input?.businessGroup;
+
+      if (businessGroup && passiveNames.includes(businessGroup)) {
+        return 0;
+      }
 
       if (businessGroup && !isAdmin) {
         const assigned = await ctx.db.businessGroup.findMany({
@@ -128,9 +134,20 @@ export const customerCardRouter = createTRPCRouter({
       // With no group selected, non-admins see every card (out-of-scope
       // ones grayed out), so the total isn't restricted to their assigned
       // business groups — it needs to match what the list/color-count
-      // cards add up to.
+      // cards add up to. Cards in a passive group stay excluded either way;
+      // cards with no group at all must stay included (NOT IN treats NULL
+      // as unknown, so it's paired with an explicit null branch).
       return ctx.db.customerCard.count({
-        where: businessGroup ? { businessGroup } : {},
+        where: businessGroup
+          ? { businessGroup }
+          : passiveNames.length > 0
+            ? {
+                OR: [
+                  { businessGroup: null },
+                  { businessGroup: { notIn: passiveNames } },
+                ],
+              }
+            : {},
       });
     }),
   get: protectedProcedure
@@ -157,6 +174,7 @@ export const customerCardRouter = createTRPCRouter({
             where: { assignedUsers: { some: { id: ctx.session.user.id } } },
             select: { name: true },
           });
+      const passiveGroupNamesPromise = getPassiveBusinessGroupNames(ctx.db);
 
       // Build search conditions based on searchScope
       const whereClause: Prisma.CustomerCardWhereInput = {};
@@ -263,10 +281,25 @@ export const customerCardRouter = createTRPCRouter({
 
       // Await the in-flight assigned-groups lookup (used below either to
       // restrict the query, or to flag out-of-scope rows as restricted)
-      const assignedGroups = assignedGroupsPromise
-        ? await assignedGroupsPromise
-        : null;
+      const [assignedGroups, passiveNames] = await Promise.all([
+        assignedGroupsPromise ?? Promise.resolve(null),
+        passiveGroupNamesPromise,
+      ]);
       const allowedNames = assignedGroups?.map((g) => g.name) ?? null;
+
+      // Cards in a passive business group are hidden for everyone, admins
+      // included — layered as its own AND condition so it composes with
+      // whatever the filters above already put on whereClause.businessGroup.
+      // Cards with no group at all must stay visible (NOT IN treats NULL as
+      // unknown, hence the explicit null branch).
+      if (passiveNames.length > 0) {
+        andConditions.push({
+          OR: [
+            { businessGroup: null },
+            { businessGroup: { notIn: passiveNames } },
+          ],
+        });
+      }
 
       if (allowedNames && !input.includeRestricted) {
         const requestedGroup = input.filter?.businessGroup;
@@ -344,6 +377,11 @@ export const customerCardRouter = createTRPCRouter({
         where: { id: input.id },
       });
       if (!customerCard) return null;
+
+      if (customerCard.businessGroup) {
+        const passiveNames = await getPassiveBusinessGroupNames(ctx.db);
+        if (passiveNames.includes(customerCard.businessGroup)) return null;
+      }
 
       if (ctx.session.user.role === 'admin') {
         return { ...customerCard, isRestricted: false };
@@ -559,6 +597,7 @@ export const customerCardRouter = createTRPCRouter({
     .input(z.object({ businessGroup: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
       const isAdmin = ctx.session.user.role === 'admin';
+      const passiveNames = await getPassiveBusinessGroupNames(ctx.db);
 
       const counts = {
         green: 0,
@@ -569,12 +608,18 @@ export const customerCardRouter = createTRPCRouter({
         gray: 0,
       };
 
+      if (input?.businessGroup && passiveNames.includes(input.businessGroup)) {
+        return counts;
+      }
+
       if (!isAdmin) {
         const assignedGroups = await ctx.db.businessGroup.findMany({
           where: { assignedUsers: { some: { id: ctx.session.user.id } } },
           select: { name: true },
         });
-        const allowedNames = assignedGroups.map((g) => g.name);
+        const allowedNames = assignedGroups
+          .map((g) => g.name)
+          .filter((name) => !passiveNames.includes(name));
         const filterByGroup =
           input?.businessGroup && allowedNames.includes(input.businessGroup)
             ? input.businessGroup
@@ -592,6 +637,8 @@ export const customerCardRouter = createTRPCRouter({
 
         // Out-of-scope cards are visible (grayed out) but their real color
         // isn't — bucket them under gray, same as the list's color filter.
+        // Passive-group cards are excluded from that bucket entirely (not
+        // even grayed out) by folding passiveNames into the notIn list.
         const [inScopeRows, outOfScopeCount] = await Promise.all([
           ctx.db.customerCard.groupBy({
             by: ['color'],
@@ -602,7 +649,9 @@ export const customerCardRouter = createTRPCRouter({
             where: {
               OR: [
                 { businessGroup: null },
-                { businessGroup: { notIn: allowedNames } },
+                {
+                  businessGroup: { notIn: [...allowedNames, ...passiveNames] },
+                },
               ],
             },
           }),
@@ -613,7 +662,10 @@ export const customerCardRouter = createTRPCRouter({
         return counts;
       }
 
-      const filterByGroup = input?.businessGroup;
+      const filterByGroup =
+        input?.businessGroup && !passiveNames.includes(input.businessGroup)
+          ? input.businessGroup
+          : undefined;
 
       const [dashboardConfig, rows] = await Promise.all([
         !filterByGroup
@@ -622,7 +674,16 @@ export const customerCardRouter = createTRPCRouter({
         ctx.db.customerCard.groupBy({
           by: ['color'],
           _count: true,
-          where: filterByGroup ? { businessGroup: filterByGroup } : {},
+          where: filterByGroup
+            ? { businessGroup: filterByGroup }
+            : passiveNames.length > 0
+              ? {
+                  OR: [
+                    { businessGroup: null },
+                    { businessGroup: { notIn: passiveNames } },
+                  ],
+                }
+              : {},
         }),
       ]);
 
@@ -630,11 +691,12 @@ export const customerCardRouter = createTRPCRouter({
         ? dashboardConfig?.graySubtractionBusinessGroup
         : null;
 
-      const graySubtractCount = graySubtractGroup
-        ? await ctx.db.customerCard.count({
-            where: { businessGroup: graySubtractGroup },
-          })
-        : null;
+      const graySubtractCount =
+        graySubtractGroup && !passiveNames.includes(graySubtractGroup)
+          ? await ctx.db.customerCard.count({
+              where: { businessGroup: graySubtractGroup },
+            })
+          : null;
 
       for (const row of rows) counts[row.color] += row._count;
       if (graySubtractCount) counts.gray -= graySubtractCount;

@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { BusinessGroup } from 'generated/prisma';
 import { MoreHorizontal } from 'lucide-react';
+import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import {
   DropdownMenu,
@@ -47,6 +48,19 @@ export const createColumns = (
     accessorKey: 'name',
     header: 'Ad',
     enableSorting: true,
+  },
+  {
+    accessorKey: 'passive',
+    header: 'Durum',
+    enableSorting: true,
+    cell: ({ row }) => {
+      const passive = row.getValue('passive') as boolean | null;
+      return (
+        <Badge variant={passive ? 'warning' : 'secondary'}>
+          {passive ? 'Pasif' : 'Aktif'}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: 'createdAt',

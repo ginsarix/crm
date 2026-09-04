@@ -5,7 +5,6 @@ import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import {
   Dialog,
@@ -18,6 +17,7 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { BusinessGroupCreateSchema } from '~/shared/zod-schemas/business-group';
 import { api } from '~/trpc/react';
 
 export function CreateBusinessGroupDialog() {
@@ -30,11 +30,7 @@ export function CreateBusinessGroupDialog() {
     reset,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(
-      z.object({
-        name: z.string().min(1, 'Meslek grubu adı zorunludur'),
-      }),
-    ),
+    resolver: zodResolver(BusinessGroupCreateSchema),
     mode: 'onChange',
     shouldFocusError: false,
   });

@@ -23,7 +23,9 @@ import { CreateBusinessGroupDialog } from './create-business-group-dialog';
 import { ViewBusinessGroupDialog } from './view-business-group-dialog';
 
 export default function BusinessGroupsTable() {
-  const { data, isLoading } = api.businessGroup.get.useQuery();
+  const { data, isLoading } = api.businessGroup.get.useQuery({
+    includePassive: true,
+  });
   const utils = api.useUtils();
 
   const [selectedBusinessGroup, setSelectedBusinessGroup] =

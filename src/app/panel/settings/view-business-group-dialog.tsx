@@ -5,7 +5,7 @@ import { Edit, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { z } from 'zod';
+import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import {
   Dialog,
@@ -18,6 +18,8 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { Switch } from '~/components/ui/switch';
+import { BusinessGroupFormSchema } from '~/shared/zod-schemas/business-group';
 import { api } from '~/trpc/react';
 
 interface ViewBusinessGroupDialogProps {
@@ -49,15 +51,14 @@ export function ViewBusinessGroupDialog({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(
-      z.object({
-        name: z.string().min(1, 'Meslek grubu adı zorunludur'),
-      }),
-    ),
+    resolver: zodResolver(BusinessGroupFormSchema),
     defaultValues: {
       name: businessGroup.name,
+      passive: businessGroup.passive ?? false,
     },
     mode: 'onChange',
   });
@@ -65,6 +66,7 @@ export function ViewBusinessGroupDialog({
   useEffect(() => {
     reset({
       name: businessGroup.name,
+      passive: businessGroup.passive ?? false,
     });
   }, [businessGroup, reset]);
 
@@ -94,7 +96,7 @@ export function ViewBusinessGroupDialog({
     },
   });
 
-  const onSubmit = async (data: { name: string }) => {
+  const onSubmit = async (data: { name: string; passive?: boolean }) => {
     await updateMutation.mutateAsync({
       id: businessGroup.id,
       ...data,
@@ -202,6 +204,16 @@ export function ViewBusinessGroupDialog({
                 <p className="text-red-500 text-sm">{errors.name.message}</p>
               )}
             </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="passive">Pasif</Label>
+              <Switch
+                checked={watch('passive')}
+                id="passive"
+                onCheckedChange={(checked) =>
+                  setValue('passive', checked, { shouldDirty: true })
+                }
+              />
+            </div>
             <DialogFooter>
               <Button
                 disabled={updateMutation.isPending}
@@ -228,6 +240,16 @@ export function ViewBusinessGroupDialog({
                   Meslek grubu adı
                 </Label>
                 <p className="text-sm">{businessGroup.name}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Durum</Label>
+                <div className="mt-1">
+                  <Badge
+                    variant={businessGroup.passive ? 'warning' : 'secondary'}
+                  >
+                    {businessGroup.passive ? 'Pasif' : 'Aktif'}
+                  </Badge>
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

@@ -49,7 +49,12 @@ export const businessGroupCardRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       await backfillMissingCards(ctx.db);
 
-      const whereClause: Prisma.BusinessGroupCardWhereInput = {};
+      // `passive` is nullable, and Prisma's `not: true` excludes NULL rows
+      // (translates to `<> true`, not `IS DISTINCT FROM true`) — an explicit
+      // null/false OR is required to actually match "active".
+      const whereClause: Prisma.BusinessGroupCardWhereInput = {
+        businessGroup: { OR: [{ passive: null }, { passive: false }] },
+      };
 
       if (input.filter?.search) {
         const scope = input.filter.searchScope;

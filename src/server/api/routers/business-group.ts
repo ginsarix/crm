@@ -3,6 +3,11 @@ import { defaultGraySubtractionBusinessGroup } from '~/constants/dashboard-confi
 import { createLocaleSorter } from '~/lib/utils';
 import { getDashboardConfig } from '~/server/lib/get-dashboard-config';
 import {
+  BusinessGroupCreateSchema,
+  BusinessGroupUpdateSchema,
+} from '~/shared/zod-schemas/business-group';
+import { getPassiveBusinessGroupNames } from '../lib/passive-business-groups';
+import {
   adminProcedure,
   createAuditLog,
   createTRPCRouter,
@@ -22,6 +27,7 @@ export const businessGroupRouter = createTRPCRouter({
     .input(z.object({ businessGroup: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
       const isAdmin = ctx.session.user.role === 'admin';
+      const passiveNames = await getPassiveBusinessGroupNames(ctx.db);
 
       let allowedGroups: string[] | null = null;
       if (!isAdmin) {
@@ -29,14 +35,18 @@ export const businessGroupRouter = createTRPCRouter({
           where: { assignedUsers: { some: { id: ctx.session.user.id } } },
           select: { name: true },
         });
-        allowedGroups = assigned.map((g) => g.name);
+        allowedGroups = assigned
+          .map((g) => g.name)
+          .filter((name) => !passiveNames.includes(name));
       }
 
       // For non-admins, only honor an explicit businessGroup filter if it's
       // one of their assigned groups — otherwise fall back to the full
-      // allowed-groups filter rather than trusting the raw input.
+      // allowed-groups filter rather than trusting the raw input. A passive
+      // group is never honored, admin or not — its stats stay hidden.
       const requestedGroup =
         input?.businessGroup &&
+        !passiveNames.includes(input.businessGroup) &&
         (!allowedGroups || allowedGroups.includes(input.businessGroup))
           ? input.businessGroup
           : undefined;
@@ -49,7 +59,7 @@ export const businessGroupRouter = createTRPCRouter({
             ? requestedGroup
             : allowedGroups
               ? { in: allowedGroups }
-              : { not: null },
+              : { not: null, notIn: passiveNames },
         },
       });
 
@@ -136,11 +146,16 @@ export const businessGroupRouter = createTRPCRouter({
         config?.graySubtractionBusinessGroup ??
         defaultGraySubtractionBusinessGroup;
 
-      const customerCardCountSpecialBusinessGroup = ctx.db.customerCard.count({
-        where: {
-          businessGroup: graySubtractionBusinessGroup,
-        },
-      });
+      const passiveNames = await getPassiveBusinessGroupNames(ctx.db);
+      const customerCardCountSpecialBusinessGroup = passiveNames.includes(
+        graySubtractionBusinessGroup,
+      )
+        ? Promise.resolve(0)
+        : ctx.db.customerCard.count({
+            where: {
+              businessGroup: graySubtractionBusinessGroup,
+            },
+          });
 
       return {
         count: customerCardCountSpecialBusinessGroup,
@@ -149,13 +164,25 @@ export const businessGroupRouter = createTRPCRouter({
     },
   ),
 
-  get: protectedProcedure.query(async ({ ctx }) => {
-    const isAdmin = ctx.session.user.role === 'admin';
-    if (isAdmin) return ctx.db.businessGroup.findMany();
-    return ctx.db.businessGroup.findMany({
-      where: { assignedUsers: { some: { id: ctx.session.user.id } } },
-    });
-  }),
+  get: protectedProcedure
+    .input(z.object({ includePassive: z.boolean().default(false) }).optional())
+    .query(async ({ ctx, input }) => {
+      const isAdmin = ctx.session.user.role === 'admin';
+      // `passive` is nullable, and Prisma's `not: true` excludes NULL rows
+      // (translates to `<> true`, not `IS DISTINCT FROM true`) — an explicit
+      // null/false OR is required to actually match "active".
+      const passiveFilter = input?.includePassive
+        ? {}
+        : { OR: [{ passive: null }, { passive: false }] };
+      if (isAdmin)
+        return ctx.db.businessGroup.findMany({ where: passiveFilter });
+      return ctx.db.businessGroup.findMany({
+        where: {
+          assignedUsers: { some: { id: ctx.session.user.id } },
+          ...passiveFilter,
+        },
+      });
+    }),
 
   getAssigned: adminProcedure
     .input(z.object({ userId: z.string() }))
@@ -184,11 +211,7 @@ export const businessGroupRouter = createTRPCRouter({
     }),
 
   create: adminProcedure
-    .input(
-      z.object({
-        name: z.string(),
-      }),
-    )
+    .input(BusinessGroupCreateSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         const result = await ctx.db.$transaction(async (tx) => {
@@ -228,12 +251,7 @@ export const businessGroupRouter = createTRPCRouter({
     }),
 
   update: adminProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-      }),
-    )
+    .input(BusinessGroupUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         const result = await ctx.db.$transaction(async (tx) => {
@@ -244,7 +262,10 @@ export const businessGroupRouter = createTRPCRouter({
 
           const updated = await tx.businessGroup.update({
             where: { id: input.id },
-            data: { name: input.name },
+            data: {
+              name: input.name,
+              ...(input.passive !== undefined && { passive: input.passive }),
+            },
           });
 
           if (old?.name && old.name !== input.name) {

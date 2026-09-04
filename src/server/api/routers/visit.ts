@@ -2,6 +2,7 @@ import { Prisma } from 'generated/prisma';
 import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
 import { VisitCreateSchema } from '~/shared/zod-schemas/visit';
+import { getPassiveBusinessGroupNames } from '../lib/passive-business-groups';
 import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
 import {
   adminProcedure,
@@ -53,18 +54,35 @@ export const visitRouter = createTRPCRouter({
     .input(z.object({ businessGroup: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
       const isAdmin = ctx.session.user.role === 'admin';
+      const passiveNames = await getPassiveBusinessGroupNames(ctx.db);
+
+      if (input?.businessGroup && passiveNames.includes(input.businessGroup)) {
+        return 0;
+      }
+
       if (isAdmin) {
         return ctx.db.visit.count({
           where: input?.businessGroup
             ? { customerCard: { businessGroup: input.businessGroup } }
-            : {},
+            : passiveNames.length > 0
+              ? {
+                  OR: [
+                    { customerCard: { businessGroup: null } },
+                    {
+                      customerCard: { businessGroup: { notIn: passiveNames } },
+                    },
+                  ],
+                }
+              : {},
         });
       }
       const assignedGroups = await ctx.db.businessGroup.findMany({
         where: { assignedUsers: { some: { id: ctx.session.user.id } } },
         select: { name: true },
       });
-      const allowedNames = assignedGroups.map((g) => g.name);
+      const allowedNames = assignedGroups
+        .map((g) => g.name)
+        .filter((name) => !passiveNames.includes(name));
       const businessGroup =
         input?.businessGroup && allowedNames.includes(input.businessGroup)
           ? input.businessGroup
@@ -82,8 +100,13 @@ export const visitRouter = createTRPCRouter({
     .input(z.object({ businessGroup: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
       const isAdmin = ctx.session.user.role === 'admin';
+      const passiveNames = await getPassiveBusinessGroupNames(ctx.db);
 
       type RawRow = { salesRepresentative: string; visitCount: bigint };
+
+      if (input?.businessGroup && passiveNames.includes(input.businessGroup)) {
+        return [];
+      }
 
       if (isAdmin) {
         if (input?.businessGroup) {
@@ -104,15 +127,22 @@ export const visitRouter = createTRPCRouter({
             visitCount: Number(r.visitCount),
           }));
         }
-        const rows = await ctx.db.$queryRaw<RawRow[]>`
-          SELECT cc."salesRepresentative", COUNT(v.id)::int AS "visitCount"
-          FROM "Visit" v
-          JOIN "CustomerCard" cc ON v."customerCardId" = cc.id
-          WHERE cc."salesRepresentative" IS NOT NULL AND cc."salesRepresentative" <> ''
-          GROUP BY cc."salesRepresentative"
-          ORDER BY "visitCount" DESC
-          LIMIT 5
-        `;
+        const passiveExclusion =
+          passiveNames.length > 0
+            ? Prisma.sql`AND (cc."businessGroup" IS NULL OR cc."businessGroup" NOT IN (${Prisma.join(passiveNames)}))`
+            : Prisma.empty;
+        const rows = await ctx.db.$queryRaw<RawRow[]>(
+          Prisma.sql`
+            SELECT cc."salesRepresentative", COUNT(v.id)::int AS "visitCount"
+            FROM "Visit" v
+            JOIN "CustomerCard" cc ON v."customerCardId" = cc.id
+            WHERE cc."salesRepresentative" IS NOT NULL AND cc."salesRepresentative" <> ''
+              ${passiveExclusion}
+            GROUP BY cc."salesRepresentative"
+            ORDER BY "visitCount" DESC
+            LIMIT 5
+          `,
+        );
         return rows.map((r) => ({
           salesRepresentative: r.salesRepresentative,
           visitCount: Number(r.visitCount),
@@ -123,7 +153,9 @@ export const visitRouter = createTRPCRouter({
         where: { assignedUsers: { some: { id: ctx.session.user.id } } },
         select: { name: true },
       });
-      const groupNames = assignedGroups.map((g) => g.name);
+      const groupNames = assignedGroups
+        .map((g) => g.name)
+        .filter((name) => !passiveNames.includes(name));
       const filterNames =
         input?.businessGroup && groupNames.includes(input.businessGroup)
           ? [input.businessGroup]
@@ -169,6 +201,7 @@ export const visitRouter = createTRPCRouter({
             where: { assignedUsers: { some: { id: ctx.session.user.id } } },
             select: { name: true },
           });
+      const passiveGroupNamesPromise = getPassiveBusinessGroupNames(ctx.db);
 
       // Build search conditions based on searchScope
       const whereClause: Prisma.VisitWhereInput = {};
@@ -238,13 +271,29 @@ export const visitRouter = createTRPCRouter({
         orderBy.push({ date: 'desc' }, { time: 'desc' });
       }
 
-      const assignedGroups = assignedGroupsPromise
-        ? await assignedGroupsPromise
-        : null;
+      const [assignedGroups, passiveNames] = await Promise.all([
+        assignedGroupsPromise ?? Promise.resolve(null),
+        passiveGroupNamesPromise,
+      ]);
       const allowedNames = assignedGroups?.map((g) => g.name) ?? null;
 
       if (allowedNames && !input.includeRestricted) {
         whereClause.customerCard = { businessGroup: { in: allowedNames } };
+      }
+
+      // Visits whose customer card belongs to a passive business group are
+      // hidden for everyone, admins included. Visits for cards with no group
+      // at all must stay visible (NOT IN treats NULL as unknown, hence the
+      // explicit null branch).
+      if (passiveNames.length > 0) {
+        whereClause.AND = [
+          {
+            OR: [
+              { customerCard: { businessGroup: null } },
+              { customerCard: { businessGroup: { notIn: passiveNames } } },
+            ],
+          },
+        ];
       }
 
       const [totalItems, data] = await Promise.all([
@@ -302,6 +351,13 @@ export const visitRouter = createTRPCRouter({
         },
       });
       if (!visit) return null;
+
+      if (visit.customerCard.businessGroup) {
+        const passiveNames = await getPassiveBusinessGroupNames(ctx.db);
+        if (passiveNames.includes(visit.customerCard.businessGroup)) {
+          return null;
+        }
+      }
 
       if (ctx.session.user.role === 'admin') {
         return { ...visit, isRestricted: false };

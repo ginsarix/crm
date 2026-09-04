@@ -92,6 +92,11 @@ model CustomerCard {
 model BusinessGroup {
   id        String   @id @default(cuid())
   name      String
+  // null/false = active, true = passive. Passive groups (and every customer
+  // card / visit referencing one) are hidden everywhere except the settings
+  // table and this group's own edit dialog. Nullable rather than a required
+  // enum so existing rows don't need a migration/backfill.
+  passive   Boolean?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

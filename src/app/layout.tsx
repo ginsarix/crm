@@ -8,7 +8,7 @@ import { env } from '~/env';
 import { TRPCReactProvider } from '~/trpc/react';
 
 export const metadata: Metadata = {
-  title: env.APP_TITLE,
+  title: env.NEXT_PUBLIC_APP_TITLE,
   description: 'CRM Sistemi',
   icons: [{ rel: 'icon', url: '/favicon.svg', type: 'image/svg+xml' }],
 };

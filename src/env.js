@@ -53,7 +53,7 @@ export const env = createEnv({
     CROSS_ORIGIN_URL: process.env.CROSS_ORIGIN_URL,
     APP_URL: process.env.APP_URL,
     APP_TITLE: process.env.APP_TITLE,
-    NEXT_PUBLIC_APP_TITLE: process.env.APP_TITLE,
+    NEXT_PUBLIC_APP_TITLE: process.env.NEXT_PUBLIC_APP_TITLE,
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,
     SMTP_USER: process.env.SMTP_USER,

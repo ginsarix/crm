@@ -39,6 +39,14 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_APP_TITLE: z.string().default('CRM'),
+
+    // Customer card color hints (e.g. "(Biz)", "(M.A.Ö)") — deployment-specific labels
+    NEXT_PUBLIC_COLOR_HINT_GREEN: z.string().optional(),
+    NEXT_PUBLIC_COLOR_HINT_BLUE: z.string().optional(),
+    NEXT_PUBLIC_COLOR_HINT_ORANGE: z.string().optional(),
+    NEXT_PUBLIC_COLOR_HINT_YELLOW: z.string().optional(),
+    NEXT_PUBLIC_COLOR_HINT_PURPLE: z.string().optional(),
+    NEXT_PUBLIC_COLOR_HINT_GRAY: z.string().optional(),
   },
 
   /**
@@ -52,6 +60,12 @@ export const env = createEnv({
     CROSS_ORIGIN_URL: process.env.CROSS_ORIGIN_URL,
     APP_URL: process.env.APP_URL,
     NEXT_PUBLIC_APP_TITLE: process.env.NEXT_PUBLIC_APP_TITLE,
+    NEXT_PUBLIC_COLOR_HINT_GREEN: process.env.NEXT_PUBLIC_COLOR_HINT_GREEN,
+    NEXT_PUBLIC_COLOR_HINT_BLUE: process.env.NEXT_PUBLIC_COLOR_HINT_BLUE,
+    NEXT_PUBLIC_COLOR_HINT_ORANGE: process.env.NEXT_PUBLIC_COLOR_HINT_ORANGE,
+    NEXT_PUBLIC_COLOR_HINT_YELLOW: process.env.NEXT_PUBLIC_COLOR_HINT_YELLOW,
+    NEXT_PUBLIC_COLOR_HINT_PURPLE: process.env.NEXT_PUBLIC_COLOR_HINT_PURPLE,
+    NEXT_PUBLIC_COLOR_HINT_GRAY: process.env.NEXT_PUBLIC_COLOR_HINT_GRAY,
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,
     SMTP_USER: process.env.SMTP_USER,

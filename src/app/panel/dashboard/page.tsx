@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { colorHint } from '~/lib/color-hints';
 import { auditAction } from '~/lib/enum-map';
 import { createLocaleSorter } from '~/lib/utils';
 import { auth } from '~/server/better-auth';
@@ -189,7 +190,11 @@ export default async function DashboardPage({
                   <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
                     <span className="flex flex-col items-start leading-tight">
                       Yeşil
-                      <span className="text-[10px] opacity-60">(Biz)</span>
+                      {colorHint.green && (
+                        <span className="text-[10px] opacity-60">
+                          {colorHint.green}
+                        </span>
+                      )}
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -207,7 +212,11 @@ export default async function DashboardPage({
                   <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
                     <span className="flex flex-col items-start leading-tight">
                       Mavi
-                      <span className="text-[10px] opacity-60">(M.A.Ö)</span>
+                      {colorHint.blue && (
+                        <span className="text-[10px] opacity-60">
+                          {colorHint.blue}
+                        </span>
+                      )}
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -225,7 +234,11 @@ export default async function DashboardPage({
                   <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
                     <span className="flex flex-col items-start leading-tight">
                       Turuncu
-                      <span className="text-[10px] opacity-60">(Y.B)</span>
+                      {colorHint.orange && (
+                        <span className="text-[10px] opacity-60">
+                          {colorHint.orange}
+                        </span>
+                      )}
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -243,9 +256,11 @@ export default async function DashboardPage({
                   <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
                     <span className="flex flex-col items-start leading-tight">
                       Sarı
-                      <span className="text-[10px] opacity-60">
-                        (Gelmeyecek)
-                      </span>
+                      {colorHint.yellow && (
+                        <span className="text-[10px] opacity-60">
+                          {colorHint.yellow}
+                        </span>
+                      )}
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -263,7 +278,11 @@ export default async function DashboardPage({
                   <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
                     <span className="flex flex-col items-start leading-tight">
                       Mor
-                      <span className="text-[10px] opacity-60">(Araf)</span>
+                      {colorHint.purple && (
+                        <span className="text-[10px] opacity-60">
+                          {colorHint.purple}
+                        </span>
+                      )}
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -281,7 +300,11 @@ export default async function DashboardPage({
                   <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
                     <span className="flex flex-col items-start leading-tight">
                       Gri
-                      <span className="text-[10px] opacity-60">(Boş)</span>
+                      {colorHint.gray && (
+                        <span className="text-[10px] opacity-60">
+                          {colorHint.gray}
+                        </span>
+                      )}
                     </span>
                   </CardTitle>
                 </CardHeader>

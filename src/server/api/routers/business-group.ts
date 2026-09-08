@@ -6,7 +6,6 @@ import {
   BusinessGroupCreateSchema,
   BusinessGroupUpdateSchema,
 } from '~/shared/zod-schemas/business-group';
-import { getActiveGraySubtractionBusinessGroupName } from '../lib/gray-subtraction-business-group';
 import { getPassiveBusinessGroupNames } from '../lib/passive-business-groups';
 import {
   adminProcedure,
@@ -52,29 +51,15 @@ export const businessGroupRouter = createTRPCRouter({
           ? input.businessGroup
           : undefined;
 
-      // The configured gray-subtraction group's cards are excluded from the
-      // aggregate breakdown the same way — its own row still shows real
-      // numbers if it's the group explicitly requested.
-      const graySubtractionGroup = requestedGroup
-        ? null
-        : await getActiveGraySubtractionBusinessGroupName(passiveNames);
-      const excludedNames = graySubtractionGroup
-        ? [...passiveNames, graySubtractionGroup]
-        : passiveNames;
-      const scopedAllowedGroups =
-        allowedGroups && graySubtractionGroup
-          ? allowedGroups.filter((name) => name !== graySubtractionGroup)
-          : allowedGroups;
-
       const rows = await ctx.db.customerCard.groupBy({
         by: ['businessGroup', 'color'],
         _count: true,
         where: {
           businessGroup: requestedGroup
             ? requestedGroup
-            : scopedAllowedGroups
-              ? { in: scopedAllowedGroups }
-              : { not: null, notIn: excludedNames },
+            : allowedGroups
+              ? { in: allowedGroups }
+              : { not: null, notIn: passiveNames },
         },
       });
 

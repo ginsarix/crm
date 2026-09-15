@@ -31,21 +31,17 @@ import type { BusinessGroupCardRow } from './columns';
 const FIELD_GROUPS: { title: string; fields: (keyof Committee)[] }[] = [
   { title: 'Meclis', fields: ['meclis1', 'meclis2', 'meclis3'] },
   {
-    title: 'Yönetim',
-    fields: ['baskan', 'baskanYardimcisi'],
+    title: 'Komite',
+    fields: ['baskan', 'baskanYardimcisi', 'uye1', 'uye2'],
   },
-  { title: 'Üyeler', fields: ['uye1', 'uye2', 'uye3', 'uye4', 'uye5'] },
+  { title: 'Meclis Yedek', fields: ['uye3', 'uye4', 'uye5'] },
+  {
+    title: 'Komite Yedek',
+    fields: ['yedekUye1', 'yedekUye2', 'yedekUye3', 'yedekUye4'],
+  },
   {
     title: 'Yedek Üyeler',
-    fields: [
-      'yedekUye1',
-      'yedekUye2',
-      'yedekUye3',
-      'yedekUye4',
-      'yedekUye5',
-      'yedekUye6',
-      'yedekUye7',
-    ],
+    fields: ['yedekUye5', 'yedekUye6', 'yedekUye7'],
   },
 ];
 
@@ -53,17 +49,17 @@ const FIELD_LABELS: Record<keyof Committee, string> = {
   meclis1: 'Meclis 1',
   meclis2: 'Meclis 2',
   meclis3: 'Meclis 3',
-  baskan: 'Meslek Grubu Başkanı',
-  baskanYardimcisi: 'Meslek Grubu Başkan Yardımcısı',
-  uye1: 'Meslek Grubu Üye 1',
-  uye2: 'Meslek Grubu Üye 2',
-  uye3: 'Meslek Grubu Üye 3',
-  uye4: 'Meslek Grubu Üye 4',
-  uye5: 'Meslek Grubu Üye 5',
-  yedekUye1: 'Yedek Üye 1',
-  yedekUye2: 'Yedek Üye 2',
-  yedekUye3: 'Yedek Üye 3',
-  yedekUye4: 'Yedek Üye 4',
+  baskan: 'Komite 1',
+  baskanYardimcisi: 'Komite 2',
+  uye1: 'Komite 3',
+  uye2: 'Komite 4',
+  uye3: 'Meclis Yedek 1',
+  uye4: 'Meclis Yedek 2',
+  uye5: 'Meclis Yedek 3',
+  yedekUye1: 'Komite Yedek 1',
+  yedekUye2: 'Komite Yedek 2',
+  yedekUye3: 'Komite Yedek 3',
+  yedekUye4: 'Komite Yedek 4',
   yedekUye5: 'Yedek Üye 5',
   yedekUye6: 'Yedek Üye 6',
   yedekUye7: 'Yedek Üye 7',
@@ -132,8 +128,7 @@ export function EditBusinessGroupCardDialog({
   const handleSubmit = async () => {
     await updateMutation.mutateAsync({
       id: businessGroupCard.id,
-      committee:
-        meclisSayisi === 2 ? { ...committee, meclis3: [] } : committee,
+      committee: meclisSayisi === 2 ? { ...committee, meclis3: [] } : committee,
       meclisSayisi: meclisSayisi ?? null,
       uyeSayisi: uyeSayisi === '' ? null : uyeSayisi,
     });

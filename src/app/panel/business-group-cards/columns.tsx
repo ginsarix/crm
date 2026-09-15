@@ -32,7 +32,9 @@ function committeeFieldColumn(
       key === 'meclis3'
         ? {
             cellClassName: (row) =>
-              row.meclisSayisi === 2 ? 'bg-muted dark:bg-muted-foreground/20' : undefined,
+              row.meclisSayisi === 2
+                ? 'bg-muted dark:bg-muted-foreground/20'
+                : undefined,
           }
         : undefined,
     accessorFn: (row) => {
@@ -133,17 +135,17 @@ export const createColumns = (
   committeeFieldColumn('meclis1', 'Meclis 1'),
   committeeFieldColumn('meclis2', 'Meclis 2'),
   committeeFieldColumn('meclis3', 'Meclis 3'),
-  committeeFieldColumn('baskan', 'Meslek Grubu Başkanı'),
-  committeeFieldColumn('baskanYardimcisi', 'Meslek Grubu Başkan Yardımcısı'),
-  committeeFieldColumn('uye1', 'Meslek Grubu Üye 1'),
-  committeeFieldColumn('yedekUye1', 'Yedek Üye 1'),
-  committeeFieldColumn('uye2', 'Meslek Grubu Üye 2'),
-  committeeFieldColumn('uye3', 'Meslek Grubu Üye 3'),
-  committeeFieldColumn('uye4', 'Meslek Grubu Üye 4'),
-  committeeFieldColumn('uye5', 'Meslek Grubu Üye 5'),
-  committeeFieldColumn('yedekUye2', 'Yedek Üye 2'),
-  committeeFieldColumn('yedekUye3', 'Yedek Üye 3'),
-  committeeFieldColumn('yedekUye4', 'Yedek Üye 4'),
+  committeeFieldColumn('baskan', 'Komite 1'),
+  committeeFieldColumn('baskanYardimcisi', 'Komite 2'),
+  committeeFieldColumn('uye1', 'Komite 3'),
+  committeeFieldColumn('uye2', 'Komite 4'),
+  committeeFieldColumn('uye3', 'Meclis Yedek 1'),
+  committeeFieldColumn('uye4', 'Meclis Yedek 2'),
+  committeeFieldColumn('uye5', 'Meclis Yedek 3'),
+  committeeFieldColumn('yedekUye1', 'Komite Yedek 1'),
+  committeeFieldColumn('yedekUye2', 'Komite Yedek 2'),
+  committeeFieldColumn('yedekUye3', 'Komite Yedek 3'),
+  committeeFieldColumn('yedekUye4', 'Komite Yedek 4'),
   committeeFieldColumn('yedekUye5', 'Yedek Üye 5'),
   committeeFieldColumn('yedekUye6', 'Yedek Üye 6'),
   committeeFieldColumn('yedekUye7', 'Yedek Üye 7'),

@@ -308,15 +308,18 @@ corrects it by construction.
 `"Sıra"`, `"Sicil no"` becomes `"Sicil"`. Losing the "no" hint is an accepted
 cost of not letting placeholders go stale when a label is renamed.
 
-## Pre-existing bug to fix in passing
+## Pre-existing bug — already fixed
 
-`src/app/panel/business-group-cards/edit-dialog.tsx:197` gates the **Üye Sayısı**
+`src/app/panel/business-group-cards/edit-dialog.tsx` gated the **Üye Sayısı**
 input on `group.title === 'Üyeler'`, but commit `2422fd7` renamed the groups to
-`Meslek` / `Komite` / `Meclis Yedek` / `Komite Yedek` / `Yedek Üyeler`. No group
-is named `'Üyeler'`, so the input never renders — Üye Sayısı is currently
-uneditable in the UI while still appearing as a column and a search scope.
-`Meclis Sayısı` is unaffected; its `'Meclis'` guard still matches. Fixed in wave 3
-since the field is being touched anyway.
+`Meclis` / `Komite` / `Meclis Yedek` / `Komite Yedek` / `Yedek Üyeler`. No group
+was named `'Üyeler'`, so the input never rendered — Üye Sayısı was uneditable in
+the UI while still appearing as a column and a search scope.
+
+Fixed separately in `58b3230` ahead of this feature so it could ship on its own,
+by gating on `'Komite'` (where the üye fields moved). Wave 3 does not need to
+carry it. The registry's MGK ordering below reflects the corrected form:
+Meclis Sayısı -> Meclis 1-3 -> Üye Sayısı -> Komite 1-4 -> ...
 
 ## Implementation waves
 

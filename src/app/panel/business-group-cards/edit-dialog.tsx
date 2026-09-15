@@ -188,7 +188,7 @@ export function EditBusinessGroupCardDialog({
                   </Select>
                 </div>
               )}
-              {group.title === 'Üyeler' && (
+              {group.title === 'Komite' && (
                 <div className="space-y-2">
                   <Label htmlFor="uyeSayisi">Üye Sayısı</Label>
                   <Input

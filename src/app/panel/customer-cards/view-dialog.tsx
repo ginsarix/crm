@@ -128,25 +128,31 @@ export function ViewCustomerCardDialog({
   const updateMutation = api.customerCard.update.useMutation({
     onSuccess: (updatedCustomerCard) => {
       utils.customerCard.get.cancel();
-      toast.success('Cari kart başarıyla güncellendi');
+      toast.success(
+        `${labels.entity.customerCard.singular} başarıyla güncellendi`,
+      );
       onUpdate(updatedCustomerCard);
       handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);
-      toast.error('Cari kart güncellenirken bir hata oluştu');
+      toast.error(
+        `${labels.entity.customerCard.singular} güncellenirken bir hata oluştu`,
+      );
     },
   });
 
   const deleteMutation = api.customerCard.delete.useMutation({
     onSuccess: () => {
       utils.customerCard.get.invalidate();
-      toast.success('Cari kart başarıyla silindi');
+      toast.success(`${labels.entity.customerCard.singular} başarıyla silindi`);
       handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);
-      toast.error('Cari kart silinirken bir hata oluştu');
+      toast.error(
+        `${labels.entity.customerCard.singular} silinirken bir hata oluştu`,
+      );
     },
   });
 
@@ -176,7 +182,7 @@ export function ViewCustomerCardDialog({
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent
-        aria-describedby="Cari kart görüntüleme ve düzenleme"
+        aria-describedby={`${labels.entity.customerCard.singular} görüntüleme ve düzenleme`}
         className="max-h-[99vh] overflow-y-auto sm:max-w-2xl"
       >
         <DialogHeader>
@@ -202,7 +208,8 @@ export function ViewCustomerCardDialog({
         {showDeleteConfirm ? (
           <div className="space-y-4 py-4">
             <p className="text-center font-medium text-lg">
-              Bu cari kartı silmek istediğinizden emin misiniz?
+              Bu {labels.entity.customerCard.singular} silmek istediğinizden
+              emin misiniz?
             </p>
             <p className="text-center text-muted-foreground text-sm">
               Bu işlem geri alınamaz ve tüm ilgili veriler silinecektir.

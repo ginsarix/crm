@@ -208,7 +208,9 @@ export function CustomerCardsPageClient() {
       utils.customerCard.get.invalidate();
       utils.customerCard.getTotal.invalidate();
       utils.customerCard.getColorCounts.invalidate();
-      toast.success(`${result.count} cari kart silindi`);
+      toast.success(
+        `${result.count} ${labels.entity.customerCard.singular} silindi`,
+      );
       setRowSelection({});
       setDeleteConfirmOpen(false);
     },
@@ -277,7 +279,7 @@ export function CustomerCardsPageClient() {
     if (customerCardById) {
       handleViewCustomerCard(customerCardById);
     } else if (customerCardByIdFetched) {
-      toast.error('Cari kart bulunamadı');
+      toast.error(`${labels.entity.customerCard.singular} bulunamadı`);
       updateParam('id', '');
     }
   }, [idParam, customerCardById, customerCardByIdFetched]);

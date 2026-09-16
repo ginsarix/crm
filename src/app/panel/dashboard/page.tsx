@@ -5,9 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { colorHint } from '~/lib/color-hints';
-import { auditAction } from '~/lib/enum-map';
 import { createLocaleSorter } from '~/lib/utils';
 import { auth } from '~/server/better-auth';
+import { auditActionLabels } from '~/shared/labels/compose';
 import { api } from '~/trpc/server';
 import { BusinessGroupAlerts } from '../_components/business-group-alerts';
 import { BusinessGroupFilter } from '../_components/business-group-filter';
@@ -24,6 +24,9 @@ export default async function DashboardPage({
     searchParams,
   ]);
   const isAdmin = session?.user.role === 'admin';
+
+  const labels = await api.label.get();
+  const auditAction = auditActionLabels(labels);
 
   const allBusinessGroups = await api.businessGroup.get();
 

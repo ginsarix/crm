@@ -1,10 +1,10 @@
 'use client';
 
 import type { PaginationState, SortingState } from '@tanstack/react-table';
-import type { User } from 'generated/prisma';
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
+import type { columnMap } from '~/lib/column-map';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { FilterControls } from './filter-controls';
@@ -26,7 +26,9 @@ export function UserReportTab() {
     pageSize: 25,
   });
   const [search, setSearch] = useState('');
-  const [searchScope, setSearchScope] = useState<'all' | keyof User>('all');
+  const [searchScope, setSearchScope] = useState<
+    'all' | (typeof columnMap.user)[number]
+  >('all');
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   // actionsTarget holds the modal's data and is intentionally NOT cleared on
   // close — only actionsOpen toggles, so ReportActionsDialog's close

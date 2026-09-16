@@ -15,10 +15,8 @@ import {
 } from '~/components/ui/dialog';
 import { Label } from '~/components/ui/label';
 import { Separator } from '~/components/ui/separator';
-import {
-  auditAction,
-  resourceType as resourceTypeLabels,
-} from '~/lib/enum-map';
+import { useLabels } from '~/hooks/use-labels';
+import { auditActionLabels, resourceTypeLabels } from '~/shared/labels/compose';
 
 type AuditLogWithUser = AuditLog & {
   user: Pick<User, 'id' | 'name' | 'email' | 'image'> | null;
@@ -35,6 +33,9 @@ export function ViewAuditLogDialog({
   open,
   onOpenChange,
 }: ViewAuditLogDialogProps) {
+  const labels = useLabels();
+  const auditAction = auditActionLabels(labels);
+  const resourceType = resourceTypeLabels(labels);
   const initials = auditLog.user?.name
     .split(' ')
     .map((n) => n[0])
@@ -113,8 +114,8 @@ export function ViewAuditLogDialog({
                 Kaynak Türü
               </Label>
               <p className="text-sm">
-                {resourceTypeLabels[
-                  auditLog.resourceType as keyof typeof resourceTypeLabels
+                {resourceType[
+                  auditLog.resourceType as keyof typeof resourceType
                 ] ?? auditLog.resourceType}
               </p>
             </div>

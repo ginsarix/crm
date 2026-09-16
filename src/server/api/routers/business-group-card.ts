@@ -10,9 +10,7 @@ import { adminProcedure, createAuditLog, createTRPCRouter } from '../trpc';
 
 const filterSchema = z.object({
   search: z.string().optional(),
-  searchScope: z
-    .enum(['all', ...Object.keys(columnMap.businessGroupCard)])
-    .default('all'),
+  searchScope: z.enum(['all', ...columnMap.businessGroupCard]).default('all'),
 });
 
 const sortingSchema = z.object({

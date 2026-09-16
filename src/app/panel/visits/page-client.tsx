@@ -27,7 +27,7 @@ import { api } from '~/trpc/react';
 import type { RouterOutputs } from '~/trpc/types';
 
 type VisitWithCustomerCard = RouterOutputs['visit']['get']['data'][number];
-type VisitSearchScope = 'all' | keyof typeof columnMap.visit;
+type VisitSearchScope = 'all' | (typeof columnMap.visit)[number];
 
 import { DataTable } from '../../_components/data-table';
 import { BulkActionsBar } from '../_components/bulk-actions-bar';
@@ -57,7 +57,7 @@ export function VisitsPageClient() {
   const [searchScope, setSearchScope] = useState<VisitSearchScope>('all');
   const [salesRepresentativeId, setSalesRepresentativeId] = useState('');
   const [emptyField, setEmptyField] = useState<
-    '' | keyof typeof columnMap.visit
+    '' | (typeof columnMap.visit)[number]
   >('');
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);

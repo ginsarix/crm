@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
+import { useLabels } from '~/hooks/use-labels';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { createColumns } from '../audit-logs/columns';
@@ -55,10 +56,11 @@ export function ReportActionsDialog({
     { enabled: open },
   );
 
+  const labels = useLabels();
   const columns = createColumns((auditLog) => {
     setSelectedAuditLog(auditLog);
     setViewDialogOpen(true);
-  });
+  }, labels);
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>

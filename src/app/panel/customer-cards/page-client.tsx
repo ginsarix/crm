@@ -6,7 +6,7 @@ import type {
   RowSelectionState,
   SortingState,
 } from '@tanstack/react-table';
-import type { $Enums, CustomerCard } from 'generated/prisma';
+import type { $Enums } from 'generated/prisma';
 import { Trash2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
+import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
 import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
@@ -87,7 +88,7 @@ export function CustomerCardsPageClient() {
     ColorValidation.safeParse(searchParams.get('color')).data ?? 'all';
   const searchScope = (searchParams.get('search_scope') ?? 'all') as
     | 'all'
-    | keyof CustomerCard;
+    | (typeof columnMap.customerCard)[number];
   const businessGroup = searchParams.get('business_group') ?? '';
   const salesRepresentative = searchParams.get('sales_representative') ?? '';
   const district = (DistrictValidation.safeParse(searchParams.get('district'))
@@ -114,7 +115,7 @@ export function CustomerCardsPageClient() {
   ) as '' | '__null__' | $Enums.Vote;
   const emptyField = (searchParams.get('empty_field') ?? '') as
     | ''
-    | keyof CustomerCard;
+    | (typeof columnMap.customerCard)[number];
 
   const updateParam = useCallback(
     (key: string, value: string) => {

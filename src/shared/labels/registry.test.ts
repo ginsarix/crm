@@ -83,9 +83,7 @@ describe('field registry', () => {
 
     for (const entity of entityKeys) {
       const registered = new Set(fields[entity].map((f) => f.key));
-      const columns = Object.keys(columnMap[entity]).filter(
-        (k) => !SYSTEM_KEYS.includes(k),
-      );
+      const columns = columnMap[entity].filter((k) => !SYSTEM_KEYS.includes(k));
 
       for (const column of columns) {
         expect(

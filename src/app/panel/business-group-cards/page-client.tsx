@@ -16,7 +16,7 @@ import { FilterControls } from './filter-controls';
 
 type BusinessGroupCardSearchScope =
   | 'all'
-  | keyof typeof columnMap.businessGroupCard;
+  | (typeof columnMap.businessGroupCard)[number];
 
 export function BusinessGroupCardsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);

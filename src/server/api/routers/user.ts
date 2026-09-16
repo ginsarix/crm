@@ -19,7 +19,7 @@ import {
 
 const filterSchema = z.object({
   search: z.string().optional(),
-  searchScope: z.enum(['all', ...Object.keys(columnMap.user)]).default('all'),
+  searchScope: z.enum(['all', ...columnMap.user]).default('all'),
 });
 
 const sortingSchema = z.object({

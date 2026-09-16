@@ -23,6 +23,7 @@ import type { HeartbeatHandle } from '~/components/ui/heartbeat-indicator';
 import { HeartbeatIndicator } from '~/components/ui/heartbeat-indicator';
 import { Spinner } from '~/components/ui/spinner';
 import { useAuditLogStream } from '~/hooks/use-audit-log-stream';
+import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
@@ -68,7 +69,8 @@ export function AuditLogsPageClient() {
     setViewDialogOpen(true);
   };
 
-  const columns = createColumns(handleViewAuditLog);
+  const labels = useLabels();
+  const columns = createColumns(handleViewAuditLog, labels);
 
   const selectedIds = Object.keys(rowSelection);
 

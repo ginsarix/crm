@@ -136,6 +136,13 @@ model SalesRepresentative {
   visits Visit[]
 }
 
+model LabelOverride {
+  key         String   @id
+  value       String
+  updatedAt   DateTime @updatedAt
+  updatedById String?
+}
+
 enum Color {
   green
   blue

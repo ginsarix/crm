@@ -5,6 +5,7 @@ import { businessGroupRouter } from '~/server/api/routers/business-group';
 import { businessGroupCardRouter } from '~/server/api/routers/business-group-card';
 import { customerCardRouter } from '~/server/api/routers/customer-card';
 import { feedbackRouter } from '~/server/api/routers/feedback';
+import { labelRouter } from '~/server/api/routers/label';
 import { salesRepresentativeRouter } from '~/server/api/routers/sales-representative';
 import { savedFilterRouter } from '~/server/api/routers/saved-filter';
 import { userRouter } from '~/server/api/routers/user';
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   businessGroupCard: businessGroupCardRouter,
   customerCard: customerCardRouter,
   feedback: feedbackRouter,
+  label: labelRouter,
   user: userRouter,
   userReport: userReportRouter,
   visit: visitRouter,

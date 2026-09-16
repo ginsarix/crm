@@ -464,8 +464,8 @@ export function CustomerCardsPageClient() {
             <DialogHeader>
               <DialogTitle>Toplu Silme</DialogTitle>
               <DialogDescription>
-                {selectedIds.length} cari kartı silmek istediğinizden emin
-                misiniz? Bu işlem geri alınamaz.
+                {selectedIds.length} {labels.entity.customerCard.singular}{' '}
+                silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

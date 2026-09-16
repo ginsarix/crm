@@ -299,6 +299,7 @@ edits anything. All cosmetic, all intended:
 | Ziyaret `customerCardId` label | Müşteri Kartı | Cari Kartı |
 | Ziyaret columns | Müşteri Ünvanı / Müşteri GSM | Cari Kartı Ünvan / Cari Kartı GSM 1 |
 | Ziyaret edit dialog `time` | Saat * | Saat |
+| Ziyaret view dialog title | Ziyaret Detayı | Ziyaret Görüntüle |
 
 The last one is a fix: `time` is optional in `VisitCreateSchema`, and the edit
 dialog's asterisk was wrong. Driving it from the registry's `required` flag

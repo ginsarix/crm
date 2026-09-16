@@ -1290,10 +1290,14 @@ export const LabelUpdateSchema = z.object({
 });
 ```
 
-**Why not `z.record(z.string().refine(...), ...)`:** this repo is on Zod 3.25.76,
-where wrapping a record's key schema in `.refine()` produces a `ZodEffects`,
-which `z.record` does not run as a key validator — unknown keys would slip
-through silently. Validate the keys explicitly instead:
+**Why `superRefine` rather than `z.record(z.string().refine(...), ...)`:**
+not for the reason originally given here. An earlier draft of this plan claimed
+a refined key schema silently validates nothing on Zod 3.25.76; that was tested
+against the installed zod@3.25.76 and is FALSE — the refined form does reject
+unknown keys. The real reasons to prefer `superRefine` are that it reports the
+offending key in the issue `path` (`['values', key]`) rather than a generic
+record error, and that key validation stays readable next to the schema. Either
+form is secure; use `superRefine`:
 
 ```ts
 export const LabelUpdateSchema = z
@@ -1313,8 +1317,8 @@ export const LabelUpdateSchema = z
   });
 ```
 
-Use the `superRefine` version. The plain `z.object` above is shown only to make
-the contrast explicit — do not ship it.
+Ship the `superRefine` version. The plain `z.object` above lacks key validation
+entirely and must not be shipped on its own.
 
 - [ ] **Step 4: Write the failing schema test**
 

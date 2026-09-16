@@ -110,3 +110,23 @@ export type FieldRegistry = {
   visit: FieldDefinition<VisitFieldKey>[];
   businessGroupCard: FieldDefinition<BusinessGroupCardFieldKey>[];
 };
+
+export type ResolvedLabels = {
+  entity: Record<EntityKey, EntityLabels>;
+  field: FieldLabels;
+  section: Record<SectionKey, string>;
+  page: Record<PageKey, string>;
+  system: { id: string; createdAt: string; updatedAt: string };
+};
+
+export const entityLabelKey = (
+  entity: EntityKey,
+  form: 'singular' | 'plural',
+) => `entity.${entity}.${form}`;
+
+export const fieldLabelKey = (entity: FieldEntityKey, field: string) =>
+  `field.${entity}.${field}`;
+
+export const sectionLabelKey = (section: SectionKey) => `section.${section}`;
+
+export const pageLabelKey = (page: PageKey) => `page.${page}.title`;

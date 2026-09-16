@@ -25,8 +25,10 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { Textarea } from '~/components/ui/textarea';
+import { useLabels } from '~/hooks/use-labels';
 import { createLocaleSorter } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
+import { labelCompose } from '~/shared/labels/compose';
 import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { api } from '~/trpc/react';
 import ColorControl from './color-control';
@@ -57,6 +59,8 @@ export function ViewCustomerCardDialog({
   onUpdate,
 }: ViewCustomerCardDialogProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const labels = useLabels();
+  const f = labels.field.customerCard;
   const utils = api.useUtils();
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === 'admin';
@@ -178,7 +182,9 @@ export function ViewCustomerCardDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>
-              {canEdit ? 'Cari Kartı Düzenle' : 'Cari Kartı Görüntüle'}
+              {canEdit
+                ? labelCompose.edit(labels.entity.customerCard)
+                : labelCompose.view(labels.entity.customerCard)}
             </span>
             {!showDeleteConfirm && isAdmin && (
               <Button
@@ -226,21 +232,17 @@ export function ViewCustomerCardDialog({
               {/* Basic Information */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="sira">Sıra</Label>
-                  <Input
-                    {...register('sira')}
-                    id="sira"
-                    placeholder="Sıra no"
-                  />
+                  <Label htmlFor="sira">{f.sira}</Label>
+                  <Input {...register('sira')} id="sira" placeholder={f.sira} />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="name">Ünvan *</Label>
+                  <Label htmlFor="name">{f.name} *</Label>
                   <Input
                     {...register('name')}
                     className={errors.name ? 'border-red-500' : ''}
                     id="name"
-                    placeholder="Ünvan"
+                    placeholder={f.name}
                   />
                   {errors.name && (
                     <p className="text-red-500 text-sm">
@@ -252,16 +254,16 @@ export function ViewCustomerCardDialog({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="sicil">Sicil</Label>
+                  <Label htmlFor="sicil">{f.sicil}</Label>
                   <Input
                     {...register('sicil')}
                     id="sicil"
-                    placeholder="Sicil no"
+                    placeholder={f.sicil}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="businessGroup">Meslek Grubu</Label>
+                  <Label htmlFor="businessGroup">{f.businessGroup}</Label>
                   <Controller
                     control={control}
                     name="businessGroup"
@@ -279,17 +281,17 @@ export function ViewCustomerCardDialog({
 
               {/* Address Information */}
               <div className="space-y-2">
-                <Label htmlFor="address">Adres</Label>
+                <Label htmlFor="address">{f.address}</Label>
                 <Input
                   {...register('address')}
                   id="address"
-                  placeholder="Adres"
+                  placeholder={f.address}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="district">İlçe</Label>
+                  <Label htmlFor="district">{f.district}</Label>
                   <Controller
                     control={control}
                     name="district"
@@ -317,11 +319,11 @@ export function ViewCustomerCardDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="region">Bölge</Label>
+                  <Label htmlFor="region">{f.region}</Label>
                   <Input
                     {...register('region')}
                     id="region"
-                    placeholder="Bölge"
+                    placeholder={f.region}
                   />
                 </div>
               </div>
@@ -332,60 +334,60 @@ export function ViewCustomerCardDialog({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="gsm1">GSM 1</Label>
+                    <Label htmlFor="gsm1">{f.gsm1}</Label>
                     <Input
                       {...register('gsm1')}
                       id="gsm1"
-                      placeholder="GSM 1"
+                      placeholder={f.gsm1}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="contact1">İletişim 1</Label>
+                    <Label htmlFor="contact1">{f.contact1}</Label>
                     <Input
                       {...register('contact1')}
                       id="contact1"
-                      placeholder="İletişim kişisi"
+                      placeholder={f.contact1}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="gsm2">GSM 2</Label>
+                    <Label htmlFor="gsm2">{f.gsm2}</Label>
                     <Input
                       {...register('gsm2')}
                       id="gsm2"
-                      placeholder="GSM 2"
+                      placeholder={f.gsm2}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="contact2">İletişim 2</Label>
+                    <Label htmlFor="contact2">{f.contact2}</Label>
                     <Input
                       {...register('contact2')}
                       id="contact2"
-                      placeholder="İletişim kişisi"
+                      placeholder={f.contact2}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="gsm3">GSM 3</Label>
+                    <Label htmlFor="gsm3">{f.gsm3}</Label>
                     <Input
                       {...register('gsm3')}
                       id="gsm3"
-                      placeholder="GSM 3"
+                      placeholder={f.gsm3}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="contact3">İletişim 3</Label>
+                    <Label htmlFor="contact3">{f.contact3}</Label>
                     <Input
                       {...register('contact3')}
                       id="contact3"
-                      placeholder="İletişim kişisi"
+                      placeholder={f.contact3}
                     />
                   </div>
                 </div>
@@ -393,16 +395,18 @@ export function ViewCustomerCardDialog({
 
               {/* Additional Information */}
               <div className="space-y-2">
-                <Label htmlFor="authorities">Yetkililer</Label>
+                <Label htmlFor="authorities">{f.authorities}</Label>
                 <Input
                   {...register('authorities')}
                   id="authorities"
-                  placeholder="Yetkililer"
+                  placeholder={f.authorities}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
+                <Label htmlFor="salesRepresentative">
+                  {f.salesRepresentative}
+                </Label>
                 <Controller
                   control={control}
                   name="salesRepresentative"
@@ -419,7 +423,7 @@ export function ViewCustomerCardDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Durum</Label>
+                <Label htmlFor="status">{f.status}</Label>
                 <Controller
                   control={control}
                   name="status"
@@ -444,7 +448,9 @@ export function ViewCustomerCardDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="authorizationDocument">Yetki Belge</Label>
+                <Label htmlFor="authorizationDocument">
+                  {f.authorizationDocument}
+                </Label>
                 <Controller
                   control={control}
                   name="authorizationDocument"
@@ -472,7 +478,7 @@ export function ViewCustomerCardDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="vote">Oy</Label>
+                <Label htmlFor="vote">{f.vote}</Label>
                 <Controller
                   control={control}
                   name="vote"
@@ -498,7 +504,7 @@ export function ViewCustomerCardDialog({
 
               <div className="space-y-2">
                 <Label className="cursor-pointer" htmlFor="color">
-                  Renk
+                  {f.color}
                 </Label>
                 <Controller
                   control={control}
@@ -514,11 +520,11 @@ export function ViewCustomerCardDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="note">Not</Label>
+                <Label htmlFor="note">{f.note}</Label>
                 <Textarea
                   {...register('note')}
                   id="note"
-                  placeholder="Not"
+                  placeholder={f.note}
                   rows={3}
                 />
               </div>

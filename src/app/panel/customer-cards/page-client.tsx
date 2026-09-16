@@ -23,9 +23,11 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
+import { useLabels } from '~/hooks/use-labels';
 import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
+import { labelCompose } from '~/shared/labels/compose';
 import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
 import { DistrictValidation } from '~/shared/zod-schemas/district';
 import { StatusValidation } from '~/shared/zod-schemas/status';
@@ -52,6 +54,7 @@ const ColorValidation = z.enum([
 export function CustomerCardsPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const labels = useLabels();
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -286,7 +289,7 @@ export function CustomerCardsPageClient() {
     }
   };
 
-  const columns = createColumns(handleViewCustomerCard);
+  const columns = createColumns(labels, handleViewCustomerCard);
 
   const selectedIds = Object.keys(rowSelection);
 
@@ -381,7 +384,9 @@ export function CustomerCardsPageClient() {
         </div>
         <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
-            <CardTitle className="mr-auto">Cari Kartlar</CardTitle>
+            <CardTitle className="mr-auto">
+              {labelCompose.tableTitle(labels.entity.customerCard)}
+            </CardTitle>
             <div className="ml-auto">
               <CreateCustomerCardDialog />
             </div>

@@ -141,7 +141,7 @@ export function CreateCustomerCardDialog() {
                 name="businessGroup"
                 render={({ field }) => (
                   <Combobox
-                    label="Meslek grubu seçin"
+                    label={`${f.businessGroup} seçin`}
                     onChange={field.onChange}
                     options={businessGroupOptions}
                     selectedKey={field.value ?? ''}
@@ -173,7 +173,7 @@ export function CreateCustomerCardDialog() {
                     onValueChange={field.onChange}
                   >
                     <SelectTrigger className="w-full" id="district">
-                      <SelectValue placeholder="İlçe seçin" />
+                      <SelectValue placeholder={`${f.district} seçin`} />
                     </SelectTrigger>
                     <SelectContent>
                       {DISTRICTS_SELECT_MAP.map((district) => (
@@ -268,7 +268,7 @@ export function CreateCustomerCardDialog() {
               render={({ field }) => (
                 <Combobox
                   className="w-full"
-                  label="Satış temsilcisi seçin"
+                  label={`${f.salesRepresentative} seçin`}
                   onChange={field.onChange}
                   options={salesRepresentativeOptions}
                   selectedKey={field.value ?? ''}
@@ -290,7 +290,7 @@ export function CreateCustomerCardDialog() {
                   value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full" id="status">
-                    <SelectValue placeholder="Durum Seçiniz" />
+                    <SelectValue placeholder={`${f.status} Seçiniz`} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__null__">Boş</SelectItem>
@@ -317,7 +317,9 @@ export function CreateCustomerCardDialog() {
                   value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full" id="authorizationDocument">
-                    <SelectValue placeholder="Durum Seçiniz" />
+                    <SelectValue
+                      placeholder={`${f.authorizationDocument} Seçiniz`}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__null__">Boş</SelectItem>
@@ -342,7 +344,7 @@ export function CreateCustomerCardDialog() {
                   value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full" id="vote">
-                    <SelectValue placeholder="Durum Seçiniz" />
+                    <SelectValue placeholder={`${f.vote} Seçiniz`} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__null__">Boş</SelectItem>

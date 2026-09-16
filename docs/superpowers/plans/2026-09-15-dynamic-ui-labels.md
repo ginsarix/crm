@@ -320,11 +320,13 @@ describe('entity registry', () => {
     }
   });
 
-  it('keeps businessGroupCard independent of businessGroup', () => {
-    expect(entities.businessGroupCard.singular).not.toContain(
-      `${entities.businessGroup.singular} Kartı`.slice(0, 0),
-    );
+  it('gives businessGroupCard its own editable pair', () => {
+    // Independence from businessGroup is enforced by resolveLabels (see
+    // resolve.test.ts "does not let businessGroup rename businessGroupCard").
+    // Here we only assert it carries its own editable defaults.
     expect(entities.businessGroupCard.editable).toBe(true);
+    expect(entities.businessGroupCard.singular).toBe('Meslek Grubu Kartı');
+    expect(entities.businessGroupCard.plural).toBe('Meslek Grubu Kartları');
   });
 });
 
@@ -1771,26 +1773,13 @@ Same treatment. The title at line ~181 becomes:
   : labelCompose.view(labels.entity.customerCard)}
 ```
 
-- [ ] **Step 5: Update `filter-controls.tsx`**
+- [ ] **Step 5: Verify `filter-controls.tsx` — do not re-convert it**
 
-The search-scope and empty-field dropdowns currently build options from `Object.entries(columnMap.customerCard)` (lines ~83 and ~147). Keep iterating `columnMap.customerCard` for the **keys** — that is the router's Zod contract — but take the label from the resolver:
-
-```tsx
-const labels = useLabels();
-
-const scopeOptions = [
-  { key: 'all', label: 'Tümü' },
-  ...columnMap.customerCard.map((key) => ({
-    key,
-    label: fieldLabel(labels, 'customerCard', key),
-  })),
-];
-```
-
-`fieldLabel` (Task 4) is what makes this compile: `columnMap` keys are plain
-strings, which `labels.field.customerCard` — typed with a precise key union —
-would reject, and those lists include the three system keys that live under
-`labels.system` rather than `labels.field`.
+**Task 8 already converted this file.** Do not edit it again. Confirm its
+scope and empty-field dropdowns read `fieldLabel(labels, 'customerCard', key)`
+over `columnMap.customerCard`, and that renaming a field in the editor would
+change the dropdown text. If Task 8 missed it, fix it here and say so in your
+report.
 
 
 - [ ] **Step 6: Verify in the running app**
@@ -1874,9 +1863,12 @@ Dialog titles:
   : labelCompose.view(labels.entity.visit)}
 ```
 
-- [ ] **Step 4: Update `filter-controls.tsx` and `related-visits-dialog.tsx`**
+- [ ] **Step 4: Update `related-visits-dialog.tsx`; verify `filter-controls.tsx`**
 
-Same `columnMap.visit` keys + resolver labels pattern as Task 9 Step 5, substituting `labels.field.visit`. In `related-visits-dialog.tsx` replace any hardcoded `Ziyaret` / `Ziyaretler` with `labels.entity.visit.singular` / `labelCompose.nav(labels.entity.visit)`.
+**Task 8 already converted `filter-controls.tsx`** — verify only, do not
+re-convert. In `related-visits-dialog.tsx` replace any hardcoded `Ziyaret` /
+`Ziyaretler` with `labels.entity.visit.singular` /
+`labelCompose.nav(labels.entity.visit)`.
 
 - [ ] **Step 5: Verify in the running app**
 
@@ -1977,7 +1969,8 @@ Table title at line ~69:
 </CardTitle>
 ```
 
-`filter-controls.tsx` follows the Task 9 Step 5 pattern with `labels.field.businessGroupCard`.
+**Task 8 already converted `filter-controls.tsx`** — verify only, do not
+re-convert.
 
 - [ ] **Step 4: Verify in the running app**
 
@@ -2080,7 +2073,7 @@ In `sale-representatives-table.tsx` (line ~111) and `business-groups-table.tsx` 
 
 - [ ] **Step 4: Update the dashboard**
 
-`src/app/panel/dashboard/page.tsx` is a server component; it already gained `const labels = await api.label.get();` in Task 8 Step 3. Now also replace:
+`src/app/panel/dashboard/page.tsx` is a server component; it already gained `const labels = await api.label.get();` in Task 8 Step 7. Now also replace:
 
 ```tsx
 <h2 className="font-bold text-3xl tracking-tight">{labels.page.dashboard}</h2>

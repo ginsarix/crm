@@ -152,7 +152,7 @@ git commit -m "chore: configure vitest and playwright"
 **Interfaces:**
 - Consumes: nothing
 - Produces:
-  - `EntityKey`, `PageKey`, `FieldEntityKey`, `SectionKey`, `FieldDefinition`, `EntityDefinition`, `ResolvedLabels`, `LabelKey`
+  - `EntityKey`, `PageKey`, `FieldEntityKey`, `SectionKey`, `FieldDefinition`, `EntityDefinition`
   - `entities: Record<EntityKey, EntityDefinition>`
   - `pages: Record<PageKey, { title: string; editable: boolean }>`
 
@@ -566,7 +566,7 @@ git commit -m "feat: add field and section label registries"
 **Files:**
 - Create: `src/shared/labels/resolve.ts`
 - Test: `src/shared/labels/resolve.test.ts`
-- Modify: `src/shared/labels/types.ts` (add `ResolvedLabels`, `LabelKey`)
+- Modify: `src/shared/labels/types.ts` (add `ResolvedLabels`)
 
 **Interfaces:**
 - Consumes: `entities`, `fields`, `pages`, `sections`, `systemFieldLabels` from Tasks 2-3
@@ -832,11 +832,15 @@ export const editableLabelKeys: ReadonlySet<string> = new Set([
 ]);
 
 export const defaultLabelValues: Record<string, string> = {
+  // Editable-only, to match labelValues() — a non-editable entity or page here
+  // makes the two disagree and the "equals the defaults" test fail.
   ...Object.fromEntries(
-    Object.entries(entities).flatMap(([key, entity]) => [
-      [entityLabelKey(key as EntityKey, 'singular'), entity.singular],
-      [entityLabelKey(key as EntityKey, 'plural'), entity.plural],
-    ]),
+    Object.entries(entities)
+      .filter(([, entity]) => entity.editable)
+      .flatMap(([key, entity]) => [
+        [entityLabelKey(key as EntityKey, 'singular'), entity.singular],
+        [entityLabelKey(key as EntityKey, 'plural'), entity.plural],
+      ]),
   ),
   ...Object.fromEntries(
     FIELD_ENTITY_KEYS.flatMap((entity) =>
@@ -852,10 +856,9 @@ export const defaultLabelValues: Record<string, string> = {
     ]),
   ),
   ...Object.fromEntries(
-    Object.entries(pages).map(([key, page]) => [
-      pageLabelKey(key as PageKey),
-      page.title,
-    ]),
+    Object.entries(pages)
+      .filter(([, page]) => page.editable)
+      .map(([key, page]) => [pageLabelKey(key as PageKey), page.title]),
   ),
 };
 

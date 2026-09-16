@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { entities, pages } from './registry';
+import { columnMap } from '~/lib/column-map';
+import { entities, fields, pages, sectionOrder, sections } from './registry';
+import type { FieldEntityKey } from './types';
 
 describe('entity registry', () => {
   it('marks exactly the five renameable entities as editable', () => {
@@ -42,5 +44,61 @@ describe('page registry', () => {
       .sort();
 
     expect(editable).toEqual(['dashboard', 'settings']);
+  });
+});
+
+const SYSTEM_KEYS = ['id', 'createdAt', 'updatedAt'];
+
+describe('field registry', () => {
+  it('has no duplicate keys within an entity', () => {
+    for (const [entity, list] of Object.entries(fields)) {
+      const keys = list.map((f) => f.key);
+      expect(new Set(keys).size, `${entity} has duplicate keys`).toBe(
+        keys.length,
+      );
+    }
+  });
+
+  it('points every inherited and composed field at a real entity', () => {
+    for (const list of Object.values(fields)) {
+      for (const field of list) {
+        if (field.kind === 'inherited') {
+          expect(entities[field.from]).toBeDefined();
+        }
+        if (field.kind === 'composed') {
+          expect(entities[field.fromEntity]).toBeDefined();
+          const source = fields[field.fromEntity as FieldEntityKey];
+          expect(source.some((f) => f.key === field.fromField)).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('covers every non-system column key', () => {
+    const entityKeys: FieldEntityKey[] = [
+      'customerCard',
+      'visit',
+      'businessGroupCard',
+    ];
+
+    for (const entity of entityKeys) {
+      const registered = new Set(fields[entity].map((f) => f.key));
+      const columns = Object.keys(columnMap[entity]).filter(
+        (k) => !SYSTEM_KEYS.includes(k),
+      );
+
+      for (const column of columns) {
+        expect(
+          registered.has(column as never),
+          `${entity}.${column} missing`,
+        ).toBe(true);
+      }
+    }
+  });
+});
+
+describe('section registry', () => {
+  it('orders exactly the defined sections', () => {
+    expect([...sectionOrder].sort()).toEqual(Object.keys(sections).sort());
   });
 });

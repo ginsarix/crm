@@ -1,4 +1,5 @@
-import { defaultLabelValues, resolveLabels } from '~/shared/labels/resolve';
+import { partitionLabelWrites } from '~/shared/labels/partition';
+import { resolveLabels } from '~/shared/labels/resolve';
 import { LabelUpdateSchema } from '~/shared/zod-schemas/label';
 import {
   adminProcedure,
@@ -19,19 +20,7 @@ export const labelRouter = createTRPCRouter({
   update: adminProcedure
     .input(LabelUpdateSchema)
     .mutation(async ({ ctx, input }) => {
-      const toDelete: string[] = [];
-      const toUpsert: { key: string; value: string }[] = [];
-
-      for (const [key, value] of Object.entries(input.values)) {
-        const trimmed = value?.trim() ?? '';
-        // Empty means "use the default", and a value equal to the default
-        // is stored as absence so improved defaults keep reaching it.
-        if (!trimmed || trimmed === defaultLabelValues[key]) {
-          toDelete.push(key);
-        } else {
-          toUpsert.push({ key, value: trimmed });
-        }
-      }
+      const { toDelete, toUpsert } = partitionLabelWrites(input.values);
 
       try {
         await ctx.db.$transaction([

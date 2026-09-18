@@ -231,9 +231,14 @@ export function ViewVisitDialog({
 
         {showDeleteConfirm ? (
           <div className="space-y-4 py-4">
+            {/* Kept literal: "ziyareti" carries the accusative -i suffix,
+                which can't be regenerated safely for an arbitrarily renamed
+                singular. (The customerCard equivalent gets away with
+                composing the label because "Cari Kartı" already ends in the
+                possessive suffix, so it reads correctly by luck — not a
+                pattern to copy here.) */}
             <p className="text-center font-medium text-lg">
-              Bu {labels.entity.visit.singular} silmek istediğinizden emin
-              misiniz?
+              Bu ziyareti silmek istediğinizden emin misiniz?
             </p>
             <p className="text-center text-muted-foreground text-sm">
               Bu işlem geri alınamaz.

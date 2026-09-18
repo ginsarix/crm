@@ -301,9 +301,15 @@ export function VisitsPageClient() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Toplu Silme</DialogTitle>
+              {/* Kept literal: "ziyareti" carries the accusative -i suffix,
+                  which can't be regenerated safely for an arbitrarily
+                  renamed singular. (The customerCard equivalent gets away
+                  with composing the label because "Cari Kartı" already ends
+                  in the possessive suffix, so it reads correctly by luck —
+                  not a pattern to copy here.) */}
               <DialogDescription>
-                {selectedIds.length} {labels.entity.visit.singular} silmek
-                istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                {selectedIds.length} ziyareti silmek istediğinizden emin
+                misiniz? Bu işlem geri alınamaz.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

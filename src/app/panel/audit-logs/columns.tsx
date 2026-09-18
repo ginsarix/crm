@@ -28,8 +28,8 @@ type AuditLogWithUser = AuditLog & {
 };
 
 export const createColumns = (
-  onViewAuditLog: (auditLog: AuditLogWithUser) => void,
   labels: ResolvedLabels,
+  onViewAuditLog: (auditLog: AuditLogWithUser) => void,
 ): ColumnDef<AuditLogWithUser>[] => {
   const auditAction = auditActionLabels(labels);
   const resourceType = resourceTypeLabels(labels);

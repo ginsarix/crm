@@ -57,10 +57,10 @@ export function ReportActionsDialog({
   );
 
   const labels = useLabels();
-  const columns = createColumns((auditLog) => {
+  const columns = createColumns(labels, (auditLog) => {
     setSelectedAuditLog(auditLog);
     setViewDialogOpen(true);
-  }, labels);
+  });
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>

@@ -156,7 +156,7 @@ export default async function DashboardPage({
             <Card className="border-l-2 border-l-primary">
               <CardHeader className="pt-4 pb-1">
                 <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
-                  {labelCompose.nav(labels.entity.visit)} Sıralaması —{' '}
+                  {labels.entity.visit.singular} Sıralaması —{' '}
                   {labelCompose.tableTitle(labels.entity.salesRepresentative)}
                 </CardTitle>
               </CardHeader>

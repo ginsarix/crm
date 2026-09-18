@@ -16,7 +16,11 @@ import {
 import { Label } from '~/components/ui/label';
 import { Separator } from '~/components/ui/separator';
 import { useLabels } from '~/hooks/use-labels';
-import { auditActionLabels, resourceTypeLabels } from '~/shared/labels/compose';
+import {
+  auditActionLabels,
+  labelCompose,
+  resourceTypeLabels,
+} from '~/shared/labels/compose';
 
 type AuditLogWithUser = AuditLog & {
   user: Pick<User, 'id' | 'name' | 'email' | 'image'> | null;
@@ -47,7 +51,7 @@ export function ViewAuditLogDialog({
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Denetim Kaydı Detayı</DialogTitle>
+          <DialogTitle>{labelCompose.view(labels.entity.auditLog)}</DialogTitle>
           <DialogDescription>
             {new Date(auditLog.createdAt).toLocaleString('tr-TR')}
           </DialogDescription>

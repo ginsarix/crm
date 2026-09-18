@@ -212,7 +212,7 @@ export function CommandPalette() {
                   <BookUser />
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate">
-                      {card.name || 'İsimsiz Cari'}
+                      {card.name || 'İsimsiz Cari Kart'}
                     </span>
                     <span className="truncate text-[11px] text-muted-foreground">
                       {[card.sicil, card.businessGroup]

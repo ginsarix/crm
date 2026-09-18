@@ -103,7 +103,7 @@ export function CreateCustomerCardDialog() {
           <DialogTitle>
             {labelCompose.create(labels.entity.customerCard)}
           </DialogTitle>
-          <DialogDescription>Tek zorunlu Adı'dır</DialogDescription>
+          <DialogDescription>Tek zorunlu alan: {f.name}</DialogDescription>
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>

@@ -6,7 +6,7 @@ import { VoteValidation } from './vote';
 
 export const CustomerCardCreateSchema = z.object({
   sira: z.string().optional(),
-  name: z.string().min(1, 'Müşteri adı zorunludur'),
+  name: z.string().min(1, 'Ünvan zorunludur'),
   sicil: z.string().optional(),
   address: z.string().optional(),
   district: DistrictValidation.optional(),

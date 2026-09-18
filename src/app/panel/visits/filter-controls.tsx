@@ -105,7 +105,7 @@ export function FilterControls({
         <ViaControl id="via" includeAll setVia={onVia} via={via} />
         <Combobox
           className="sm:w-56"
-          label="Satış Temsilcisi"
+          label={labels.entity.salesRepresentative.singular}
           onChange={onSalesRepresentativeId}
           options={[
             { key: '', label: 'Tümü' },

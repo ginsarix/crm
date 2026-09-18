@@ -19,6 +19,8 @@ import {
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { Switch } from '~/components/ui/switch';
+import { useLabels } from '~/hooks/use-labels';
+import { labelCompose } from '~/shared/labels/compose';
 import { BusinessGroupFormSchema } from '~/shared/zod-schemas/business-group';
 import { api } from '~/trpc/react';
 
@@ -37,6 +39,7 @@ export function ViewBusinessGroupDialog({
 }: ViewBusinessGroupDialogProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const labels = useLabels();
   const utils = api.useUtils();
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -128,7 +131,9 @@ export function ViewBusinessGroupDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>
-              {isEditMode ? 'Meslek Grubu Düzenle' : 'Meslek Grubu Detayı'}
+              {isEditMode
+                ? labelCompose.edit(labels.entity.businessGroup)
+                : labelCompose.view(labels.entity.businessGroup)}
             </span>
             <div className="flex gap-2">
               {!isEditMode && !showDeleteConfirm && (

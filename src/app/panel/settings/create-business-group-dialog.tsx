@@ -17,11 +17,14 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { useLabels } from '~/hooks/use-labels';
+import { labelCompose } from '~/shared/labels/compose';
 import { BusinessGroupCreateSchema } from '~/shared/zod-schemas/business-group';
 import { api } from '~/trpc/react';
 
 export function CreateBusinessGroupDialog() {
   const [open, setOpen] = useState(false);
+  const labels = useLabels();
   const utils = api.useUtils();
 
   const {
@@ -65,7 +68,9 @@ export function CreateBusinessGroupDialog() {
         className="max-h-[99vh] overflow-y-auto"
       >
         <DialogHeader>
-          <DialogTitle>Meslek Grubu Ekle</DialogTitle>
+          <DialogTitle>
+            {labelCompose.create(labels.entity.businessGroup)}
+          </DialogTitle>
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>

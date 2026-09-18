@@ -24,6 +24,9 @@
 			}
 		}
 	],
+	"files": {
+		"includes": ["**", "!**/*.svg"]
+	},
 	"assist": {
 		"enabled": true,
 		"actions": {

@@ -131,7 +131,7 @@ export function ElectionResultsPageClient() {
             </TooltipTrigger>
             <TooltipContent className="max-w-[260px]">
               <p className="text-xs">
-                Toplamlar uygulanan filtrelere göre hesaplanır.
+                Toplamlar, uygulanan filtrelere göre hesaplanır.
               </p>
             </TooltipContent>
           </Tooltip>

@@ -6,7 +6,7 @@ import type {
   RowSelectionState,
   SortingState,
 } from '@tanstack/react-table';
-import type { $Enums, CustomerCard } from 'generated/prisma';
+import type { $Enums } from 'generated/prisma';
 import { Trash2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -23,8 +23,11 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
+import { useLabels } from '~/hooks/use-labels';
+import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
+import { labelCompose } from '~/shared/labels/compose';
 import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
 import { DistrictValidation } from '~/shared/zod-schemas/district';
 import { StatusValidation } from '~/shared/zod-schemas/status';
@@ -51,6 +54,7 @@ const ColorValidation = z.enum([
 export function CustomerCardsPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const labels = useLabels();
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -87,7 +91,7 @@ export function CustomerCardsPageClient() {
     ColorValidation.safeParse(searchParams.get('color')).data ?? 'all';
   const searchScope = (searchParams.get('search_scope') ?? 'all') as
     | 'all'
-    | keyof CustomerCard;
+    | (typeof columnMap.customerCard)[number];
   const businessGroup = searchParams.get('business_group') ?? '';
   const salesRepresentative = searchParams.get('sales_representative') ?? '';
   const district = (DistrictValidation.safeParse(searchParams.get('district'))
@@ -114,7 +118,7 @@ export function CustomerCardsPageClient() {
   ) as '' | '__null__' | $Enums.Vote;
   const emptyField = (searchParams.get('empty_field') ?? '') as
     | ''
-    | keyof CustomerCard;
+    | (typeof columnMap.customerCard)[number];
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -204,7 +208,9 @@ export function CustomerCardsPageClient() {
       utils.customerCard.get.invalidate();
       utils.customerCard.getTotal.invalidate();
       utils.customerCard.getColorCounts.invalidate();
-      toast.success(`${result.count} cari kart silindi`);
+      toast.success(
+        `${result.count} ${labels.entity.customerCard.singular} silindi`,
+      );
       setRowSelection({});
       setDeleteConfirmOpen(false);
     },
@@ -273,7 +279,7 @@ export function CustomerCardsPageClient() {
     if (customerCardById) {
       handleViewCustomerCard(customerCardById);
     } else if (customerCardByIdFetched) {
-      toast.error('Cari kart bulunamadı');
+      toast.error(`${labels.entity.customerCard.singular} bulunamadı`);
       updateParam('id', '');
     }
   }, [idParam, customerCardById, customerCardByIdFetched]);
@@ -285,7 +291,7 @@ export function CustomerCardsPageClient() {
     }
   };
 
-  const columns = createColumns(handleViewCustomerCard);
+  const columns = createColumns(labels, handleViewCustomerCard);
 
   const selectedIds = Object.keys(rowSelection);
 
@@ -380,7 +386,9 @@ export function CustomerCardsPageClient() {
         </div>
         <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
-            <CardTitle className="mr-auto">Cari Kartlar</CardTitle>
+            <CardTitle className="mr-auto">
+              {labelCompose.tableTitle(labels.entity.customerCard)}
+            </CardTitle>
             <div className="ml-auto">
               <CreateCustomerCardDialog />
             </div>
@@ -455,9 +463,14 @@ export function CustomerCardsPageClient() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Toplu Silme</DialogTitle>
+              {/* The accusative suffix sits on the fixed noun "kaydını"
+                  rather than on the entity name, so labels.entity.customerCard.singular
+                  can be substituted in bare nominative and stay grammatical
+                  under any rename. */}
               <DialogDescription>
-                {selectedIds.length} cari kartı silmek istediğinizden emin
-                misiniz? Bu işlem geri alınamaz.
+                {selectedIds.length} {labels.entity.customerCard.singular}{' '}
+                kaydını silmek istediğinizden emin misiniz? Bu işlem geri
+                alınamaz.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

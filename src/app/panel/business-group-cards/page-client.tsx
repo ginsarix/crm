@@ -4,8 +4,10 @@ import type { PaginationState, SortingState } from '@tanstack/react-table';
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
+import { useLabels } from '~/hooks/use-labels';
 import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
+import { labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 
 import { DataTable } from '../../_components/data-table';
@@ -16,9 +18,10 @@ import { FilterControls } from './filter-controls';
 
 type BusinessGroupCardSearchScope =
   | 'all'
-  | keyof typeof columnMap.businessGroupCard;
+  | (typeof columnMap.businessGroupCard)[number];
 
 export function BusinessGroupCardsPageClient() {
+  const labels = useLabels();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -51,7 +54,7 @@ export function BusinessGroupCardsPageClient() {
     setEditDialogOpen(true);
   };
 
-  const columns = createColumns(handleEdit);
+  const columns = createColumns(labels, handleEdit);
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
@@ -66,7 +69,9 @@ export function BusinessGroupCardsPageClient() {
         </div>
         <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
-            <CardTitle className="mr-auto">Meslek Grubu Kartları</CardTitle>
+            <CardTitle className="mr-auto">
+              {labelCompose.tableTitle(labels.entity.businessGroupCard)}
+            </CardTitle>
           </CardHeader>
         </Card>
         {isLoading ? (

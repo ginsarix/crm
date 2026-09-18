@@ -14,10 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import {
-  auditAction,
-  resourceType as resourceTypeLabels,
-} from '~/lib/enum-map';
+import { useLabels } from '~/hooks/use-labels';
+import { auditActionLabels, resourceTypeLabels } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 
 export function FilterControls({
@@ -39,6 +37,9 @@ export function FilterControls({
   result: 'SUCCESS' | 'FAILURE' | 'all';
   onResult: (result: 'SUCCESS' | 'FAILURE' | 'all') => void;
 }) {
+  const labels = useLabels();
+  const auditAction = auditActionLabels(labels);
+  const resourceTypeLabelMap = resourceTypeLabels(labels);
   const { data: actions } = api.auditLog.getDistinctActions.useQuery();
   const { data: resourceTypes } =
     api.auditLog.getDistinctResourceTypes.useQuery();
@@ -89,8 +90,9 @@ export function FilterControls({
               <SelectItem value="all">Tüm Kaynaklar</SelectItem>
               {resourceTypes?.map((rt) => (
                 <SelectItem key={rt} value={rt}>
-                  {resourceTypeLabels[rt as keyof typeof resourceTypeLabels] ??
-                    rt}
+                  {resourceTypeLabelMap[
+                    rt as keyof typeof resourceTypeLabelMap
+                  ] ?? rt}
                 </SelectItem>
               ))}
             </SelectContent>

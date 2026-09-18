@@ -8,11 +8,13 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from '~/components/ui/input-group';
+import { useLabels } from '~/hooks/use-labels';
 import { columnMap } from '~/lib/column-map';
+import { fieldLabel } from '~/shared/labels/resolve';
 
 type BusinessGroupCardSearchScope =
   | 'all'
-  | keyof typeof columnMap.businessGroupCard;
+  | (typeof columnMap.businessGroupCard)[number];
 
 export function FilterControls({
   search,
@@ -25,13 +27,17 @@ export function FilterControls({
   searchScope: BusinessGroupCardSearchScope;
   onSearchScope: (searchScope: BusinessGroupCardSearchScope) => void;
 }) {
+  const labels = useLabels();
   const comboboxOptions = [
     { key: 'all', label: 'Tümü' },
-    ...Object.entries(columnMap.businessGroupCard)
+    ...columnMap.businessGroupCard
       .filter(
-        ([key]) => key !== 'id' && key !== 'createdAt' && key !== 'updatedAt',
+        (key) => key !== 'id' && key !== 'createdAt' && key !== 'updatedAt',
       )
-      .map(([key, label]) => ({ key, label })),
+      .map((key) => ({
+        key,
+        label: fieldLabel(labels, 'businessGroupCard', key),
+      })),
   ];
 
   return (

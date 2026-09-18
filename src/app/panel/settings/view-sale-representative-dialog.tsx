@@ -18,7 +18,9 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { useLabels } from '~/hooks/use-labels';
 import { authClient } from '~/server/better-auth/client';
+import { labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 
 interface ViewSaleRepresentativeDialogProps {
@@ -36,6 +38,7 @@ export function ViewSaleRepresentativeDialog({
 }: ViewSaleRepresentativeDialogProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const labels = useLabels();
   const utils = api.useUtils();
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === 'admin';
@@ -132,8 +135,8 @@ export function ViewSaleRepresentativeDialog({
           <DialogTitle className="flex items-center justify-between">
             <span>
               {isEditMode
-                ? 'Satış Temsilcisi Düzenle'
-                : 'Satış Temsilcisi Detayı'}
+                ? labelCompose.edit(labels.entity.salesRepresentative)
+                : labelCompose.view(labels.entity.salesRepresentative)}
             </span>
             <div className="flex gap-2">
               {!isEditMode && !showDeleteConfirm && (

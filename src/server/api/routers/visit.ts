@@ -14,14 +14,14 @@ import {
 // Fields eligible for the "boş alan" (missing-value) filter — every visit
 // column except id/createdAt/updatedAt (technical fields) and date (always
 // required on create, so "empty" is meaningless)
-const emptyFields = Object.keys(columnMap.visit).filter(
+const emptyFields = columnMap.visit.filter(
   (key) => !['id', 'createdAt', 'updatedAt', 'date'].includes(key),
 );
 
 const filterSchema = z.object({
   search: z.string().optional(),
   via: z.enum(['phone', 'inPerson', 'email', 'sms', 'all']).default('all'),
-  searchScope: z.enum(['all', ...Object.keys(columnMap.visit)]).default('all'),
+  searchScope: z.enum(['all', ...columnMap.visit]).default('all'),
   customerCardId: z.string().optional(),
   salesRepresentativeId: z.string().optional(),
   emptyField: z.enum(['', ...emptyFields]).default(''),

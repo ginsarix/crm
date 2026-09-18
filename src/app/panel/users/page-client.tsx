@@ -22,6 +22,7 @@ import {
 } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
@@ -41,7 +42,9 @@ export function UsersPageClient() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [searchScope, setSearchScope] = useState<'all' | keyof User>('all');
+  const [searchScope, setSearchScope] = useState<
+    'all' | (typeof columnMap.user)[number]
+  >('all');
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const utils = api.useUtils();

@@ -152,7 +152,7 @@ git commit -m "chore: configure vitest and playwright"
 **Interfaces:**
 - Consumes: nothing
 - Produces:
-  - `EntityKey`, `PageKey`, `FieldEntityKey`, `SectionKey`, `FieldDefinition`, `EntityDefinition`, `ResolvedLabels`, `LabelKey`
+  - `EntityKey`, `PageKey`, `FieldEntityKey`, `SectionKey`, `FieldDefinition`, `EntityDefinition`
   - `entities: Record<EntityKey, EntityDefinition>`
   - `pages: Record<PageKey, { title: string; editable: boolean }>`
 
@@ -320,11 +320,13 @@ describe('entity registry', () => {
     }
   });
 
-  it('keeps businessGroupCard independent of businessGroup', () => {
-    expect(entities.businessGroupCard.singular).not.toContain(
-      `${entities.businessGroup.singular} Kartı`.slice(0, 0),
-    );
+  it('gives businessGroupCard its own editable pair', () => {
+    // Independence from businessGroup is enforced by resolveLabels (see
+    // resolve.test.ts "does not let businessGroup rename businessGroupCard").
+    // Here we only assert it carries its own editable defaults.
     expect(entities.businessGroupCard.editable).toBe(true);
+    expect(entities.businessGroupCard.singular).toBe('Meslek Grubu Kartı');
+    expect(entities.businessGroupCard.plural).toBe('Meslek Grubu Kartları');
   });
 });
 
@@ -564,7 +566,7 @@ git commit -m "feat: add field and section label registries"
 **Files:**
 - Create: `src/shared/labels/resolve.ts`
 - Test: `src/shared/labels/resolve.test.ts`
-- Modify: `src/shared/labels/types.ts` (add `ResolvedLabels`, `LabelKey`)
+- Modify: `src/shared/labels/types.ts` (add `ResolvedLabels`)
 
 **Interfaces:**
 - Consumes: `entities`, `fields`, `pages`, `sections`, `systemFieldLabels` from Tasks 2-3
@@ -830,11 +832,15 @@ export const editableLabelKeys: ReadonlySet<string> = new Set([
 ]);
 
 export const defaultLabelValues: Record<string, string> = {
+  // Editable-only, to match labelValues() — a non-editable entity or page here
+  // makes the two disagree and the "equals the defaults" test fail.
   ...Object.fromEntries(
-    Object.entries(entities).flatMap(([key, entity]) => [
-      [entityLabelKey(key as EntityKey, 'singular'), entity.singular],
-      [entityLabelKey(key as EntityKey, 'plural'), entity.plural],
-    ]),
+    Object.entries(entities)
+      .filter(([, entity]) => entity.editable)
+      .flatMap(([key, entity]) => [
+        [entityLabelKey(key as EntityKey, 'singular'), entity.singular],
+        [entityLabelKey(key as EntityKey, 'plural'), entity.plural],
+      ]),
   ),
   ...Object.fromEntries(
     FIELD_ENTITY_KEYS.flatMap((entity) =>
@@ -850,10 +856,9 @@ export const defaultLabelValues: Record<string, string> = {
     ]),
   ),
   ...Object.fromEntries(
-    Object.entries(pages).map(([key, page]) => [
-      pageLabelKey(key as PageKey),
-      page.title,
-    ]),
+    Object.entries(pages)
+      .filter(([, page]) => page.editable)
+      .map(([key, page]) => [pageLabelKey(key as PageKey), page.title]),
   ),
 };
 
@@ -1285,10 +1290,14 @@ export const LabelUpdateSchema = z.object({
 });
 ```
 
-**Why not `z.record(z.string().refine(...), ...)`:** this repo is on Zod 3.25.76,
-where wrapping a record's key schema in `.refine()` produces a `ZodEffects`,
-which `z.record` does not run as a key validator — unknown keys would slip
-through silently. Validate the keys explicitly instead:
+**Why `superRefine` rather than `z.record(z.string().refine(...), ...)`:**
+not for the reason originally given here. An earlier draft of this plan claimed
+a refined key schema silently validates nothing on Zod 3.25.76; that was tested
+against the installed zod@3.25.76 and is FALSE — the refined form does reject
+unknown keys. The real reasons to prefer `superRefine` are that it reports the
+offending key in the issue `path` (`['values', key]`) rather than a generic
+record error, and that key validation stays readable next to the schema. Either
+form is secure; use `superRefine`:
 
 ```ts
 export const LabelUpdateSchema = z
@@ -1308,8 +1317,8 @@ export const LabelUpdateSchema = z
   });
 ```
 
-Use the `superRefine` version. The plain `z.object` above is shown only to make
-the contrast explicit — do not ship it.
+Ship the `superRefine` version. The plain `z.object` above lacks key validation
+entirely and must not be shipped on its own.
 
 - [ ] **Step 4: Write the failing schema test**
 
@@ -1771,26 +1780,13 @@ Same treatment. The title at line ~181 becomes:
   : labelCompose.view(labels.entity.customerCard)}
 ```
 
-- [ ] **Step 5: Update `filter-controls.tsx`**
+- [ ] **Step 5: Verify `filter-controls.tsx` — do not re-convert it**
 
-The search-scope and empty-field dropdowns currently build options from `Object.entries(columnMap.customerCard)` (lines ~83 and ~147). Keep iterating `columnMap.customerCard` for the **keys** — that is the router's Zod contract — but take the label from the resolver:
-
-```tsx
-const labels = useLabels();
-
-const scopeOptions = [
-  { key: 'all', label: 'Tümü' },
-  ...columnMap.customerCard.map((key) => ({
-    key,
-    label: fieldLabel(labels, 'customerCard', key),
-  })),
-];
-```
-
-`fieldLabel` (Task 4) is what makes this compile: `columnMap` keys are plain
-strings, which `labels.field.customerCard` — typed with a precise key union —
-would reject, and those lists include the three system keys that live under
-`labels.system` rather than `labels.field`.
+**Task 8 already converted this file.** Do not edit it again. Confirm its
+scope and empty-field dropdowns read `fieldLabel(labels, 'customerCard', key)`
+over `columnMap.customerCard`, and that renaming a field in the editor would
+change the dropdown text. If Task 8 missed it, fix it here and say so in your
+report.
 
 
 - [ ] **Step 6: Verify in the running app**
@@ -1874,9 +1870,12 @@ Dialog titles:
   : labelCompose.view(labels.entity.visit)}
 ```
 
-- [ ] **Step 4: Update `filter-controls.tsx` and `related-visits-dialog.tsx`**
+- [ ] **Step 4: Update `related-visits-dialog.tsx`; verify `filter-controls.tsx`**
 
-Same `columnMap.visit` keys + resolver labels pattern as Task 9 Step 5, substituting `labels.field.visit`. In `related-visits-dialog.tsx` replace any hardcoded `Ziyaret` / `Ziyaretler` with `labels.entity.visit.singular` / `labelCompose.nav(labels.entity.visit)`.
+**Task 8 already converted `filter-controls.tsx`** — verify only, do not
+re-convert. In `related-visits-dialog.tsx` replace any hardcoded `Ziyaret` /
+`Ziyaretler` with `labels.entity.visit.singular` /
+`labelCompose.nav(labels.entity.visit)`.
 
 - [ ] **Step 5: Verify in the running app**
 
@@ -1977,7 +1976,8 @@ Table title at line ~69:
 </CardTitle>
 ```
 
-`filter-controls.tsx` follows the Task 9 Step 5 pattern with `labels.field.businessGroupCard`.
+**Task 8 already converted `filter-controls.tsx`** — verify only, do not
+re-convert.
 
 - [ ] **Step 4: Verify in the running app**
 
@@ -2080,7 +2080,7 @@ In `sale-representatives-table.tsx` (line ~111) and `business-groups-table.tsx` 
 
 - [ ] **Step 4: Update the dashboard**
 
-`src/app/panel/dashboard/page.tsx` is a server component; it already gained `const labels = await api.label.get();` in Task 8 Step 3. Now also replace:
+`src/app/panel/dashboard/page.tsx` is a server component; it already gained `const labels = await api.label.get();` in Task 8 Step 7. Now also replace:
 
 ```tsx
 <h2 className="font-bold text-3xl tracking-tight">{labels.page.dashboard}</h2>

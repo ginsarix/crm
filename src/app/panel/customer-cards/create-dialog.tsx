@@ -28,14 +28,18 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { Textarea } from '~/components/ui/textarea';
+import { useLabels } from '~/hooks/use-labels';
 import { createLocaleSorter } from '~/lib/utils';
 import { DISTRICTS_SELECT_MAP } from '~/shared/constants';
+import { labelCompose } from '~/shared/labels/compose';
 import { CustomerCardCreateSchema } from '~/shared/zod-schemas/customer-card';
 import { api } from '~/trpc/react';
 import ColorControl from './color-control';
 
 export function CreateCustomerCardDialog() {
   const [open, setOpen] = useState(false);
+  const labels = useLabels();
+  const f = labels.field.customerCard;
   const utils = api.useUtils();
   const {
     register,
@@ -73,12 +77,14 @@ export function CreateCustomerCardDialog() {
   const onSubmit = async (data: z.infer<typeof CustomerCardCreateSchema>) => {
     try {
       await createMutation.mutateAsync(data);
-      toast.success('Cari kart başarıyla eklendi');
+      toast.success(`${labels.entity.customerCard.singular} başarıyla eklendi`);
       reset();
       setOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error('Cari kart eklenirken bir hata oluştu');
+      toast.error(
+        `${labels.entity.customerCard.singular} eklenirken bir hata oluştu`,
+      );
     }
   };
 
@@ -90,29 +96,31 @@ export function CreateCustomerCardDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent
-        aria-describedby="Cari kart ekleme formu"
+        aria-describedby={`${labels.entity.customerCard.singular} ekleme formu`}
         className="max-h-[99vh] overflow-y-auto sm:max-w-2xl"
       >
         <DialogHeader>
-          <DialogTitle>Cari Kart Ekle</DialogTitle>
-          <DialogDescription>Tek zorunlu Adı'dır</DialogDescription>
+          <DialogTitle>
+            {labelCompose.create(labels.entity.customerCard)}
+          </DialogTitle>
+          <DialogDescription>Tek zorunlu alan: {f.name}</DialogDescription>
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Basic Information */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sira">Sıra</Label>
-              <Input {...register('sira')} id="sira" placeholder="Sıra no" />
+              <Label htmlFor="sira">{f.sira}</Label>
+              <Input {...register('sira')} id="sira" placeholder={f.sira} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name">Ünvan *</Label>
+              <Label htmlFor="name">{f.name} *</Label>
               <Input
                 {...register('name')}
                 className={errors.name ? 'border-red-500' : ''}
                 id="name"
-                placeholder="Ünvan"
+                placeholder={f.name}
               />
               {errors.name && (
                 <p className="text-red-500 text-sm">{errors.name.message}</p>
@@ -122,18 +130,18 @@ export function CreateCustomerCardDialog() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="sicil">Sicil</Label>
-              <Input {...register('sicil')} id="sicil" placeholder="Sicil no" />
+              <Label htmlFor="sicil">{f.sicil}</Label>
+              <Input {...register('sicil')} id="sicil" placeholder={f.sicil} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="businessGroup">Meslek Grubu</Label>
+              <Label htmlFor="businessGroup">{f.businessGroup}</Label>
               <Controller
                 control={control}
                 name="businessGroup"
                 render={({ field }) => (
                   <Combobox
-                    label="Meslek grubu seçin"
+                    label={`${f.businessGroup} seçin`}
                     onChange={field.onChange}
                     options={businessGroupOptions}
                     selectedKey={field.value ?? ''}
@@ -145,13 +153,17 @@ export function CreateCustomerCardDialog() {
 
           {/* Address Information */}
           <div className="space-y-2">
-            <Label htmlFor="address">Adres</Label>
-            <Input {...register('address')} id="address" placeholder="Adres" />
+            <Label htmlFor="address">{f.address}</Label>
+            <Input
+              {...register('address')}
+              id="address"
+              placeholder={f.address}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="district">İlçe</Label>
+              <Label htmlFor="district">{f.district}</Label>
               <Controller
                 control={control}
                 name="district"
@@ -161,7 +173,7 @@ export function CreateCustomerCardDialog() {
                     onValueChange={field.onChange}
                   >
                     <SelectTrigger className="w-full" id="district">
-                      <SelectValue placeholder="İlçe seçin" />
+                      <SelectValue placeholder={`${f.district} seçin`} />
                     </SelectTrigger>
                     <SelectContent>
                       {DISTRICTS_SELECT_MAP.map((district) => (
@@ -176,8 +188,12 @@ export function CreateCustomerCardDialog() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="region">Bölge</Label>
-              <Input {...register('region')} id="region" placeholder="Bölge" />
+              <Label htmlFor="region">{f.region}</Label>
+              <Input
+                {...register('region')}
+                id="region"
+                placeholder={f.region}
+              />
             </div>
           </div>
 
@@ -187,48 +203,48 @@ export function CreateCustomerCardDialog() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="gsm1">GSM 1</Label>
-                <Input {...register('gsm1')} id="gsm1" placeholder="GSM 1" />
+                <Label htmlFor="gsm1">{f.gsm1}</Label>
+                <Input {...register('gsm1')} id="gsm1" placeholder={f.gsm1} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact1">İletişim 1</Label>
+                <Label htmlFor="contact1">{f.contact1}</Label>
                 <Input
                   {...register('contact1')}
                   id="contact1"
-                  placeholder="İletişim kişisi"
+                  placeholder={f.contact1}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="gsm2">GSM 2</Label>
-                <Input {...register('gsm2')} id="gsm2" placeholder="GSM 2" />
+                <Label htmlFor="gsm2">{f.gsm2}</Label>
+                <Input {...register('gsm2')} id="gsm2" placeholder={f.gsm2} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact2">İletişim 2</Label>
+                <Label htmlFor="contact2">{f.contact2}</Label>
                 <Input
                   {...register('contact2')}
                   id="contact2"
-                  placeholder="İletişim kişisi"
+                  placeholder={f.contact2}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="gsm3">GSM 3</Label>
-                <Input {...register('gsm3')} id="gsm3" placeholder="GSM 3" />
+                <Label htmlFor="gsm3">{f.gsm3}</Label>
+                <Input {...register('gsm3')} id="gsm3" placeholder={f.gsm3} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact3">İletişim 3</Label>
+                <Label htmlFor="contact3">{f.contact3}</Label>
                 <Input
                   {...register('contact3')}
                   id="contact3"
-                  placeholder="İletişim kişisi"
+                  placeholder={f.contact3}
                 />
               </div>
             </div>
@@ -236,23 +252,23 @@ export function CreateCustomerCardDialog() {
 
           {/* Additional Information */}
           <div className="space-y-2">
-            <Label htmlFor="authorities">Yetkililer</Label>
+            <Label htmlFor="authorities">{f.authorities}</Label>
             <Input
               {...register('authorities')}
               id="authorities"
-              placeholder="Yetkililer"
+              placeholder={f.authorities}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="salesRepresentative">Satış Temsilcisi</Label>
+            <Label htmlFor="salesRepresentative">{f.salesRepresentative}</Label>
             <Controller
               control={control}
               name="salesRepresentative"
               render={({ field }) => (
                 <Combobox
                   className="w-full"
-                  label="Satış temsilcisi seçin"
+                  label={`${f.salesRepresentative} seçin`}
                   onChange={field.onChange}
                   options={salesRepresentativeOptions}
                   selectedKey={field.value ?? ''}
@@ -262,7 +278,7 @@ export function CreateCustomerCardDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="status">Durum</Label>
+            <Label htmlFor="status">{f.status}</Label>
             <Controller
               control={control}
               name="status"
@@ -274,7 +290,7 @@ export function CreateCustomerCardDialog() {
                   value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full" id="status">
-                    <SelectValue placeholder="Durum Seçiniz" />
+                    <SelectValue placeholder={`${f.status} Seçiniz`} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__null__">Boş</SelectItem>
@@ -287,7 +303,9 @@ export function CreateCustomerCardDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="authorizationDocument">Yetki Belge</Label>
+            <Label htmlFor="authorizationDocument">
+              {f.authorizationDocument}
+            </Label>
             <Controller
               control={control}
               name="authorizationDocument"
@@ -299,7 +317,9 @@ export function CreateCustomerCardDialog() {
                   value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full" id="authorizationDocument">
-                    <SelectValue placeholder="Durum Seçiniz" />
+                    <SelectValue
+                      placeholder={`${f.authorizationDocument} Seçiniz`}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__null__">Boş</SelectItem>
@@ -312,7 +332,7 @@ export function CreateCustomerCardDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="vote">Oy</Label>
+            <Label htmlFor="vote">{f.vote}</Label>
             <Controller
               control={control}
               name="vote"
@@ -324,7 +344,7 @@ export function CreateCustomerCardDialog() {
                   value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full" id="vote">
-                    <SelectValue placeholder="Durum Seçiniz" />
+                    <SelectValue placeholder={`${f.vote} Seçiniz`} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__null__">Boş</SelectItem>
@@ -338,7 +358,7 @@ export function CreateCustomerCardDialog() {
 
           <div className="space-y-2">
             <Label className="cursor-pointer" htmlFor="color">
-              Renk
+              {f.color}
             </Label>
             <Controller
               control={control}
@@ -354,11 +374,11 @@ export function CreateCustomerCardDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="note">Not</Label>
+            <Label htmlFor="note">{f.note}</Label>
             <Textarea
               {...register('note')}
               id="note"
-              placeholder="Not"
+              placeholder={f.note}
               rows={3}
             />
           </div>

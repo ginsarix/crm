@@ -32,8 +32,10 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { Textarea } from '~/components/ui/textarea';
+import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
+import { labelCompose } from '~/shared/labels/compose';
 import { VisitCreateSchema } from '~/shared/zod-schemas/visit';
 import { api } from '~/trpc/react';
 
@@ -59,6 +61,8 @@ export function ViewVisitDialog({
 }: ViewVisitDialogProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const labels = useLabels();
+  const f = labels.field.visit;
   const utils = api.useUtils();
   const [customerCardSearch, setCustomerCardSearch] = useState('');
   const { data: session } = authClient.useSession();
@@ -118,7 +122,7 @@ export function ViewVisitDialog({
   const updateMutation = api.visit.update.useMutation({
     onSuccess: (updatedVisit) => {
       utils.visit.get.cancel();
-      toast.success('Ziyaret başarıyla güncellendi');
+      toast.success(`${labels.entity.visit.singular} başarıyla güncellendi`);
 
       onUpdate?.({
         ...visit,
@@ -129,19 +133,21 @@ export function ViewVisitDialog({
     },
     onError: (error) => {
       console.error(error);
-      toast.error('Ziyaret güncellenirken bir hata oluştu');
+      toast.error(
+        `${labels.entity.visit.singular} güncellenirken bir hata oluştu`,
+      );
     },
   });
 
   const deleteMutation = api.visit.delete.useMutation({
     onSuccess: () => {
       utils.visit.get.invalidate();
-      toast.success('Ziyaret başarıyla silindi');
+      toast.success(`${labels.entity.visit.singular} başarıyla silindi`);
       handleOpenChange(false);
     },
     onError: (error) => {
       console.error(error);
-      toast.error('Ziyaret silinirken bir hata oluştu');
+      toast.error(`${labels.entity.visit.singular} silinirken bir hata oluştu`);
     },
   });
 
@@ -174,12 +180,16 @@ export function ViewVisitDialog({
   return (
     <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogContent
-        aria-describedby="Ziyaret görüntüleme ve düzenleme"
+        aria-describedby={`${labels.entity.visit.singular} görüntüleme ve düzenleme`}
         className="max-h-[99vh] overflow-y-auto"
       >
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{isEditMode ? 'Ziyareti Düzenle' : 'Ziyaret Detayı'}</span>
+            <span>
+              {isEditMode
+                ? labelCompose.edit(labels.entity.visit)
+                : labelCompose.view(labels.entity.visit)}
+            </span>
             <div className="flex gap-2">
               {!isEditMode && !showDeleteConfirm && (
                 <>
@@ -213,15 +223,21 @@ export function ViewVisitDialog({
           </DialogTitle>
           {!isEditMode && (
             <DialogDescription>
-              Ziyaret bilgilerini görüntüleyin veya düzenleyin
+              {labels.entity.visit.singular} bilgilerini görüntüleyin veya
+              düzenleyin
             </DialogDescription>
           )}
         </DialogHeader>
 
         {showDeleteConfirm ? (
           <div className="space-y-4 py-4">
+            {/* The accusative suffix sits on the fixed noun "kaydını"
+                rather than on the entity name, so labels.entity.visit.singular
+                can be substituted in bare nominative and stay grammatical
+                under any rename. */}
             <p className="text-center font-medium text-lg">
-              Bu ziyareti silmek istediğinizden emin misiniz?
+              Bu {labels.entity.visit.singular} kaydını silmek istediğinizden
+              emin misiniz?
             </p>
             <p className="text-center text-muted-foreground text-sm">
               Bu işlem geri alınamaz.
@@ -246,7 +262,7 @@ export function ViewVisitDialog({
           <form className="min-w-0 space-y-4" onSubmit={handleSubmit(onSubmit)}>
             {/* Customer Card Selection */}
             <div className="space-y-2">
-              <Label htmlFor="customerCardId">Müşteri Kartı *</Label>
+              <Label htmlFor="customerCardId">{f.customerCardId} *</Label>
               <Controller
                 control={control}
                 name="customerCardId"
@@ -257,7 +273,7 @@ export function ViewVisitDialog({
                       'w-full',
                     )}
                     id="customerCardId"
-                    label="Müşteri seçin"
+                    label={`${f.customerCardId} seçin`}
                     loading={isCustomerCardsLoading}
                     onChange={field.onChange}
                     onInputChange={(value) => {
@@ -289,7 +305,9 @@ export function ViewVisitDialog({
 
             {/* Sales Representative */}
             <div className="space-y-2">
-              <Label htmlFor="salesRepresentativeId">Satış Temsilcisi</Label>
+              <Label htmlFor="salesRepresentativeId">
+                {f.salesRepresentativeId}
+              </Label>
               <Controller
                 control={control}
                 name="salesRepresentativeId"
@@ -297,7 +315,7 @@ export function ViewVisitDialog({
                   <Combobox
                     className="w-full"
                     id="salesRepresentativeId"
-                    label="Satış temsilcisi seçin"
+                    label={`${f.salesRepresentativeId} seçin`}
                     onChange={field.onChange}
                     options={
                       salesRepresentatives?.map((sr) => ({
@@ -314,7 +332,7 @@ export function ViewVisitDialog({
             {/* Date and Time */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Tarih *</Label>
+                <Label htmlFor="date">{f.date} *</Label>
                 <Controller
                   control={control}
                   name="date"
@@ -335,7 +353,7 @@ export function ViewVisitDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="time">Saat *</Label>
+                <Label htmlFor="time">{f.time}</Label>
                 <Controller
                   control={control}
                   name="time"
@@ -379,7 +397,7 @@ export function ViewVisitDialog({
 
             {/* Via */}
             <div className="space-y-2">
-              <Label htmlFor="via">İletişim Türü</Label>
+              <Label htmlFor="via">{f.via}</Label>
               <Controller
                 control={control}
                 name="via"
@@ -389,7 +407,7 @@ export function ViewVisitDialog({
                     value={field.value ?? undefined}
                   >
                     <SelectTrigger className="w-full" id="via">
-                      <SelectValue placeholder="İletişim türü seçin" />
+                      <SelectValue placeholder={`${f.via} seçin`} />
                     </SelectTrigger>
                     <SelectContent>
                       {VIA_OPTIONS.map((option) => (
@@ -405,11 +423,11 @@ export function ViewVisitDialog({
 
             {/* Note */}
             <div className="space-y-2">
-              <Label htmlFor="note">Not</Label>
+              <Label htmlFor="note">{f.note}</Label>
               <Textarea
                 {...register('note')}
                 id="note"
-                placeholder="Ziyaret hakkında notlar..."
+                placeholder={`${labels.entity.visit.singular} hakkında notlar...`}
                 rows={3}
               />
             </div>
@@ -436,13 +454,15 @@ export function ViewVisitDialog({
           <div className="min-w-0 space-y-4">
             {/* View Mode - Display data */}
             <div>
-              <Label className="text-muted-foreground">Müşteri</Label>
+              <Label className="text-muted-foreground">
+                {f.customerCardId}
+              </Label>
               <p className="font-medium text-sm">{customerCardName}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-muted-foreground">Tarih</Label>
+                <Label className="text-muted-foreground">{f.date}</Label>
                 <p className="text-sm">
                   {(() => {
                     const d = new Date(visit.date);
@@ -454,7 +474,7 @@ export function ViewVisitDialog({
               </div>
               {visit.time && (
                 <div>
-                  <Label className="text-muted-foreground">Saat</Label>
+                  <Label className="text-muted-foreground">{f.time}</Label>
                   <p className="text-sm">
                     {`${String(new Date(visit.time).getUTCHours()).padStart(
                       2,
@@ -469,7 +489,7 @@ export function ViewVisitDialog({
             </div>
 
             <div>
-              <Label className="text-muted-foreground">İletişim Türü</Label>
+              <Label className="text-muted-foreground">{f.via}</Label>
               <p className="text-sm">
                 {visit.via
                   ? VIA_OPTIONS.find((opt) => opt.value === visit.via)?.label
@@ -478,21 +498,23 @@ export function ViewVisitDialog({
             </div>
 
             <div>
-              <Label className="text-muted-foreground">Satış Temsilcisi</Label>
+              <Label className="text-muted-foreground">
+                {f.salesRepresentativeId}
+              </Label>
               <p className="text-sm">
                 {visit.salesRepresentative?.name || '-'}
               </p>
             </div>
 
             <div>
-              <Label className="text-muted-foreground">Not</Label>
+              <Label className="text-muted-foreground">{f.note}</Label>
               <p className="text-sm">{visit.note || '-'}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-muted-foreground">
-                  Oluşturulma Tarihi
+                  {labels.system.createdAt}
                 </Label>
                 <p className="text-sm">
                   {visit.createdAt.toLocaleString('tr-TR')}
@@ -500,7 +522,7 @@ export function ViewVisitDialog({
               </div>
               <div>
                 <Label className="text-muted-foreground">
-                  Güncellenme Tarihi
+                  {labels.system.updatedAt}
                 </Label>
                 <p className="text-sm">
                   {visit.updatedAt.toLocaleString('tr-TR')}

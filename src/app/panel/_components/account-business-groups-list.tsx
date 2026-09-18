@@ -2,6 +2,8 @@
 
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '~/components/ui/button';
+import { useLabels } from '~/hooks/use-labels';
+import { labelCompose } from '~/shared/labels/compose';
 
 interface AccountBusinessGroupsListProps {
   businessGroups: { id: string; name: string }[];
@@ -12,6 +14,7 @@ export function AccountBusinessGroupsList({
   businessGroups,
   onBack,
 }: AccountBusinessGroupsListProps) {
+  const labels = useLabels();
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -23,7 +26,9 @@ export function AccountBusinessGroupsList({
         >
           <ArrowLeft className="size-4" />
         </Button>
-        <h3 className="font-semibold text-sm">Atanmış Meslek Grupları</h3>
+        <h3 className="font-semibold text-sm">
+          Atanmış {labelCompose.tableTitle(labels.entity.businessGroup)}
+        </h3>
       </div>
 
       <div className="divide-y rounded-lg border">

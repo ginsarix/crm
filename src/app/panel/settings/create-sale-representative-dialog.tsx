@@ -18,10 +18,13 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { useLabels } from '~/hooks/use-labels';
+import { labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 
 export function CreateSaleRepresentativeDialog() {
   const [open, setOpen] = useState(false);
+  const labels = useLabels();
   const utils = api.useUtils();
 
   const {
@@ -70,7 +73,9 @@ export function CreateSaleRepresentativeDialog() {
         className="max-h-[99vh] overflow-y-auto"
       >
         <DialogHeader>
-          <DialogTitle>Satış Temsilcisi Ekle</DialogTitle>
+          <DialogTitle>
+            {labelCompose.create(labels.entity.salesRepresentative)}
+          </DialogTitle>
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>

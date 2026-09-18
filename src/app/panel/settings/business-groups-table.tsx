@@ -16,13 +16,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
+import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
+import { labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 import { createColumns } from './business-groups-columns';
 import { CreateBusinessGroupDialog } from './create-business-group-dialog';
 import { ViewBusinessGroupDialog } from './view-business-group-dialog';
 
 export default function BusinessGroupsTable() {
+  const labels = useLabels();
   const { data, isLoading } = api.businessGroup.get.useQuery({
     includePassive: true,
   });
@@ -72,7 +75,9 @@ export default function BusinessGroupsTable() {
     <div>
       <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
         <CardHeader className="flex flex-row items-center">
-          <CardTitle className="mr-auto">Meslek Grupları</CardTitle>
+          <CardTitle className="mr-auto">
+            {labelCompose.tableTitle(labels.entity.businessGroup)}
+          </CardTitle>
           <div className="ml-auto">
             <CreateBusinessGroupDialog />
           </div>

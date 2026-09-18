@@ -8,14 +8,16 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from '~/components/ui/input-group';
+import { useLabels } from '~/hooks/use-labels';
 import { columnMap } from '~/lib/column-map';
+import { fieldLabel } from '~/shared/labels/resolve';
 import { api } from '~/trpc/react';
 import { SavedFilters } from '../_components/saved-filters';
 import ViaControl from './via-control';
 
-type VisitSearchScope = 'all' | keyof typeof columnMap.visit;
+type VisitSearchScope = 'all' | (typeof columnMap.visit)[number];
 
-type VisitEmptyField = '' | keyof typeof columnMap.visit;
+type VisitEmptyField = '' | (typeof columnMap.visit)[number];
 
 export function FilterControls({
   search,
@@ -44,12 +46,13 @@ export function FilterControls({
   currentFilters: Record<string, string>;
   onApplyPreset: (filters: Record<string, string>) => void;
 }) {
+  const labels = useLabels();
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
   const comboboxOptions = [
     { key: 'all', label: 'Tümü' },
-    ...Object.entries(columnMap.visit)
+    ...columnMap.visit
       .filter(
-        ([key]) =>
+        (key) =>
           key !== 'via' &&
           key !== 'createdAt' &&
           key !== 'updatedAt' &&
@@ -57,22 +60,20 @@ export function FilterControls({
           key !== 'date' &&
           key !== 'time',
       )
-      .map(([key, label]) => {
-        return { key, label };
-      }),
+      .map((key) => ({ key, label: fieldLabel(labels, 'visit', key) })),
   ];
 
   const emptyFieldComboboxOptions = [
     { key: '', label: 'Kapalı' },
-    ...Object.entries(columnMap.visit)
+    ...columnMap.visit
       .filter(
-        ([key]) =>
+        (key) =>
           key !== 'id' &&
           key !== 'date' &&
           key !== 'createdAt' &&
           key !== 'updatedAt',
       )
-      .map(([key, label]) => ({ key, label })),
+      .map((key) => ({ key, label: fieldLabel(labels, 'visit', key) })),
   ];
 
   return (
@@ -104,7 +105,7 @@ export function FilterControls({
         <ViaControl id="via" includeAll setVia={onVia} via={via} />
         <Combobox
           className="sm:w-56"
-          label="Satış Temsilcisi"
+          label={labels.entity.salesRepresentative.singular}
           onChange={onSalesRepresentativeId}
           options={[
             { key: '', label: 'Tümü' },

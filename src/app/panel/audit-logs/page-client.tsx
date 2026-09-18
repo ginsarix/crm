@@ -23,7 +23,9 @@ import type { HeartbeatHandle } from '~/components/ui/heartbeat-indicator';
 import { HeartbeatIndicator } from '~/components/ui/heartbeat-indicator';
 import { Spinner } from '~/components/ui/spinner';
 import { useAuditLogStream } from '~/hooks/use-audit-log-stream';
+import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
+import { labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { BulkActionsBar } from '../_components/bulk-actions-bar';
@@ -68,7 +70,8 @@ export function AuditLogsPageClient() {
     setViewDialogOpen(true);
   };
 
-  const columns = createColumns(handleViewAuditLog);
+  const labels = useLabels();
+  const columns = createColumns(labels, handleViewAuditLog);
 
   const selectedIds = Object.keys(rowSelection);
 
@@ -134,7 +137,7 @@ export function AuditLogsPageClient() {
         <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
             <CardTitle className="mr-auto flex items-center gap-2">
-              Denetim Kayıtları
+              {labelCompose.tableTitle(labels.entity.auditLog)}
               <HeartbeatIndicator connected={connected} ref={heartbeatRef} />
             </CardTitle>
             <div className="text-right text-muted-foreground text-sm">

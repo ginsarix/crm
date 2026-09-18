@@ -41,62 +41,54 @@ import {
   useSidebar,
 } from '~/components/ui/sidebar';
 import { env } from '~/env';
+import { useLabels } from '~/hooks/use-labels';
 import { authClient } from '~/server/better-auth/client';
+import { labelCompose } from '~/shared/labels/compose';
+import type { ResolvedLabels } from '~/shared/labels/types';
 import { AccountSheet } from './account-sheet';
 
 const navigationItems = [
+  { key: 'dashboard', icon: Home, href: '/panel/dashboard' },
+  { key: 'customerCard', icon: BookUser, href: '/panel/customer-cards' },
+  { key: 'visit', icon: Calendar, href: '/panel/visits' },
   {
-    title: 'Panel',
-    icon: Home,
-    href: '/panel/dashboard',
-  },
-  {
-    title: 'Cari Kartları',
-    icon: BookUser,
-    href: '/panel/customer-cards',
-  },
-  {
-    title: 'Ziyaretler',
-    icon: Calendar,
-    href: '/panel/visits',
-  },
-  {
-    title: 'Meslek Grubu Kartları',
+    key: 'businessGroupCard',
     icon: Building2,
     href: '/panel/business-group-cards',
     adminOnly: true,
   },
-];
+] as const;
 
 const adminItems = [
-  {
-    title: 'Kullanıcılar',
-    icon: Users,
-    href: '/panel/users',
-  },
-  {
-    title: 'Duyurular',
-    icon: Megaphone,
-    href: '/panel/announcements',
-  },
-  {
-    title: 'Denetim Kayıtları',
-    icon: ClipboardList,
-    href: '/panel/audit-logs',
-  },
-];
+  { key: 'users', icon: Users, href: '/panel/users' },
+  { key: 'announcements', icon: Megaphone, href: '/panel/announcements' },
+  { key: 'auditLogs', icon: ClipboardList, href: '/panel/audit-logs' },
+] as const;
 
 const settingsItems = [
-  {
-    title: 'Ayarlar',
-    icon: Settings,
-    href: '/panel/settings',
-  },
-];
+  { key: 'settings', icon: Settings, href: '/panel/settings' },
+] as const;
+
+function titleForKey(labels: ResolvedLabels, key: string) {
+  return key === 'dashboard'
+    ? labels.page.dashboard
+    : key === 'settings'
+      ? labels.page.settings
+      : key === 'users'
+        ? labels.page.users
+        : key === 'announcements'
+          ? labels.page.announcements
+          : key === 'auditLogs'
+            ? labels.page.auditLogs
+            : labelCompose.nav(
+                labels.entity[key as keyof typeof labels.entity],
+              );
+}
 
 export function SidebarNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const labels = useLabels();
   const { data: session, isPending } = authClient.useSession();
   const { setOpenMobile } = useSidebar();
   const isAdmin = session?.user?.role === 'admin';
@@ -157,17 +149,20 @@ export function SidebarNav() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems
-                .filter((item) => !item.adminOnly || isAdmin)
+                .filter(
+                  (item) =>
+                    !('adminOnly' in item) || !item.adminOnly || isAdmin,
+                )
                 .map((item) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
                       isActive={pathname === item.href}
-                      tooltip={item.title}
+                      tooltip={titleForKey(labels, item.key)}
                     >
                       <Link href={item.href}>
                         <item.icon />
-                        <span>{item.title}</span>
+                        <span>{titleForKey(labels, item.key)}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -188,11 +183,11 @@ export function SidebarNav() {
                     <SidebarMenuButton
                       asChild
                       isActive={pathname === item.href}
-                      tooltip={item.title}
+                      tooltip={titleForKey(labels, item.key)}
                     >
                       <Link href={item.href}>
                         <item.icon />
-                        <span>{item.title}</span>
+                        <span>{titleForKey(labels, item.key)}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -202,11 +197,11 @@ export function SidebarNav() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.href}
-                    tooltip={item.title}
+                    tooltip={titleForKey(labels, item.key)}
                   >
                     <Link href={item.href}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span>{titleForKey(labels, item.key)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

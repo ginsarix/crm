@@ -15,10 +15,12 @@ import {
 } from '~/components/ui/dialog';
 import { Label } from '~/components/ui/label';
 import { Separator } from '~/components/ui/separator';
+import { useLabels } from '~/hooks/use-labels';
 import {
-  auditAction,
-  resourceType as resourceTypeLabels,
-} from '~/lib/enum-map';
+  auditActionLabels,
+  labelCompose,
+  resourceTypeLabels,
+} from '~/shared/labels/compose';
 
 type AuditLogWithUser = AuditLog & {
   user: Pick<User, 'id' | 'name' | 'email' | 'image'> | null;
@@ -35,6 +37,9 @@ export function ViewAuditLogDialog({
   open,
   onOpenChange,
 }: ViewAuditLogDialogProps) {
+  const labels = useLabels();
+  const auditAction = auditActionLabels(labels);
+  const resourceType = resourceTypeLabels(labels);
   const initials = auditLog.user?.name
     .split(' ')
     .map((n) => n[0])
@@ -46,7 +51,7 @@ export function ViewAuditLogDialog({
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Denetim Kaydı Detayı</DialogTitle>
+          <DialogTitle>{labelCompose.view(labels.entity.auditLog)}</DialogTitle>
           <DialogDescription>
             {new Date(auditLog.createdAt).toLocaleString('tr-TR')}
           </DialogDescription>
@@ -113,8 +118,8 @@ export function ViewAuditLogDialog({
                 Kaynak Türü
               </Label>
               <p className="text-sm">
-                {resourceTypeLabels[
-                  auditLog.resourceType as keyof typeof resourceTypeLabels
+                {resourceType[
+                  auditLog.resourceType as keyof typeof resourceType
                 ] ?? auditLog.resourceType}
               </p>
             </div>

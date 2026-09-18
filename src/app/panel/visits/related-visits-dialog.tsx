@@ -10,6 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
+import { useLabels } from '~/hooks/use-labels';
+import { labelCompose } from '~/shared/labels/compose';
 import type { RouterOutputs } from '~/trpc/types';
 import { ViewVisitDialog } from './view-dialog';
 
@@ -27,6 +29,7 @@ export default function RelatedVisitsDialog({
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedVisit, setSelectedVisit] =
     useState<VisitWithCustomerCard | null>(null);
+  const labels = useLabels();
 
   const handleSelect = (visit: VisitWithCustomerCard) => {
     setSelectedVisit(visit);
@@ -37,12 +40,16 @@ export default function RelatedVisitsDialog({
     <>
       <Dialog onOpenChange={onOpenChange} open={open}>
         <DialogContent
-          aria-describedby="İlişkili ziyaretler"
+          aria-describedby={`İlişkili ${labelCompose.nav(labels.entity.visit)}`}
           className="max-h-[99vh] overflow-y-auto"
         >
           <DialogHeader>
-            <DialogTitle>İlişkili ziyaretler</DialogTitle>
-            <DialogDescription>Müşteriye ait ziyaretler</DialogDescription>
+            <DialogTitle>
+              İlişkili {labelCompose.nav(labels.entity.visit)}
+            </DialogTitle>
+            <DialogDescription>
+              Müşteriye ait {labelCompose.nav(labels.entity.visit)}
+            </DialogDescription>
           </DialogHeader>
           {visits.map((visit) => (
             <Button

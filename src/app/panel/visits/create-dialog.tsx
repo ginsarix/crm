@@ -29,7 +29,9 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { Textarea } from '~/components/ui/textarea';
+import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
+import { labelCompose } from '~/shared/labels/compose';
 import { VisitCreateSchema } from '~/shared/zod-schemas/visit';
 import { api } from '~/trpc/react';
 
@@ -42,6 +44,8 @@ const VIA_OPTIONS = [
 
 export function CreateVisitDialog() {
   const [open, setOpen] = useState(false);
+  const labels = useLabels();
+  const f = labels.field.visit;
   const utils = api.useUtils();
   const [customerCardSearch, setCustomerCardSearch] = useState('');
 
@@ -86,12 +90,12 @@ export function CreateVisitDialog() {
   const onSubmit = async (data: z.infer<typeof VisitCreateSchema>) => {
     try {
       await createMutation.mutateAsync(data);
-      toast.success('Ziyaret başarıyla eklendi');
+      toast.success(`${labels.entity.visit.singular} başarıyla eklendi`);
       reset();
       setOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error('Ziyaret eklenirken bir hata oluştu');
+      toast.error(`${labels.entity.visit.singular} eklenirken bir hata oluştu`);
     }
   };
 
@@ -103,18 +107,18 @@ export function CreateVisitDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent
-        aria-describedby="Ziyaret ekleme formu"
+        aria-describedby={`${labels.entity.visit.singular} ekleme formu`}
         className="max-h-[99vh] overflow-y-auto"
       >
         <DialogHeader>
-          <DialogTitle>Ziyaret Ekle</DialogTitle>
+          <DialogTitle>{labelCompose.create(labels.entity.visit)}</DialogTitle>
           <DialogDescription>Müşteri ziyaret kaydı oluşturun</DialogDescription>
         </DialogHeader>
 
         <form className="min-w-0 space-y-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Customer Card Selection */}
           <div className="space-y-2">
-            <Label htmlFor="customerCardId">Müşteri Kartı *</Label>
+            <Label htmlFor="customerCardId">{f.customerCardId} *</Label>
             <Controller
               control={control}
               name="customerCardId"
@@ -125,7 +129,7 @@ export function CreateVisitDialog() {
                     'w-full',
                   )}
                   id="customerCardId"
-                  label="Müşteri seçin"
+                  label={`${f.customerCardId} seçin`}
                   loading={isCustomerCardsLoading}
                   onChange={field.onChange}
                   onInputChange={(value) => {
@@ -151,7 +155,9 @@ export function CreateVisitDialog() {
 
           {/* Sales Representative */}
           <div className="space-y-2">
-            <Label htmlFor="salesRepresentativeId">Satış Temsilcisi</Label>
+            <Label htmlFor="salesRepresentativeId">
+              {f.salesRepresentativeId}
+            </Label>
             <Controller
               control={control}
               name="salesRepresentativeId"
@@ -159,7 +165,7 @@ export function CreateVisitDialog() {
                 <Combobox
                   className="w-full"
                   id="salesRepresentativeId"
-                  label="Satış temsilcisi seçin"
+                  label={`${f.salesRepresentativeId} seçin`}
                   onChange={field.onChange}
                   options={
                     salesRepresentatives?.map((sr) => ({
@@ -176,7 +182,7 @@ export function CreateVisitDialog() {
           {/* Date and Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Tarih *</Label>
+              <Label htmlFor="date">{f.date} *</Label>
               <Controller
                 control={control}
                 name="date"
@@ -197,7 +203,7 @@ export function CreateVisitDialog() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="time">Saat</Label>
+              <Label htmlFor="time">{f.time}</Label>
               <Controller
                 control={control}
                 name="time"
@@ -241,7 +247,7 @@ export function CreateVisitDialog() {
 
           {/* Via */}
           <div className="space-y-2">
-            <Label>İletişim Türü</Label>
+            <Label>{f.via}</Label>
             <Controller
               control={control}
               name="via"
@@ -251,7 +257,7 @@ export function CreateVisitDialog() {
                   value={field.value ?? undefined}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="İletişim türü seçin" />
+                    <SelectValue placeholder={`${f.via} seçin`} />
                   </SelectTrigger>
                   <SelectContent>
                     {VIA_OPTIONS.map((option) => (
@@ -267,11 +273,11 @@ export function CreateVisitDialog() {
 
           {/* Note */}
           <div className="space-y-2">
-            <Label htmlFor="note">Not</Label>
+            <Label htmlFor="note">{f.note}</Label>
             <Textarea
               {...register('note')}
               id="note"
-              placeholder="Ziyaret hakkında notlar..."
+              placeholder={`${labels.entity.visit.singular} hakkında notlar...`}
               rows={3}
             />
           </div>

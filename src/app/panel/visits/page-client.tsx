@@ -20,14 +20,16 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
+import { useLabels } from '~/hooks/use-labels';
 import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
+import { labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 import type { RouterOutputs } from '~/trpc/types';
 
 type VisitWithCustomerCard = RouterOutputs['visit']['get']['data'][number];
-type VisitSearchScope = 'all' | keyof typeof columnMap.visit;
+type VisitSearchScope = 'all' | (typeof columnMap.visit)[number];
 
 import { DataTable } from '../../_components/data-table';
 import { BulkActionsBar } from '../_components/bulk-actions-bar';
@@ -40,6 +42,7 @@ import { ViewVisitDialog } from './view-dialog';
 export function VisitsPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const labels = useLabels();
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -57,7 +60,7 @@ export function VisitsPageClient() {
   const [searchScope, setSearchScope] = useState<VisitSearchScope>('all');
   const [salesRepresentativeId, setSalesRepresentativeId] = useState('');
   const [emptyField, setEmptyField] = useState<
-    '' | keyof typeof columnMap.visit
+    '' | (typeof columnMap.visit)[number]
   >('');
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -106,7 +109,7 @@ export function VisitsPageClient() {
     onSuccess: (result) => {
       utils.visit.get.invalidate();
       utils.visit.getTotal.invalidate();
-      toast.success(`${result.count} ziyaret silindi`);
+      toast.success(`${result.count} ${labels.entity.visit.singular} silindi`);
       setRowSelection({});
       setDeleteConfirmOpen(false);
     },
@@ -145,7 +148,7 @@ export function VisitsPageClient() {
     if (visitById) {
       handleViewVisit(visitById);
     } else if (visitByIdFetched) {
-      toast.error('Ziyaret bulunamadı');
+      toast.error(`${labels.entity.visit.singular} bulunamadı`);
       updateParam('id', '');
     }
   }, [idParam, visitById, visitByIdFetched]);
@@ -181,7 +184,7 @@ export function VisitsPageClient() {
     }
   }, [isLoading, data, customerCardId, relatedVisits.length]);
 
-  const columns = createColumns(handleViewVisit);
+  const columns = createColumns(labels, handleViewVisit);
 
   const selectedIds = Object.keys(rowSelection);
 
@@ -222,7 +225,9 @@ export function VisitsPageClient() {
         </div>
         <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
           <CardHeader className="flex flex-row items-center">
-            <CardTitle className="mr-auto">Ziyaretler</CardTitle>
+            <CardTitle className="mr-auto">
+              {labelCompose.tableTitle(labels.entity.visit)}
+            </CardTitle>
             <div className="ml-auto">
               <CreateVisitDialog />
             </div>
@@ -296,9 +301,13 @@ export function VisitsPageClient() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Toplu Silme</DialogTitle>
+              {/* The accusative suffix sits on the fixed noun "kaydını"
+                  rather than on the entity name, so labels.entity.visit.singular
+                  can be substituted in bare nominative and stay grammatical
+                  under any rename. */}
               <DialogDescription>
-                {selectedIds.length} ziyareti silmek istediğinizden emin
-                misiniz? Bu işlem geri alınamaz.
+                {selectedIds.length} {labels.entity.visit.singular} kaydını
+                silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

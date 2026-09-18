@@ -5,9 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { colorHint } from '~/lib/color-hints';
-import { auditAction } from '~/lib/enum-map';
 import { createLocaleSorter } from '~/lib/utils';
 import { auth } from '~/server/better-auth';
+import { auditActionLabels, labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/server';
 import { BusinessGroupAlerts } from '../_components/business-group-alerts';
 import { BusinessGroupFilter } from '../_components/business-group-filter';
@@ -24,6 +24,9 @@ export default async function DashboardPage({
     searchParams,
   ]);
   const isAdmin = session?.user.role === 'admin';
+
+  const labels = await api.label.get();
+  const auditAction = auditActionLabels(labels);
 
   const allBusinessGroups = await api.businessGroup.get();
 
@@ -86,7 +89,7 @@ export default async function DashboardPage({
           {allBusinessGroups.length > 0 && (
             <div className="mb-4">
               <p className="mb-1.5 text-muted-foreground text-sm">
-                Meslek Grubu
+                {labels.entity.businessGroup.singular}
               </p>
               <BusinessGroupFilter
                 groups={allBusinessGroups}
@@ -95,7 +98,9 @@ export default async function DashboardPage({
             </div>
           )}
           <div className="mb-6">
-            <h2 className="font-bold text-3xl tracking-tight">Panel</h2>
+            <h2 className="font-bold text-3xl tracking-tight">
+              {labels.page.dashboard}
+            </h2>
             <p className="text-muted-foreground">CRM Panelinize hoş geldiniz</p>
           </div>
           <div
@@ -105,7 +110,7 @@ export default async function DashboardPage({
               <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
                 <CardHeader className="pt-4 pb-1">
                   <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
-                    Toplam Cari Kart
+                    Toplam {labels.entity.customerCard.singular}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-4">
@@ -137,7 +142,7 @@ export default async function DashboardPage({
               <Card className="group h-full cursor-pointer border-l-2 border-l-primary transition-colors hover:bg-accent">
                 <CardHeader className="pt-4 pb-1">
                   <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
-                    Toplam Ziyaret
+                    Toplam {labels.entity.visit.singular}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-4">
@@ -151,7 +156,8 @@ export default async function DashboardPage({
             <Card className="border-l-2 border-l-primary">
               <CardHeader className="pt-4 pb-1">
                 <CardTitle className="font-bold text-base text-muted-foreground uppercase tracking-widest">
-                  Ziyaret Sıralaması — Satış Temsilcileri
+                  {labels.entity.visit.singular} Sıralaması —{' '}
+                  {labelCompose.tableTitle(labels.entity.salesRepresentative)}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -316,7 +322,10 @@ export default async function DashboardPage({
               </Card>
             </Link>
           </div>
-          <BusinessGroupAlerts groups={businessGroupStats.groups} />
+          <BusinessGroupAlerts
+            groups={businessGroupStats.groups}
+            labels={labels}
+          />
           <Card className="mt-4 border-l-2 border-l-primary/40">
             <CardHeader className="pt-4 pb-2">
               <CardTitle className="font-medium text-[11px] text-muted-foreground uppercase tracking-widest">

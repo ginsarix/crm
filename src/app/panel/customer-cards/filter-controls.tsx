@@ -10,6 +10,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from '~/components/ui/input-group';
+import { useLabels } from '~/hooks/use-labels';
 import { columnMap } from '~/lib/column-map';
 import { createLocaleSorter } from '~/lib/utils';
 import {
@@ -18,6 +19,7 @@ import {
   STATUSES_SELECT_MAP,
   VOTES_SELECT_MAP,
 } from '~/shared/constants';
+import { fieldLabel } from '~/shared/labels/resolve';
 import { SavedFilters } from '../_components/saved-filters';
 import ColorControl from './color-control';
 
@@ -78,11 +80,12 @@ export function FilterControls({
   onApplyPreset: (filters: Record<string, string>) => void;
   onReset: () => void;
 }) {
+  const labels = useLabels();
   const searchScopeComboboxOptions = [
     { key: 'all', label: 'Tümü' },
-    ...Object.entries(columnMap.customerCard)
+    ...columnMap.customerCard
       .filter(
-        ([key]) =>
+        (key) =>
           key !== 'color' &&
           key !== 'status' &&
           key !== 'authorizationDocument' &&
@@ -94,9 +97,10 @@ export function FilterControls({
           key !== 'businessGroup' &&
           key !== 'salesRepresentative',
       )
-      .map(([key, label]) => {
-        return { key, label };
-      }),
+      .map((key) => ({
+        key,
+        label: fieldLabel(labels, 'customerCard', key),
+      })),
   ];
 
   const businessGroupComboboxOptions = [
@@ -144,15 +148,18 @@ export function FilterControls({
 
   const emptyFieldComboboxOptions = [
     { key: '', label: 'Kapalı' },
-    ...Object.entries(columnMap.customerCard)
+    ...columnMap.customerCard
       .filter(
-        ([key]) =>
+        (key) =>
           key !== 'id' &&
           key !== 'createdAt' &&
           key !== 'updatedAt' &&
           key !== 'color',
       )
-      .map(([key, label]) => ({ key, label })),
+      .map((key) => ({
+        key,
+        label: fieldLabel(labels, 'customerCard', key),
+      })),
   ];
 
   return (
@@ -190,31 +197,31 @@ export function FilterControls({
             setColor={onColor}
           />
           <Combobox
-            label="İlçe"
+            label={labels.field.customerCard.district}
             onChange={(v) => onDistrict(v as '' | $Enums.District)}
             options={districtComboboxOptions}
             selectedKey={district}
           />
           <Combobox
-            label="Meslek Grubu"
+            label={labels.entity.businessGroup.singular}
             onChange={(v) => onBusinessGroup(v as string)}
             options={businessGroupComboboxOptions}
             selectedKey={businessGroup}
           />
           <Combobox
-            label="Satış Temsilcisi"
+            label={labels.entity.salesRepresentative.singular}
             onChange={(v) => onSalesRepresentative(v as string)}
             options={salesRepresentativeComboboxOptions}
             selectedKey={salesRepresentative}
           />
           <Combobox
-            label="Durum"
+            label={labels.field.customerCard.status}
             onChange={(v) => onStatus(v as '' | $Enums.Status)}
             options={statusComboboxOptions}
             selectedKey={status}
           />
           <Combobox
-            label="Yetki Belge"
+            label={labels.field.customerCard.authorizationDocument}
             onChange={(v) =>
               onAuthorizationDocument(v as '' | $Enums.AuthorizationDocument)
             }
@@ -222,7 +229,7 @@ export function FilterControls({
             selectedKey={authorizationDocument}
           />
           <Combobox
-            label="Oy"
+            label={labels.field.customerCard.vote}
             onChange={(v) => onVote(v as '' | $Enums.Vote)}
             options={voteComboboxOptions}
             selectedKey={vote}

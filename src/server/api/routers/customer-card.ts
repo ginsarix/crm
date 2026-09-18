@@ -20,7 +20,7 @@ import {
 // Fields eligible for the "boş alan" (missing-value) filter — every
 // customerCard column except id/createdAt/updatedAt (technical fields) and
 // color (always has a value via its DB default, so "empty" is meaningless)
-const emptyFields = Object.keys(columnMap.customerCard).filter(
+const emptyFields = columnMap.customerCard.filter(
   (key) => !['id', 'createdAt', 'updatedAt', 'color'].includes(key),
 );
 
@@ -32,9 +32,7 @@ const filterSchema = z.object({
   color: z
     .enum(['green', 'blue', 'orange', 'yellow', 'gray', 'purple', 'all'])
     .default('all'),
-  searchScope: z
-    .enum(['all', ...Object.keys(columnMap.customerCard)])
-    .default('all'),
+  searchScope: z.enum(['all', ...columnMap.customerCard]).default('all'),
   businessGroup: z.string().optional(),
   salesRepresentative: z.string().optional(),
   district: z

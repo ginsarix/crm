@@ -1,6 +1,5 @@
 'use client';
 
-import type { User } from 'generated/prisma';
 import { SearchIcon } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Combobox } from '~/components/ui/combobox';
@@ -11,6 +10,18 @@ import {
 } from '~/components/ui/input-group';
 import { columnMap } from '~/lib/column-map';
 
+// `user` is a static entity with no field registry, so its labels stay
+// hardcoded here rather than routing through the label resolver.
+const userFieldLabels: Record<(typeof columnMap.user)[number], string> = {
+  id: 'ID',
+  name: 'Ad',
+  email: 'E-posta',
+  emailVerified: 'E-posta Doğrulandı',
+  image: 'Profil Resmi',
+  createdAt: 'Oluşturulma Tarihi',
+  updatedAt: 'Güncellenme Tarihi',
+};
+
 export function FilterControls({
   search,
   searchScope,
@@ -19,23 +30,21 @@ export function FilterControls({
 }: {
   search: string;
   onSearch: (search: string) => void;
-  searchScope: 'all' | keyof User;
-  onSearchScope: (searchScope: 'all' | keyof User) => void;
+  searchScope: 'all' | (typeof columnMap.user)[number];
+  onSearchScope: (searchScope: 'all' | (typeof columnMap.user)[number]) => void;
 }) {
   const comboboxOptions = [
     { key: 'all', label: 'Tümü' },
-    ...Object.entries(columnMap.user)
+    ...columnMap.user
       .filter(
-        ([key]) =>
+        (key) =>
           key !== 'emailVerified' &&
           key !== 'createdAt' &&
           key !== 'updatedAt' &&
           key !== 'id' &&
           key !== 'image',
       )
-      .map(([key, label]) => {
-        return { key, label };
-      }),
+      .map((key) => ({ key, label: userFieldLabels[key] })),
   ];
 
   return (
@@ -58,7 +67,9 @@ export function FilterControls({
         <Combobox
           className="sm:w-50"
           label="Arama Kapsamı"
-          onChange={(v) => onSearchScope(v as 'all' | keyof User)}
+          onChange={(v) =>
+            onSearchScope(v as 'all' | (typeof columnMap.user)[number])
+          }
           options={comboboxOptions}
           selectedKey={searchScope}
         />

@@ -7,7 +7,7 @@ export const VisitCreateSchema = z.object({
   time: z.date().optional(),
   via: z.enum(['phone', 'inPerson', 'email', 'sms']).optional(),
   note: z.string().optional(),
-  customerCardId: z.string().min(1, 'Müşteri kartı zorunludur'),
+  customerCardId: z.string().min(1, 'Cari kartı zorunludur'),
   salesRepresentativeId: z.string().optional(),
 });
 

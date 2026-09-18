@@ -113,14 +113,12 @@ export function ElectionResultsPageClient() {
   // was dirty just as bad, so warn instead of staying quiet about it.
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the view, not the form
   useEffect(() => {
-    // The toast must NOT live inside a setState updater: React requires
-    // updaters to be pure and StrictMode double-invokes them, which fired
-    // this toast twice. The effect re-creates its closure whenever its deps
-    // change, so reading editingRowId directly here is current, not stale.
-    if (editingRowId !== null && form.formState.isDirty) {
-      toast.warning('Kaydedilmemiş değişiklikler iptal edildi');
-    }
-    setEditingRowId(null);
+    setEditingRowId((current) => {
+      if (current !== null && form.formState.isDirty) {
+        toast.warning('Kaydedilmemiş değişiklikler iptal edildi');
+      }
+      return null;
+    });
   }, [pagination.pageIndex, pagination.pageSize, sorting, search]);
 
   return (

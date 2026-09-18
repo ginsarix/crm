@@ -1,15 +1,20 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import type { PaginationState, SortingState } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
 import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
 import { labelCompose } from '~/shared/labels/compose';
+import { ElectionResultUpdateSchema } from '~/shared/zod-schemas/election-result';
 import { api } from '~/trpc/react';
 
 import { DataTable } from '../../_components/data-table';
+import type { ElectionResultRow } from './columns';
 import { createColumns } from './columns';
 import { FilterControls } from './filter-controls';
 
@@ -29,7 +34,85 @@ export function ElectionResultsPageClient() {
     sorting,
   });
 
-  const columns = createColumns(labels);
+  const utils = api.useUtils();
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
+
+  const form = useForm({
+    resolver: zodResolver(ElectionResultUpdateSchema),
+    defaultValues: {
+      id: '',
+      toplamOy: 0,
+      kullanilanOy: 0,
+      gecerliOy: 0,
+      meclisUyeSayisi: 0,
+      yesil: 0,
+      mavi: 0,
+      turuncu: 0,
+    },
+  });
+
+  const updateMutation = api.electionResult.update.useMutation({
+    onSuccess: async () => {
+      setEditingRowId(null);
+      await utils.electionResult.get.invalidate();
+      toast.success(
+        `${labels.entity.electionResult.singular} başarıyla güncellendi`,
+      );
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error(
+        `${labels.entity.electionResult.singular} güncellenirken bir hata oluştu`,
+      );
+    },
+  });
+
+  const handleEdit = (row: ElectionResultRow) => {
+    // One row edits at a time. Rather than silently discarding a dirty row,
+    // make the user resolve it — there is no dialog in a table cell.
+    if (editingRowId && editingRowId !== row.id && form.formState.isDirty) {
+      toast.warning('Önce mevcut satırı kaydedin veya iptal edin');
+      return;
+    }
+    // Written out rather than built with Object.fromEntries, which widens to
+    // Record<string, number> and no longer satisfies the form's value type.
+    form.reset({
+      id: row.id,
+      toplamOy: row.toplamOy,
+      kullanilanOy: row.kullanilanOy,
+      gecerliOy: row.gecerliOy,
+      meclisUyeSayisi: row.meclisUyeSayisi,
+      yesil: row.yesil,
+      mavi: row.mavi,
+      turuncu: row.turuncu,
+    });
+    setEditingRowId(row.id);
+  };
+
+  const handleCancel = () => {
+    setEditingRowId(null);
+    form.reset();
+  };
+
+  const handleSave = form.handleSubmit((values) =>
+    updateMutation.mutate(values),
+  );
+
+  const columns = createColumns(labels, {
+    editingRowId,
+    form,
+    isSaving: updateMutation.isPending,
+    onEdit: handleEdit,
+    onCancel: handleCancel,
+    onSave: handleSave,
+  });
+
+  // Sorting/paginating can scroll the edited row off the page; close the
+  // editor rather than leave the form bound to an invisible row.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the view, not the form
+  useEffect(() => {
+    setEditingRowId(null);
+  }, [pagination.pageIndex, pagination.pageSize, sorting, search]);
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">

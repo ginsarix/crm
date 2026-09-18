@@ -10,5 +10,5 @@ export function useLabels(): ResolvedLabels {
     staleTime: 5 * 60 * 1000,
   });
 
-  return data;
+  return data ?? DEFAULT_LABELS;
 }

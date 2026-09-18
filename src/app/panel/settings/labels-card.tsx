@@ -16,7 +16,12 @@ import {
   sections,
 } from '~/shared/labels/registry';
 import { defaultLabelValues, labelValues } from '~/shared/labels/resolve';
-import type { EntityKey, FieldEntityKey, PageKey } from '~/shared/labels/types';
+import type {
+  EntityKey,
+  FieldDefinition,
+  FieldEntityKey,
+  PageKey,
+} from '~/shared/labels/types';
 import {
   entityLabelKey,
   fieldLabelKey,
@@ -161,7 +166,7 @@ export function LabelsCard() {
     return (
       <div key={entityKey}>
         <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-          {entities[entityKey].plural}
+          {labels.entity[entityKey].plural}
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
@@ -187,51 +192,84 @@ export function LabelsCard() {
     );
   };
 
-  const renderFieldRows = (entity: FieldEntityKey) =>
-    fields[entity].map((field, index) => {
-      const position = index + 1;
-      const rowId = `${entity}-${field.key}`;
-      const resolved = labels.field[entity] as Record<string, string>;
+  /**
+   * `inherited`/`composed` fields normally back a real form control (e.g.
+   * customerCard's `businessGroup` combobox), so they belong in the numbered
+   * "Alanlar" list like any other field. The one exception is
+   * businessGroupCard's `businessGroupName`: that card has no create form of
+   * its own (it's spawned alongside its businessGroup), so the field only
+   * ever shows up as a table column. `composed` fields (visit's
+   * `customerCardName`/`customerCardGsm`) are always derived display text,
+   * never a form control, so they're column-only too.
+   */
+  const isColumnOnlyField = (entity: FieldEntityKey, field: FieldDefinition) =>
+    field.kind === 'composed' ||
+    (field.kind === 'inherited' && entity === 'businessGroupCard');
 
-      if (field.kind === 'inherited') {
-        return (
-          <LabelFieldRow
-            badge={SOURCE_BADGE[field.from] ?? 'Devralınır'}
-            defaultValue={labels.entity[field.from].singular}
-            id={rowId}
-            key={field.key}
-            position={position}
-          />
-        );
-      }
+  const renderFieldRow = (
+    entity: FieldEntityKey,
+    field: FieldDefinition,
+    position: number,
+    unit?: string,
+  ) => {
+    const rowId = `${entity}-${field.key}`;
+    const resolved = labels.field[entity] as Record<string, string>;
 
-      if (field.kind === 'composed') {
-        return (
-          <LabelFieldRow
-            badge={SOURCE_BADGE[field.fromEntity] ?? 'Devralınır'}
-            defaultValue={resolved[field.key] ?? ''}
-            id={rowId}
-            key={field.key}
-            position={position}
-          />
-        );
-      }
-
-      const key = fieldLabelKey(entity, field.key);
-
+    if (field.kind === 'inherited') {
       return (
         <LabelFieldRow
-          badge={field.required ? 'Formda Zorunlu' : 'Formda Opsiyonel'}
-          defaultValue={field.default}
+          badge={SOURCE_BADGE[field.from] ?? 'Devralınır'}
+          defaultValue={labels.entity[field.from].singular}
           id={rowId}
           key={field.key}
-          onChange={(value) => set(key, value)}
-          onReset={() => resetKeys([key])}
           position={position}
-          value={draft[key]}
+          unit={unit}
         />
       );
-    });
+    }
+
+    if (field.kind === 'composed') {
+      return (
+        <LabelFieldRow
+          badge={SOURCE_BADGE[field.fromEntity] ?? 'Devralınır'}
+          defaultValue={resolved[field.key] ?? ''}
+          id={rowId}
+          key={field.key}
+          position={position}
+          unit={unit}
+        />
+      );
+    }
+
+    const key = fieldLabelKey(entity, field.key);
+
+    return (
+      <LabelFieldRow
+        badge={field.required ? 'Formda Zorunlu' : 'Formda Opsiyonel'}
+        defaultValue={field.default}
+        id={rowId}
+        key={field.key}
+        onChange={(value) => set(key, value)}
+        onReset={() => resetKeys([key])}
+        position={position}
+        value={draft[key]}
+      />
+    );
+  };
+
+  /** A faithful top-to-bottom mirror of the actual form — column-only
+   * entries are excluded here and rendered separately. */
+  const renderFieldRows = (entity: FieldEntityKey) =>
+    fields[entity]
+      .filter((field) => !isColumnOnlyField(entity, field))
+      .map((field, index) => renderFieldRow(entity, field, index + 1));
+
+  /** Column-only entries: visible and read-only, numbered within their own
+   * list rather than the form's. */
+  const renderColumnOnlyRows = (entity: FieldEntityKey) =>
+    fields[entity]
+      .filter((field) => isColumnOnlyField(entity, field))
+      .map((field, index) => renderFieldRow(entity, field, index + 1, 'Sütun'));
 
   const renderSectionRows = () =>
     sectionOrder.map((sectionKey, index) => {
@@ -295,6 +333,9 @@ export function LabelsCard() {
 
           {TABS.map((tab) => {
             const keys = keysForTab(tab);
+            const columnOnlyRows = tab.fieldEntity
+              ? renderColumnOnlyRows(tab.fieldEntity)
+              : [];
 
             return (
               <TabsContent className="space-y-4" key={tab.id} value={tab.id}>
@@ -325,6 +366,15 @@ export function LabelsCard() {
                       Alanlar
                     </p>
                     {renderFieldRows(tab.fieldEntity)}
+                  </div>
+                )}
+
+                {columnOnlyRows.length > 0 && (
+                  <div className="space-y-3 border-t pt-4">
+                    <p className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                      Sütunlar
+                    </p>
+                    {columnOnlyRows}
                   </div>
                 )}
 

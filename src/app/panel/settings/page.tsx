@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { auth } from '~/server/better-auth';
 import { api, HydrateClient } from '~/trpc/server';
 import BusinessGroupsTable from './business-groups-table';
+import { LabelsCard } from './labels-card';
 import SaleRepresentativesTable from './sale-representatives-table';
 
 export default async function SettingsPage() {
@@ -33,11 +34,14 @@ export default async function SettingsPage() {
         </div>
 
         <HydrateClient>
-          <div
-            className={isAdmin ? 'grid grid-cols-1 gap-4 lg:grid-cols-2' : ''}
-          >
-            <SaleRepresentativesTable />
-            {isAdmin && <BusinessGroupsTable />}
+          <div className="space-y-4">
+            <div
+              className={isAdmin ? 'grid grid-cols-1 gap-4 lg:grid-cols-2' : ''}
+            >
+              <SaleRepresentativesTable />
+              {isAdmin && <BusinessGroupsTable />}
+            </div>
+            {isAdmin && <LabelsCard />}
           </div>
         </HydrateClient>
       </div>

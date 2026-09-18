@@ -2,11 +2,18 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { PaginationState, SortingState } from '@tanstack/react-table';
+import { InfoIcon } from 'lucide-react';
 import { type ReactNode, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip';
 import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
 import { labelCompose } from '~/shared/labels/compose';
@@ -115,7 +122,23 @@ export function ElectionResultsPageClient() {
   // the rows on this page.
   const totals = data?.totals;
   const footerValues: Record<string, ReactNode> | undefined = totals && {
-    businessGroupName: 'Toplam',
+    businessGroupName: (
+      <span className="flex items-center gap-1.5">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <InfoIcon className="size-3.5 shrink-0 cursor-help text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[260px]">
+              <p className="text-xs">
+                Toplamlar uygulanan filtrelere göre hesaplanır.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        Toplam
+      </span>
+    ),
     ...Object.fromEntries(
       electionResultCountKeys.map((key) => [
         key,

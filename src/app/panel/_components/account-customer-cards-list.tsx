@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Skeleton } from '~/components/ui/skeleton';
+import { useLabels } from '~/hooks/use-labels';
+import { labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 
 const SKELETON_ROWS = ['a', 'b', 'c', 'd', 'e'];
@@ -18,6 +20,7 @@ export function AccountCustomerCardsList({
   onBack,
   onNavigate,
 }: AccountCustomerCardsListProps) {
+  const labels = useLabels();
   const [page, setPage] = useState(1);
   const { data, isLoading } = api.user.getMyCustomerCards.useQuery({ page });
 
@@ -32,7 +35,9 @@ export function AccountCustomerCardsList({
         >
           <ArrowLeft className="size-4" />
         </Button>
-        <h3 className="font-semibold text-sm">Oluşturduğum Cari Kartlar</h3>
+        <h3 className="font-semibold text-sm">
+          Oluşturduğum {labelCompose.tableTitle(labels.entity.customerCard)}
+        </h3>
       </div>
 
       <div className="divide-y rounded-lg border">

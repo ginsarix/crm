@@ -186,14 +186,18 @@ export function CommandPalette() {
             ))}
           </CommandGroup>
           {searchActive && cardsFetching && (
-            <CommandGroup heading="Cari Kartlar">
+            <CommandGroup
+              heading={labelCompose.nav(labels.entity.customerCard)}
+            >
               <CommandItem disabled value={query}>
                 Aranıyor...
               </CommandItem>
             </CommandGroup>
           )}
           {searchActive && !cardsFetching && !!cardResults?.data.length && (
-            <CommandGroup heading="Cari Kartlar">
+            <CommandGroup
+              heading={labelCompose.nav(labels.entity.customerCard)}
+            >
               {cardResults.data.map((card) => (
                 <CommandItem
                   className={cn(card.isRestricted && 'opacity-60')}

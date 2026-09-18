@@ -89,7 +89,7 @@ export default async function DashboardPage({
           {allBusinessGroups.length > 0 && (
             <div className="mb-4">
               <p className="mb-1.5 text-muted-foreground text-sm">
-                Meslek Grubu
+                {labels.entity.businessGroup.singular}
               </p>
               <BusinessGroupFilter
                 groups={allBusinessGroups}

@@ -38,13 +38,13 @@ model ElectionResult {
   businessGroupId String        @unique
   businessGroup   BusinessGroup @relation(fields: [businessGroupId], references: [id], onDelete: Cascade)
 
-  toplamOy        Int?
-  kullanilanOy    Int?
-  gecerliOy       Int?
-  meclisUyeSayisi Int?
-  yesil           Int?
-  mavi            Int?
-  turuncu         Int?
+  toplamOy        Int @default(0)
+  kullanilanOy    Int @default(0)
+  gecerliOy       Int @default(0)
+  meclisUyeSayisi Int @default(0)
+  yesil           Int @default(0)
+  mavi            Int @default(0)
+  turuncu         Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -63,11 +63,16 @@ other's number.
 Apply with `pnpm db:push` (this repo has no migration history), then restart the
 dev server so the regenerated client in `generated/prisma` is picked up.
 
-### Nullability
+### Blank means zero
 
-Every column is nullable in the DB and **every field is optional on save** —
-a partially filled row is valid and persists. A freshly backfilled row is
-entirely blank.
+**Every field is optional on save, and a blank field means `0`** (product
+decision, confirmed 2026-09-18). The columns are therefore non-null with a
+`0` default rather than nullable: there is no "not yet entered" state to
+distinguish from a genuine zero, so nothing in the model, router, color
+function or cell renderers needs to handle `null`.
+
+A freshly backfilled row reads `0` across all seven columns and renders
+uncolored.
 
 ## Validation
 
@@ -75,7 +80,8 @@ entirely blank.
 React Hook Form resolver per project convention.
 
 - Each of the seven numeric fields: optional, integer, `>= 0`, no upper bound.
-- Empty input coerces to `null`, not `0`.
+- Empty input coerces to `0`. The schema's output type is therefore
+  `number`, never `number | undefined`, so the router writes plain integers.
 - No cross-field constraints. `Kullanılan Oy > Toplam Oy` and
   `Yeşil + Mavi + Turuncu > Geçerli Oy` are both accepted without warning.
 
@@ -89,14 +95,13 @@ needed and the Excel export inherits the coloring for free.
 A pure function, `resolveElectionRowColor(yesil, mavi, turuncu)`, in
 `src/lib/election-result-color.ts`:
 
-1. Coerce `null` to `0`. **Temporary** — the product rule for blank faction
-   counts is not yet decided. Blanks are stored as `null` so that when the real
-   rule arrives only this coercion changes and no data has been overwritten
-   with a fabricated zero.
-2. If all three are `0`, return `null` (row renders with default striping).
-3. If exactly one value is the maximum, return `green` / `blue` / `orange`
+1. If all three are `0`, return `null` (row renders with default striping).
+2. If exactly one value is the maximum, return `green` / `blue` / `orange`
    for `yesil` / `mavi` / `turuncu` respectively.
-4. Otherwise (two- or three-way tie for the maximum), return `purple`.
+3. Otherwise (two- or three-way tie for the maximum), return `purple`.
+
+All three arguments are plain `number`s — blanks became `0` at the schema
+boundary, so there is no null case here.
 
 Note on purple: `src/lib/color-hints.ts` gives every color a
 deployment-configured business meaning shown on the dashboard and the
@@ -111,6 +116,11 @@ accepted overload.
 `src/server/api/root.ts`. Both procedures are `protectedProcedure` — every
 logged-in user may read and write every row. There is no `isRestricted`
 scoping and no admin gate.
+
+Business-group assignment deliberately does **not** apply here (product
+decision, confirmed 2026-09-18): a user with no assignment to a group still
+sees that group's row and can still edit it. This is the one table in the app
+where the role-scoping pattern is intentionally absent.
 
 ### `get`
 
@@ -230,9 +240,8 @@ Modified:
 ## Testing
 
 - Unit tests for `resolveElectionRowColor`: each single maximum, two-way ties
-  in all three pairings, a three-way tie, all zero, all null, and mixed
-  null/zero.
-- Unit tests for the Zod schema: blank coerces to null, negatives rejected,
+  in all three pairings, a three-way tie, and all zero.
+- Unit tests for the Zod schema: blank coerces to `0`, negatives rejected,
   non-integers rejected, large values accepted, all-blank accepted.
 - The label registry invariant tests cover the label wiring.
 - Manual check: `pnpm typecheck`, `pnpm check`, and the page rendering with
@@ -242,5 +251,4 @@ Modified:
 
 - Any cross-field validation or totals reconciliation.
 - Aggregate/summary rows, dashboard tiles, or charts for election data.
-- Per-user edit scoping.
-- Deciding the permanent semantics of a blank faction count.
+- Per-user or per-business-group edit scoping.

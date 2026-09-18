@@ -22,44 +22,72 @@ import {
   CommandItem,
   CommandList,
 } from '~/components/ui/command';
+import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
+import { labelCompose } from '~/shared/labels/compose';
+import type { ResolvedLabels } from '~/shared/labels/types';
 import { api } from '~/trpc/react';
 
 const pages = [
-  { title: 'Panel', icon: Home, href: '/panel/dashboard' },
-  { title: 'Cari Kartları', icon: BookUser, href: '/panel/customer-cards' },
-  { title: 'Ziyaretler', icon: Calendar, href: '/panel/visits' },
+  { key: 'dashboard', icon: Home, href: '/panel/dashboard' },
+  { key: 'customerCard', icon: BookUser, href: '/panel/customer-cards' },
+  { key: 'visit', icon: Calendar, href: '/panel/visits' },
   {
-    title: 'Meslek Grubu Kartları',
+    key: 'businessGroupCard',
     icon: Building2,
     href: '/panel/business-group-cards',
     adminOnly: true,
   },
   {
-    title: 'Kullanıcılar',
+    key: 'users',
     icon: Users,
     href: '/panel/users',
     adminOnly: true,
   },
   {
-    title: 'Duyurular',
+    key: 'announcements',
     icon: Megaphone,
     href: '/panel/announcements',
     adminOnly: true,
   },
   {
-    title: 'Denetim Kayıtları',
+    key: 'auditLogs',
     icon: ClipboardList,
     href: '/panel/audit-logs',
     adminOnly: true,
   },
-  { title: 'Ayarlar', icon: Settings, href: '/panel/settings' },
-  { title: 'Yenilikler', icon: Sparkles, href: '/panel/changelog' },
-];
+  { key: 'settings', icon: Settings, href: '/panel/settings' },
+  // "Yenilikler" is call-to-action copy for this link, not the changelog
+  // page's own title ("Sürüm Notları") — stays literal, same as the
+  // sidebar footer link.
+  {
+    key: 'changelog',
+    icon: Sparkles,
+    href: '/panel/changelog',
+    title: 'Yenilikler',
+  },
+] as const;
+
+function titleForKey(labels: ResolvedLabels, key: string) {
+  return key === 'dashboard'
+    ? labels.page.dashboard
+    : key === 'settings'
+      ? labels.page.settings
+      : key === 'users'
+        ? labels.page.users
+        : key === 'announcements'
+          ? labels.page.announcements
+          : key === 'auditLogs'
+            ? labels.page.auditLogs
+            : labelCompose.nav(
+                labels.entity[key as keyof typeof labels.entity],
+              );
+}
 
 export function CommandPalette() {
   const router = useRouter();
+  const labels = useLabels();
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === 'admin';
 
@@ -112,7 +140,12 @@ export function CommandPalette() {
     action();
   };
 
-  const visiblePages = pages.filter((p) => !p.adminOnly || isAdmin);
+  const visiblePages = pages
+    .filter((p) => !('adminOnly' in p) || !p.adminOnly || isAdmin)
+    .map((p) => ({
+      ...p,
+      title: 'title' in p ? p.title : titleForKey(labels, p.key),
+    }));
 
   return (
     <>

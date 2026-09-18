@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { labelCompose } from '~/shared/labels/compose';
+import type { ResolvedLabels } from '~/shared/labels/types';
 
 interface GroupStat {
   name: string;
@@ -20,6 +22,7 @@ interface GroupStat {
 
 interface Props {
   groups: GroupStat[];
+  labels: ResolvedLabels;
 }
 
 function GroupRow({ g }: { g: GroupStat }) {
@@ -94,14 +97,14 @@ function GroupRow({ g }: { g: GroupStat }) {
   );
 }
 
-export function BusinessGroupAlerts({ groups }: Props) {
+export function BusinessGroupAlerts({ groups, labels }: Props) {
   if (groups.length === 0) return null;
 
   return (
     <Card className="mt-4 border-l-2 border-l-primary/40">
       <CardHeader className="pt-4 pb-2">
         <CardTitle className="font-mono text-base text-muted-foreground uppercase tracking-[0.15em]">
-          Renk Dağılımı — Meslek Grupları
+          Renk Dağılımı — {labelCompose.tableTitle(labels.entity.businessGroup)}
         </CardTitle>
       </CardHeader>
       <CardContent className="pb-3">

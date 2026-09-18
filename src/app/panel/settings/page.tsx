@@ -7,6 +7,7 @@ import SaleRepresentativesTable from './sale-representatives-table';
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const isAdmin = session?.user?.role === 'admin';
+  const labels = await api.label.get();
 
   const prefetches = [
     api.salesRepresentative.getPaginated.prefetch({
@@ -23,7 +24,9 @@ export default async function SettingsPage() {
     <div className="w-full p-4 sm:p-6 lg:p-8">
       <div className="mx-auto w-full max-w-[1600px]">
         <div className="mb-6">
-          <h2 className="font-bold text-3xl tracking-tight">Ayarlar</h2>
+          <h2 className="font-bold text-3xl tracking-tight">
+            {labels.page.settings}
+          </h2>
           <p className="text-muted-foreground">
             Genel ayarlar, tanımlar ve tercihler
           </p>

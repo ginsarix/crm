@@ -29,6 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
+import { useLabels } from '~/hooks/use-labels';
+import { labelCompose } from '~/shared/labels/compose';
 import { UserUpdateSchema } from '~/shared/zod-schemas/user';
 import { api } from '~/trpc/react';
 
@@ -45,6 +47,7 @@ export function ViewUserDialog({
   onOpenChange,
   onUpdate,
 }: ViewUserDialogProps) {
+  const labels = useLabels();
   const [isEditMode, setIsEditMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
@@ -404,7 +407,12 @@ export function ViewUserDialog({
             {/* Business Group Assignment */}
             {allGroups && allGroups.length > 0 && (
               <div className="space-y-2 border-t pt-4">
-                <Label className="font-medium">Meslek Grupları</Label>
+                <Label className="font-medium">
+                  {labelCompose.tableTitle(labels.entity.businessGroup)}
+                </Label>
+                {/* Kept literal: "gruplarını" carries the accusative -nı
+                    suffix, which can't be regenerated safely for an
+                    arbitrarily renamed plural (see the Button below). */}
                 <p className="text-muted-foreground text-xs">
                   Bu kullanıcının görebileceği meslek gruplarını seçin
                 </p>
@@ -434,7 +442,15 @@ export function ViewUserDialog({
                 >
                   {assignMutation.isPending
                     ? 'Kaydediliyor...'
-                    : 'Meslek Gruplarını Kaydet'}
+                    : // Kept literal: "Gruplarını" appends the accusative
+                      // -nı suffix onto the plural. That only stays correct
+                      // because the default plural happens to end in a
+                      // vowel ("ı"); a renamed plural ending in a consonant
+                      // (e.g. "Departmanlar") would need "ı" with no "n"
+                      // buffer instead, so the suffix can't be generated
+                      // safely for an arbitrary noun. Left as a fixed
+                      // string rather than risk a garbled label.
+                      'Meslek Gruplarını Kaydet'}
                 </Button>
               </div>
             )}

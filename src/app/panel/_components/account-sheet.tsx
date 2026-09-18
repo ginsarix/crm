@@ -13,6 +13,8 @@ import {
   SheetTitle,
 } from '~/components/ui/sheet';
 import { Skeleton } from '~/components/ui/skeleton';
+import { useLabels } from '~/hooks/use-labels';
+import { labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 import { AccountBusinessGroupsList } from './account-business-groups-list';
 import { AccountCustomerCardsList } from './account-customer-cards-list';
@@ -29,6 +31,7 @@ interface AccountSheetProps {
 }
 
 export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
+  const labels = useLabels();
   const [view, setView] = useState<View>('overview');
   const { data: account, isLoading } = api.user.getMyAccount.useQuery(
     undefined,
@@ -102,7 +105,7 @@ export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">
-                      Oluşturduğu Cari Kartlar
+                      Oluşturduğu {labelCompose.nav(labels.entity.customerCard)}
                     </p>
                     <Button
                       asChild
@@ -123,7 +126,7 @@ export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">
-                      Oluşturduğu Ziyaretler
+                      Oluşturduğu {labelCompose.nav(labels.entity.visit)}
                     </p>
                     <Button
                       asChild
@@ -144,7 +147,8 @@ export function AccountSheet({ open, onOpenChange }: AccountSheetProps) {
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">
-                      Atanmış Meslek Grupları
+                      Atanmış{' '}
+                      {labelCompose.tableTitle(labels.entity.businessGroup)}
                     </p>
                     <Button
                       asChild

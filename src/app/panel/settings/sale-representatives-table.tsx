@@ -25,13 +25,16 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from '~/components/ui/input-group';
+import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
+import { labelCompose } from '~/shared/labels/compose';
 import { api } from '~/trpc/react';
 import { CreateSaleRepresentativeDialog } from './create-sale-representative-dialog';
 import { createColumns } from './sale-representatives-columns';
 import { ViewSaleRepresentativeDialog } from './view-sale-representative-dialog';
 
 export default function SaleRepresentativesTable() {
+  const labels = useLabels();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -108,7 +111,9 @@ export default function SaleRepresentativesTable() {
     <div>
       <Card className={cn(!isLoading && 'rounded-b-none border-b-0')}>
         <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <CardTitle className="sm:mr-auto">Satış Temsilcileri</CardTitle>
+          <CardTitle className="sm:mr-auto">
+            {labelCompose.tableTitle(labels.entity.salesRepresentative)}
+          </CardTitle>
           <InputGroup className="sm:w-64">
             <InputGroupInput
               onChange={(e) => setSearch(e.target.value)}

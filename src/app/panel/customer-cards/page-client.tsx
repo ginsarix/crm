@@ -463,9 +463,14 @@ export function CustomerCardsPageClient() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Toplu Silme</DialogTitle>
+              {/* The accusative suffix sits on the fixed noun "kaydını"
+                  rather than on the entity name, so labels.entity.customerCard.singular
+                  can be substituted in bare nominative and stay grammatical
+                  under any rename. */}
               <DialogDescription>
                 {selectedIds.length} {labels.entity.customerCard.singular}{' '}
-                silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                kaydını silmek istediğinizden emin misiniz? Bu işlem geri
+                alınamaz.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

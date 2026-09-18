@@ -207,9 +207,13 @@ export function ViewCustomerCardDialog({
 
         {showDeleteConfirm ? (
           <div className="space-y-4 py-4">
+            {/* The accusative suffix sits on the fixed noun "kaydını"
+                rather than on the entity name, so labels.entity.customerCard.singular
+                can be substituted in bare nominative and stay grammatical
+                under any rename. */}
             <p className="text-center font-medium text-lg">
-              Bu {labels.entity.customerCard.singular} silmek istediğinizden
-              emin misiniz?
+              Bu {labels.entity.customerCard.singular} kaydını silmek
+              istediğinizden emin misiniz?
             </p>
             <p className="text-center text-muted-foreground text-sm">
               Bu işlem geri alınamaz ve tüm ilgili veriler silinecektir.

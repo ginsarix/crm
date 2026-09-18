@@ -304,9 +304,7 @@ export function VisitsPageClient() {
               {/* The accusative suffix sits on the fixed noun "kaydını"
                   rather than on the entity name, so labels.entity.visit.singular
                   can be substituted in bare nominative and stay grammatical
-                  under any rename. (Not applied to the customerCard
-                  equivalent: "Cari Kartı" already ends in the possessive, so
-                  "Cari Kartı kaydını" would be redundant.) */}
+                  under any rename. */}
               <DialogDescription>
                 {selectedIds.length} {labels.entity.visit.singular} kaydını
                 silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.

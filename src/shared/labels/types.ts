@@ -6,9 +6,14 @@ export type EntityKey =
   | 'salesRepresentative'
   | 'user'
   | 'announcement'
-  | 'auditLog';
+  | 'auditLog'
+  | 'electionResult';
 
-export type FieldEntityKey = 'customerCard' | 'visit' | 'businessGroupCard';
+export type FieldEntityKey =
+  | 'customerCard'
+  | 'visit'
+  | 'businessGroupCard'
+  | 'electionResult';
 
 export type PageKey =
   | 'dashboard'
@@ -34,7 +39,12 @@ export type EntityDefinition = {
 export type FieldDefinition<K extends string = string> =
   | { kind: 'editable'; key: K; default: string; required: boolean }
   | { kind: 'inherited'; key: K; from: EntityKey }
-  | { kind: 'composed'; key: K; fromEntity: EntityKey; fromField: string };
+  | { kind: 'composed'; key: K; fromEntity: EntityKey; fromField: string }
+  /**
+   * In the registry so headers resolve through one place, but never
+   * admin-renameable — the same treatment enum display values get.
+   */
+  | { kind: 'static'; key: K; default: string };
 
 export type EntityLabels = { singular: string; plural: string };
 
@@ -99,16 +109,28 @@ export type BusinessGroupCardFieldKey =
   | 'yedekUye7'
   | 'businessGroupName';
 
+export type ElectionResultFieldKey =
+  | 'businessGroupName'
+  | 'toplamOy'
+  | 'kullanilanOy'
+  | 'gecerliOy'
+  | 'meclisUyeSayisi'
+  | 'yesil'
+  | 'mavi'
+  | 'turuncu';
+
 export type FieldLabels = {
   customerCard: Record<CustomerCardFieldKey, string>;
   visit: Record<VisitFieldKey, string>;
   businessGroupCard: Record<BusinessGroupCardFieldKey, string>;
+  electionResult: Record<ElectionResultFieldKey, string>;
 };
 
 export type FieldRegistry = {
   customerCard: FieldDefinition<CustomerCardFieldKey>[];
   visit: FieldDefinition<VisitFieldKey>[];
   businessGroupCard: FieldDefinition<BusinessGroupCardFieldKey>[];
+  electionResult: FieldDefinition<ElectionResultFieldKey>[];
 };
 
 export type ResolvedLabels = {

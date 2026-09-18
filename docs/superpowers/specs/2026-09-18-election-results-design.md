@@ -150,8 +150,9 @@ instance that `reset()`s to the edited row's values when edit mode opens. Cells
 render `Controller`-bound number inputs, so validation comes from the shared Zod
 schema.
 
-- A trailing actions column holds a pencil button instead of the usual 3-dot
-  menu. Clicking it puts that row — and only that row — into edit mode.
+- A leading actions column (first column, matching every other table in this
+  app) holds a pencil button instead of the usual 3-dot menu. Clicking it
+  puts that row — and only that row — into edit mode.
 - While editing, the seven numeric cells become inputs and the pencil is
   replaced by a save / cancel pair. Komite stays read-only text.
 - Escape cancels. Only one row is editable at a time; starting a second edit

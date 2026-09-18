@@ -4,7 +4,7 @@ import { entities, fields, pages, sectionOrder, sections } from './registry';
 import type { FieldEntityKey } from './types';
 
 describe('entity registry', () => {
-  it('marks exactly the five renameable entities as editable', () => {
+  it('marks exactly the six renameable entities as editable', () => {
     const editable = Object.entries(entities)
       .filter(([, e]) => e.editable)
       .map(([k]) => k)
@@ -14,9 +14,16 @@ describe('entity registry', () => {
       'businessGroup',
       'businessGroupCard',
       'customerCard',
+      'electionResult',
       'salesRepresentative',
       'visit',
     ]);
+  });
+
+  it('gives electionResult its own editable pair', () => {
+    expect(entities.electionResult.editable).toBe(true);
+    expect(entities.electionResult.singular).toBe('Seçim Sonucu');
+    expect(entities.electionResult.plural).toBe('Seçim Sonuçları');
   });
 
   it('gives every entity a non-empty tekil and çoğul', () => {
@@ -79,6 +86,7 @@ describe('field registry', () => {
       'customerCard',
       'visit',
       'businessGroupCard',
+      'electionResult',
     ];
 
     for (const entity of entityKeys) {
@@ -92,6 +100,26 @@ describe('field registry', () => {
         ).toBe(true);
       }
     }
+  });
+
+  it('keeps the three election colors static rather than editable', () => {
+    const staticKeys = fields.electionResult
+      .filter((f) => f.kind === 'static')
+      .map((f) => f.key)
+      .sort();
+
+    expect(staticKeys).toEqual(['mavi', 'turuncu', 'yesil']);
+  });
+
+  it('names the election result business group column Komite independently', () => {
+    const komite = fields.electionResult.find(
+      (f) => f.key === 'businessGroupName',
+    );
+
+    // Deliberately `editable`, not `inherited` — renaming the Meslek Grubu
+    // entity must not rename this column.
+    expect(komite?.kind).toBe('editable');
+    expect(komite).toMatchObject({ default: 'Komite' });
   });
 });
 

@@ -62,6 +62,14 @@ describe('resolveLabels', () => {
     const labels = resolveLabels({ 'entity.user.singular': 'Hesap' });
     expect(labels.entity.user.singular).toBe('Kullanıcı');
   });
+
+  it('resolves static field labels and refuses to override them', () => {
+    const labels = resolveLabels({ 'field.electionResult.yesil': 'Kırmızı' });
+
+    expect(labels.field.electionResult.yesil).toBe('Yeşil');
+    expect(editableLabelKeys.has('field.electionResult.yesil')).toBe(false);
+    expect(editableLabelKeys.has('field.electionResult.toplamOy')).toBe(true);
+  });
 });
 
 describe('editableLabelKeys', () => {

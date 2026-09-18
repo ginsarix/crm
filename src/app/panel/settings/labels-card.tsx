@@ -49,6 +49,14 @@ type TabDefinition = {
   fieldEntity?: FieldEntityKey;
   showSections?: boolean;
   pageKeys?: PageKey[];
+  /**
+   * The entity has no create/edit form of its own — every one of its labels
+   * is a table column. Renders the whole tab as a single "Sütunlar" list
+   * instead of splitting an "Alanlar" form section from a column-only one.
+   * Editable fields stay editable; only their section/badge placement
+   * changes.
+   */
+  allColumns?: true;
 };
 
 const TABS: TabDefinition[] = [
@@ -70,6 +78,13 @@ const TABS: TabDefinition[] = [
     entityKeys: ['businessGroupCard'],
     fieldEntity: 'businessGroupCard',
     showSections: true,
+  },
+  {
+    id: 'electionResult',
+    titleEntity: 'electionResult',
+    entityKeys: ['electionResult'],
+    fieldEntity: 'electionResult',
+    allColumns: true,
   },
   {
     id: 'genel',
@@ -201,9 +216,19 @@ export function LabelsCard() {
    * ever shows up as a table column. `composed` fields (visit's
    * `customerCardName`/`customerCardGsm`) are always derived display text,
    * never a form control, so they're column-only too.
+   *
+   * A tab flagged `allColumns` (electionResult) has no form at all — every
+   * field on it is column-only, including the `editable` ones, which stay
+   * editable but move to the "Sütunlar" list instead of "Alanlar".
    */
-  const isColumnOnlyField = (entity: FieldEntityKey, field: FieldDefinition) =>
+  const isColumnOnlyField = (
+    entity: FieldEntityKey,
+    field: FieldDefinition,
+    allColumns?: boolean,
+  ) =>
+    allColumns === true ||
     field.kind === 'composed' ||
+    field.kind === 'static' ||
     (field.kind === 'inherited' && entity === 'businessGroupCard');
 
   const renderFieldRow = (
@@ -211,6 +236,7 @@ export function LabelsCard() {
     field: FieldDefinition,
     position: number,
     unit?: string,
+    columnOnly?: boolean,
   ) => {
     const rowId = `${entity}-${field.key}`;
     const resolved = labels.field[entity] as Record<string, string>;
@@ -241,11 +267,30 @@ export function LabelsCard() {
       );
     }
 
+    if (field.kind === 'static') {
+      return (
+        <LabelFieldRow
+          badge="Sabit"
+          defaultValue={field.default}
+          id={rowId}
+          key={field.key}
+          position={position}
+          unit={unit}
+        />
+      );
+    }
+
     const key = fieldLabelKey(entity, field.key);
 
     return (
       <LabelFieldRow
-        badge={field.required ? 'Formda Zorunlu' : 'Formda Opsiyonel'}
+        badge={
+          columnOnly
+            ? 'Düzenlenebilir'
+            : field.required
+              ? 'Formda Zorunlu'
+              : 'Formda Opsiyonel'
+        }
         defaultValue={field.default}
         id={rowId}
         key={field.key}
@@ -258,18 +303,25 @@ export function LabelsCard() {
   };
 
   /** A faithful top-to-bottom mirror of the actual form — column-only
-   * entries are excluded here and rendered separately. */
+   * entries are excluded here and rendered separately. Tabs with no form
+   * (`allColumns`) render nothing here; everything moves to
+   * `renderColumnOnlyRows`. */
   const renderFieldRows = (entity: FieldEntityKey) =>
     fields[entity]
       .filter((field) => !isColumnOnlyField(entity, field))
       .map((field, index) => renderFieldRow(entity, field, index + 1));
 
-  /** Column-only entries: visible and read-only, numbered within their own
-   * list rather than the form's. */
-  const renderColumnOnlyRows = (entity: FieldEntityKey) =>
+  /** Column-only entries: numbered within their own list rather than the
+   * form's. Read-only for inherited/composed/static kinds; `editable`
+   * kinds (only possible when `allColumns` is set) keep their input,
+   * onChange and reset — only the badge changes to reflect there's no
+   * form. */
+  const renderColumnOnlyRows = (entity: FieldEntityKey, allColumns?: boolean) =>
     fields[entity]
-      .filter((field) => isColumnOnlyField(entity, field))
-      .map((field, index) => renderFieldRow(entity, field, index + 1, 'Sütun'));
+      .filter((field) => isColumnOnlyField(entity, field, allColumns))
+      .map((field, index) =>
+        renderFieldRow(entity, field, index + 1, 'Sütun', true),
+      );
 
   const renderSectionRows = () =>
     sectionOrder.map((sectionKey, index) => {
@@ -334,7 +386,7 @@ export function LabelsCard() {
           {TABS.map((tab) => {
             const keys = keysForTab(tab);
             const columnOnlyRows = tab.fieldEntity
-              ? renderColumnOnlyRows(tab.fieldEntity)
+              ? renderColumnOnlyRows(tab.fieldEntity, tab.allColumns)
               : [];
 
             return (
@@ -360,7 +412,7 @@ export function LabelsCard() {
                   </Button>
                 </div>
 
-                {tab.fieldEntity && (
+                {tab.fieldEntity && !tab.allColumns && (
                   <div className="space-y-3 border-t pt-4">
                     <p className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                       Alanlar

@@ -24,6 +24,7 @@ const FIELD_ENTITY_KEYS: FieldEntityKey[] = [
   'customerCard',
   'visit',
   'businessGroupCard',
+  'electionResult',
 ];
 
 /** An override only counts if it has non-whitespace content. */
@@ -115,6 +116,11 @@ export function resolveLabels(
           override(fieldLabelKey(entityKey, definition.key)),
           definition.default,
         );
+      }
+      // Static labels resolve to their default and ignore any stored
+      // override — they are never in editableLabelKeys to begin with.
+      if (definition.kind === 'static') {
+        resolved[definition.key] = definition.default;
       }
     }
     field[entityKey] = resolved;

@@ -13,6 +13,7 @@ import {
   Sparkles,
   UserCog,
   Users,
+  Vote,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -56,6 +57,11 @@ const navigationItems = [
     icon: Building2,
     href: '/panel/business-group-cards',
     adminOnly: true,
+  },
+  {
+    key: 'electionResult',
+    icon: Vote,
+    href: '/panel/election-results',
   },
 ] as const;
 

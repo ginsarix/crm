@@ -45,6 +45,8 @@ export function auditActionLabels(labels: ResolvedLabels) {
 
     BUSINESS_GROUP_CARD_UPDATED: labelCompose.updated(entity.businessGroupCard),
 
+    ELECTION_RESULT_UPDATED: labelCompose.updated(entity.electionResult),
+
     SALES_REPRESENTATIVE_CREATED: labelCompose.created(
       entity.salesRepresentative,
     ),
@@ -78,6 +80,7 @@ export function resourceTypeLabels(labels: ResolvedLabels) {
     ROLE: 'Rol',
     BUSINESS_GROUP: entity.businessGroup.singular,
     BUSINESS_GROUP_CARD: entity.businessGroupCard.singular,
+    ELECTION_RESULT: entity.electionResult.singular,
     SALES_REPRESENTATIVE: entity.salesRepresentative.singular,
     ANNOUNCEMENT: entity.announcement.singular,
     LABEL: 'Etiket',

@@ -18,6 +18,11 @@ export const entities: Record<EntityKey, EntityDefinition> = {
     plural: 'Meslek Grubu Kartları',
     editable: true,
   },
+  electionResult: {
+    singular: 'Seçim Sonucu',
+    plural: 'Seçim Sonuçları',
+    editable: true,
+  },
   businessGroup: {
     singular: 'Meslek Grubu',
     plural: 'Meslek Grupları',
@@ -214,6 +219,44 @@ export const fields: FieldRegistry = {
       required: false,
     },
     { kind: 'inherited', key: 'businessGroupName', from: 'businessGroup' },
+  ],
+  electionResult: [
+    // `editable`, not `inherited` from businessGroup: this column is named
+    // Komite, so renaming the Meslek Grubu entity must not rename it.
+    {
+      kind: 'editable',
+      key: 'businessGroupName',
+      default: 'Komite',
+      required: false,
+    },
+    {
+      kind: 'editable',
+      key: 'toplamOy',
+      default: 'Toplam Oy',
+      required: false,
+    },
+    {
+      kind: 'editable',
+      key: 'kullanilanOy',
+      default: 'Kullanılan Oy',
+      required: false,
+    },
+    {
+      kind: 'editable',
+      key: 'gecerliOy',
+      default: 'Geçerli Oy',
+      required: false,
+    },
+    {
+      kind: 'editable',
+      key: 'meclisUyeSayisi',
+      default: 'Meclis Üye Sayısı',
+      required: false,
+    },
+    // Color names, not concepts — static like the enum display values.
+    { kind: 'static', key: 'yesil', default: 'Yeşil' },
+    { kind: 'static', key: 'mavi', default: 'Mavi' },
+    { kind: 'static', key: 'turuncu', default: 'Turuncu' },
   ],
 };
 

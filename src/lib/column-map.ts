@@ -70,4 +70,17 @@ export const columnMap = {
     'createdAt',
     'updatedAt',
   ],
+  electionResult: [
+    'id',
+    'businessGroupName',
+    'toplamOy',
+    'kullanilanOy',
+    'gecerliOy',
+    'meclisUyeSayisi',
+    'yesil',
+    'mavi',
+    'turuncu',
+    'createdAt',
+    'updatedAt',
+  ],
 } as const;

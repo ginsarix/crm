@@ -100,8 +100,9 @@ model BusinessGroup {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  assignedUsers User[]
-  card          BusinessGroupCard?
+  assignedUsers   User[]
+  card            BusinessGroupCard?
+  electionResult  ElectionResult?
 }
 
 model BusinessGroupCard {
@@ -115,6 +116,26 @@ model BusinessGroupCard {
 
   uyeSayisi    String?
   meclisSayisi Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// One row per BusinessGroup, backfilled on read (see electionResultRouter).
+// Every count is non-null with a 0 default: product decided that leaving a
+// field blank MEANS zero, so there is no "not yet entered" state to model.
+model ElectionResult {
+  id              String        @id @default(cuid())
+  businessGroupId String        @unique
+  businessGroup   BusinessGroup @relation(fields: [businessGroupId], references: [id], onDelete: Cascade)
+
+  toplamOy        Int @default(0)
+  kullanilanOy    Int @default(0)
+  gecerliOy       Int @default(0)
+  meclisUyeSayisi Int @default(0)
+  yesil           Int @default(0)
+  mavi            Int @default(0)
+  turuncu         Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

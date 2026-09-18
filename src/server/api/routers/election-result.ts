@@ -104,7 +104,7 @@ export const electionResultRouter = createTRPCRouter({
         orderBy.push({ businessGroup: { name: 'asc' } });
       }
 
-      const [totalItems, rows] = await Promise.all([
+      const [totalItems, rows, sums] = await Promise.all([
         ctx.db.electionResult.count({ where: whereClause }),
         ctx.db.electionResult.findMany({
           where: whereClause,
@@ -113,10 +113,45 @@ export const electionResultRouter = createTRPCRouter({
           skip: (input.page - 1) * input.itemsPerPage,
           take: input.itemsPerPage,
         }),
+        // Aggregated over the same whereClause, NOT the current page: the
+        // footer row sums every matching group, and follows the search filter.
+        ctx.db.electionResult.aggregate({
+          where: whereClause,
+          _sum: {
+            toplamOy: true,
+            kullanilanOy: true,
+            gecerliOy: true,
+            meclisUyeSayisi: true,
+            yesil: true,
+            mavi: true,
+            turuncu: true,
+          },
+        }),
       ]);
+
+      // `_sum` is null for every field when no rows match.
+      const totals = {
+        toplamOy: sums._sum.toplamOy ?? 0,
+        kullanilanOy: sums._sum.kullanilanOy ?? 0,
+        gecerliOy: sums._sum.gecerliOy ?? 0,
+        meclisUyeSayisi: sums._sum.meclisUyeSayisi ?? 0,
+        yesil: sums._sum.yesil ?? 0,
+        mavi: sums._sum.mavi ?? 0,
+        turuncu: sums._sum.turuncu ?? 0,
+      };
 
       return {
         data: rows.map(toRow),
+        totals: {
+          ...totals,
+          // Same rule as a data row: single leader wins, any tie is purple,
+          // all-zero is uncolored.
+          color: resolveElectionRowColor(
+            totals.yesil,
+            totals.mavi,
+            totals.turuncu,
+          ),
+        },
         pagination: {
           totalItems,
           totalPages: Math.ceil(totalItems / input.itemsPerPage),

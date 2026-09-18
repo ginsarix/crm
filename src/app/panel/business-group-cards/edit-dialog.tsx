@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from '~/components/ui/select';
 import { TagAutocomplete } from '~/components/ui/tag-autocomplete';
+import { useLabels } from '~/hooks/use-labels';
+import type { SectionKey } from '~/shared/labels/types';
 import type { Committee } from '~/shared/zod-schemas/business-group-card';
 import {
   committeeFieldKeys,
@@ -28,42 +30,16 @@ import {
 import { api } from '~/trpc/react';
 import type { BusinessGroupCardRow } from './columns';
 
-const FIELD_GROUPS: { title: string; fields: (keyof Committee)[] }[] = [
-  { title: 'Meclis', fields: ['meclis1', 'meclis2', 'meclis3'] },
+const FIELD_GROUPS: { key: SectionKey; fields: (keyof Committee)[] }[] = [
+  { key: 'meclis', fields: ['meclis1', 'meclis2', 'meclis3'] },
+  { key: 'komite', fields: ['baskan', 'baskanYardimcisi', 'uye1', 'uye2'] },
+  { key: 'meclisYedek', fields: ['uye3', 'uye4', 'uye5'] },
   {
-    title: 'Komite',
-    fields: ['baskan', 'baskanYardimcisi', 'uye1', 'uye2'],
-  },
-  { title: 'Meclis Yedek', fields: ['uye3', 'uye4', 'uye5'] },
-  {
-    title: 'Komite Yedek',
+    key: 'komiteYedek',
     fields: ['yedekUye1', 'yedekUye2', 'yedekUye3', 'yedekUye4'],
   },
-  {
-    title: 'Yedek Üyeler',
-    fields: ['yedekUye5', 'yedekUye6', 'yedekUye7'],
-  },
+  { key: 'yedekUyeler', fields: ['yedekUye5', 'yedekUye6', 'yedekUye7'] },
 ];
-
-const FIELD_LABELS: Record<keyof Committee, string> = {
-  meclis1: 'Meclis 1',
-  meclis2: 'Meclis 2',
-  meclis3: 'Meclis 3',
-  baskan: 'Komite 1',
-  baskanYardimcisi: 'Komite 2',
-  uye1: 'Komite 3',
-  uye2: 'Komite 4',
-  uye3: 'Meclis Yedek 1',
-  uye4: 'Meclis Yedek 2',
-  uye5: 'Meclis Yedek 3',
-  yedekUye1: 'Komite Yedek 1',
-  yedekUye2: 'Komite Yedek 2',
-  yedekUye3: 'Komite Yedek 3',
-  yedekUye4: 'Komite Yedek 4',
-  yedekUye5: 'Yedek Üye 5',
-  yedekUye6: 'Yedek Üye 6',
-  yedekUye7: 'Yedek Üye 7',
-};
 
 function toCommittee(row: BusinessGroupCardRow): Committee {
   const committee = (row.committee as Record<string, string[]> | null) ?? {};
@@ -87,6 +63,8 @@ export function EditBusinessGroupCardDialog({
   onOpenChange,
   onUpdate,
 }: EditBusinessGroupCardDialogProps) {
+  const labels = useLabels();
+  const f = labels.field.businessGroupCard;
   const utils = api.useUtils();
   const { data: salesRepresentatives } = api.salesRepresentative.get.useQuery();
   const suggestions = salesRepresentatives?.map((sr) => sr.name) ?? [];
@@ -115,13 +93,17 @@ export function EditBusinessGroupCardDialog({
   const updateMutation = api.businessGroupCard.update.useMutation({
     onSuccess: (updated) => {
       utils.businessGroupCard.get.cancel();
-      toast.success('Meslek grubu kartı başarıyla güncellendi');
+      toast.success(
+        `${labels.entity.businessGroupCard.singular} başarıyla güncellendi`,
+      );
       onUpdate(updated);
       onOpenChange(false);
     },
     onError: (error) => {
       console.error(error);
-      toast.error('Meslek grubu kartı güncellenirken bir hata oluştu');
+      toast.error(
+        `${labels.entity.businessGroupCard.singular} güncellenirken bir hata oluştu`,
+      );
     },
   });
 
@@ -137,12 +119,13 @@ export function EditBusinessGroupCardDialog({
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent
-        aria-describedby="Meslek grubu kartı düzenleme"
+        aria-describedby={`${labels.entity.businessGroupCard.singular} düzenleme`}
         className="max-h-[99vh] overflow-y-auto sm:max-w-2xl"
       >
         <DialogHeader>
           <DialogTitle>
-            {businessGroupCard.businessGroupName} — Meslek Grubu Kartı
+            {businessGroupCard.businessGroupName} —{' '}
+            {labels.entity.businessGroupCard.singular}
           </DialogTitle>
         </DialogHeader>
 
@@ -161,10 +144,10 @@ export function EditBusinessGroupCardDialog({
 
         <div className="space-y-4">
           {FIELD_GROUPS.map((group) => (
-            <Fragment key={group.title}>
-              {group.title === 'Meclis' && (
+            <Fragment key={group.key}>
+              {group.key === 'meclis' && (
                 <div className="space-y-2">
-                  <Label htmlFor="meclisSayisi">Meclis Sayısı</Label>
+                  <Label htmlFor="meclisSayisi">{f.meclisSayisi}</Label>
                   <Select
                     onValueChange={(v) =>
                       setMeclisSayisi(
@@ -188,9 +171,9 @@ export function EditBusinessGroupCardDialog({
                   </Select>
                 </div>
               )}
-              {group.title === 'Komite' && (
+              {group.key === 'komite' && (
                 <div className="space-y-2">
-                  <Label htmlFor="uyeSayisi">Üye Sayısı</Label>
+                  <Label htmlFor="uyeSayisi">{f.uyeSayisi}</Label>
                   <Input
                     id="uyeSayisi"
                     onChange={(e) => setUyeSayisi(e.target.value)}
@@ -199,10 +182,12 @@ export function EditBusinessGroupCardDialog({
                 </div>
               )}
               <div className="space-y-3 rounded-lg border p-3">
-                <h4 className="font-medium text-sm">{group.title}</h4>
+                <h4 className="font-medium text-sm">
+                  {labels.section[group.key]}
+                </h4>
                 {group.fields.map((field) => (
                   <div className="space-y-2" key={field}>
-                    <Label htmlFor={field}>{FIELD_LABELS[field]}</Label>
+                    <Label htmlFor={field}>{f[field]}</Label>
                     <TagAutocomplete
                       disabled={field === 'meclis3' && meclisSayisi === 2}
                       duplicateValues={duplicateNames}

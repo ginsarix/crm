@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { cn } from '~/lib/utils';
+import { labelCompose } from '~/shared/labels/compose';
+import type { ResolvedLabels } from '~/shared/labels/types';
 import type { CommitteeFieldKey } from '~/shared/zod-schemas/business-group-card';
 import { getDuplicateCommitteeNames } from '~/shared/zod-schemas/business-group-card';
 import type { RouterOutputs } from '~/trpc/types';
@@ -70,101 +72,94 @@ function committeeFieldColumn(
 }
 
 export const createColumns = (
+  labels: ResolvedLabels,
   onEditBusinessGroupCard: (row: BusinessGroupCardRow) => void,
-): ColumnDef<BusinessGroupCardRow>[] => [
-  {
-    id: 'actions',
-    size: 60,
-    enableResizing: false,
-    cell: ({ row }) => {
-      const businessGroupCard = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="h-8 w-8 p-0" variant="ghost">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-              Eylemler
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => onEditBusinessGroupCard(businessGroupCard)}
-            >
-              Düzenle
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+): ColumnDef<BusinessGroupCardRow>[] => {
+  const f = labels.field.businessGroupCard;
+
+  return [
+    {
+      id: 'actions',
+      size: 60,
+      enableResizing: false,
+      cell: ({ row }) => {
+        const businessGroupCard = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="h-8 w-8 p-0" variant="ghost">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Eylemler
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => onEditBusinessGroupCard(businessGroupCard)}
+              >
+                {labelCompose.edit(labels.entity.businessGroupCard)}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
     },
-  },
-  {
-    accessorKey: 'businessGroupName',
-    header: 'Meslek Grubu',
-    enableSorting: true,
-  },
-  {
-    accessorKey: 'uyeSayisi',
-    header: () => (
-      <span className="block leading-tight">
-        Üye
-        <br />
-        Sayısı
-      </span>
-    ),
-    size: 40,
-    enableSorting: false,
-    cell: ({ row }) => row.original.uyeSayisi ?? '-',
-  },
-  {
-    accessorKey: 'meclisSayisi',
-    header: () => (
-      <span className="block leading-tight">
-        Meclis
-        <br />
-        Sayısı
-      </span>
-    ),
-    size: 40,
-    enableSorting: false,
-    cell: ({ row }) => row.original.meclisSayisi ?? '-',
-  },
-  committeeFieldColumn('meclis1', 'Meclis 1'),
-  committeeFieldColumn('meclis2', 'Meclis 2'),
-  committeeFieldColumn('meclis3', 'Meclis 3'),
-  committeeFieldColumn('baskan', 'Komite 1'),
-  committeeFieldColumn('baskanYardimcisi', 'Komite 2'),
-  committeeFieldColumn('uye1', 'Komite 3'),
-  committeeFieldColumn('uye2', 'Komite 4'),
-  committeeFieldColumn('uye3', 'Meclis Yedek 1'),
-  committeeFieldColumn('uye4', 'Meclis Yedek 2'),
-  committeeFieldColumn('uye5', 'Meclis Yedek 3'),
-  committeeFieldColumn('yedekUye1', 'Komite Yedek 1'),
-  committeeFieldColumn('yedekUye2', 'Komite Yedek 2'),
-  committeeFieldColumn('yedekUye3', 'Komite Yedek 3'),
-  committeeFieldColumn('yedekUye4', 'Komite Yedek 4'),
-  committeeFieldColumn('yedekUye5', 'Yedek Üye 5'),
-  committeeFieldColumn('yedekUye6', 'Yedek Üye 6'),
-  committeeFieldColumn('yedekUye7', 'Yedek Üye 7'),
-  {
-    accessorKey: 'updatedAt',
-    header: 'Güncellenme Tarihi',
-    enableSorting: true,
-    cell: ({ row }) => {
-      const date = row.getValue('updatedAt') as Date;
-      return new Date(date).toLocaleDateString('tr-TR');
+    {
+      accessorKey: 'businessGroupName',
+      header: f.businessGroupName,
+      enableSorting: true,
     },
-  },
-  {
-    accessorKey: 'createdAt',
-    header: 'Oluşturulma Tarihi',
-    enableSorting: true,
-    cell: ({ row }) => {
-      const date = row.getValue('createdAt') as Date;
-      return new Date(date).toLocaleDateString('tr-TR');
+    {
+      accessorKey: 'uyeSayisi',
+      header: f.uyeSayisi,
+      size: 40,
+      enableSorting: false,
+      cell: ({ row }) => row.original.uyeSayisi ?? '-',
     },
-  },
-];
+    {
+      accessorKey: 'meclisSayisi',
+      header: f.meclisSayisi,
+      size: 40,
+      enableSorting: false,
+      cell: ({ row }) => row.original.meclisSayisi ?? '-',
+    },
+    committeeFieldColumn('meclis1', f.meclis1),
+    committeeFieldColumn('meclis2', f.meclis2),
+    committeeFieldColumn('meclis3', f.meclis3),
+    committeeFieldColumn('baskan', f.baskan),
+    committeeFieldColumn('baskanYardimcisi', f.baskanYardimcisi),
+    committeeFieldColumn('uye1', f.uye1),
+    committeeFieldColumn('uye2', f.uye2),
+    committeeFieldColumn('uye3', f.uye3),
+    committeeFieldColumn('uye4', f.uye4),
+    committeeFieldColumn('uye5', f.uye5),
+    committeeFieldColumn('yedekUye1', f.yedekUye1),
+    committeeFieldColumn('yedekUye2', f.yedekUye2),
+    committeeFieldColumn('yedekUye3', f.yedekUye3),
+    committeeFieldColumn('yedekUye4', f.yedekUye4),
+    committeeFieldColumn('yedekUye5', f.yedekUye5),
+    committeeFieldColumn('yedekUye6', f.yedekUye6),
+    committeeFieldColumn('yedekUye7', f.yedekUye7),
+    {
+      accessorKey: 'updatedAt',
+      header: labels.system.updatedAt,
+      enableSorting: true,
+      cell: ({ row }) => {
+        const date = row.getValue('updatedAt') as Date;
+        return new Date(date).toLocaleDateString('tr-TR');
+      },
+    },
+    {
+      accessorKey: 'createdAt',
+      header: labels.system.createdAt,
+      enableSorting: true,
+      cell: ({ row }) => {
+        const date = row.getValue('createdAt') as Date;
+        return new Date(date).toLocaleDateString('tr-TR');
+      },
+    },
+  ];
+};

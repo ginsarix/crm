@@ -4,6 +4,7 @@ import { auditLogRouter } from '~/server/api/routers/audit-log';
 import { businessGroupRouter } from '~/server/api/routers/business-group';
 import { businessGroupCardRouter } from '~/server/api/routers/business-group-card';
 import { customerCardRouter } from '~/server/api/routers/customer-card';
+import { electionResultRouter } from '~/server/api/routers/election-result';
 import { feedbackRouter } from '~/server/api/routers/feedback';
 import { labelRouter } from '~/server/api/routers/label';
 import { salesRepresentativeRouter } from '~/server/api/routers/sales-representative';
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   businessGroup: businessGroupRouter,
   businessGroupCard: businessGroupCardRouter,
   customerCard: customerCardRouter,
+  electionResult: electionResultRouter,
   feedback: feedbackRouter,
   label: labelRouter,
   user: userRouter,

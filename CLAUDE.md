@@ -55,9 +55,26 @@ Validated via `@t3-oss/env-nextjs` in `src/env.js`. Required variables: `DATABAS
 
 ### UI / Language
 
-All UI text is in Turkish. Enum→display mappings live in `src/lib/enum-map.ts`; column header mappings in `src/lib/column-map.ts`. shadcn/ui components are in `src/components/ui/`.
+All UI text is in Turkish. shadcn/ui components are in `src/components/ui/`. Turkish common nouns take suffixes with **no apostrophe** — `Formda Zorunlu`, `Meslek Grubundan`, never `Form'da` / `Meslek Grubu'ndan`.
 
-The search-scope dropdown in filter controls (e.g. `filter-controls.tsx`) is driven by `columnMap.<entity>` — adding a new searchable field to a router's `searchableFields` array **also requires** adding the field to the corresponding entry in `column-map.ts`, otherwise it will never appear as a selectable scope in the UI.
+### Display text comes from the label resolver
+
+Column headers, form input labels, table titles, page header titles, nav item labels and the audit-log action/resource strings are **not hardcoded**. They resolve at runtime from `src/shared/labels/`:
+
+- `registry.ts` — the defaults, plus metadata (field order, `required`, inheritance). The only place this Turkish is typed.
+- `resolve.ts` — layers an admin's stored overrides (the `LabelOverride` table) over those defaults.
+- `compose.ts` — derives nav labels, table titles, dialog titles and audit strings from each entity's tekil/çoğul pair.
+
+Client components read `useLabels()` (`~/hooks/use-labels`); server components `await api.label.get()`. Admins edit the editable subset in the **Etiketler** card on `/panel/settings`.
+
+**Before adding a new page, a new field, or a new title, ask the user whether it should be admin-editable in the label editor.** Not everything is: `id` / `createdAt` / `updatedAt`, enum *values* (Geldi/Gelmedi, Aldı/Almadı), and the columns of the Satış Temsilcileri and Meslek Grupları tables are deliberately static, while entity names, their field labels, MGK's form section headings, and the Panel / Ayarlar page titles are editable. Route the text through the resolver either way — static entries still live in the registry — but which side of that line a new label falls on is a product decision, not one to assume.
+
+Two rules that bite when adding a field:
+
+- `src/lib/column-map.ts` holds **key arrays only** (no Turkish). Five routers build Zod enums from them, so the keys are a server-side contract. Adding a searchable field to a router's `searchableFields` requires adding the key there **and** a label entry in `registry.ts` — a registry invariant test fails otherwise, which is the intended safety net.
+- Never bake a required asterisk into a label. Compose it in JSX as `{label} *`.
+
+Strings are left hardcoded only when composing them would need a Turkish suffix that cannot be generated safely for an arbitrary renamed noun (genitive/possessive/accusative forms — e.g. "Meslek Gruplarını Kaydet", where the accusative buffer consonant depends on the plural's final vowel). Those sites carry an in-code comment saying so.
 
 ### Versioning and releases
 

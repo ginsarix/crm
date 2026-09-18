@@ -301,15 +301,15 @@ export function VisitsPageClient() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Toplu Silme</DialogTitle>
-              {/* Kept literal: "ziyareti" carries the accusative -i suffix,
-                  which can't be regenerated safely for an arbitrarily
-                  renamed singular. (The customerCard equivalent gets away
-                  with composing the label because "Cari Kartı" already ends
-                  in the possessive suffix, so it reads correctly by luck —
-                  not a pattern to copy here.) */}
+              {/* The accusative suffix sits on the fixed noun "kaydını"
+                  rather than on the entity name, so labels.entity.visit.singular
+                  can be substituted in bare nominative and stay grammatical
+                  under any rename. (Not applied to the customerCard
+                  equivalent: "Cari Kartı" already ends in the possessive, so
+                  "Cari Kartı kaydını" would be redundant.) */}
               <DialogDescription>
-                {selectedIds.length} ziyareti silmek istediğinizden emin
-                misiniz? Bu işlem geri alınamaz.
+                {selectedIds.length} {labels.entity.visit.singular} kaydını
+                silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

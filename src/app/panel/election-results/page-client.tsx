@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { PaginationState, SortingState } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
@@ -10,7 +10,10 @@ import { Spinner } from '~/components/ui/spinner';
 import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
 import { labelCompose } from '~/shared/labels/compose';
-import { ElectionResultUpdateSchema } from '~/shared/zod-schemas/election-result';
+import {
+  ElectionResultUpdateSchema,
+  electionResultCountKeys,
+} from '~/shared/zod-schemas/election-result';
 import { api } from '~/trpc/react';
 
 import { DataTable } from '../../_components/data-table';
@@ -107,6 +110,22 @@ export function ElectionResultsPageClient() {
     onSave: handleSave,
   });
 
+  // Keyed by column id so the footer stays aligned when columns are hidden.
+  // The totals come from the server and cover every matching group, not just
+  // the rows on this page.
+  const totals = data?.totals;
+  const footerValues: Record<string, ReactNode> | undefined = totals && {
+    businessGroupName: 'Toplam',
+    ...Object.fromEntries(
+      electionResultCountKeys.map((key) => [
+        key,
+        <span className="tabular-nums" key={key}>
+          {totals[key]}
+        </span>,
+      ]),
+    ),
+  };
+
   // Sorting/paginating can scroll the edited row off the page; close the
   // editor rather than leave the form bound to an invisible row. Refusing to
   // close would be worse than closing — but doing it silently when the row
@@ -144,6 +163,8 @@ export function ElectionResultsPageClient() {
               columns={columns}
               data={data?.data ?? []}
               exportFilename="secim_sonuclari"
+              footerColor={data?.totals.color}
+              footerValues={footerValues}
               pageCount={data?.pagination?.totalPages ?? -1}
               pagination={pagination}
               setPagination={setPagination}

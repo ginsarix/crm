@@ -53,6 +53,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -65,6 +66,36 @@ declare module '@tanstack/react-table' {
     /** Extra className applied to this column's <TableCell>, computed per row. */
     cellClassName?: (row: TData) => string | undefined;
   }
+}
+
+/** The `Color` enum values a row can be tinted with. */
+export type RowColor =
+  | 'green'
+  | 'blue'
+  | 'orange'
+  | 'yellow'
+  | 'gray'
+  | 'purple';
+
+/**
+ * Tailwind classes for a color-coded row. Shared by the body rows and the
+ * optional footer row so both tint identically.
+ */
+function rowColorClass(color: RowColor | null | undefined) {
+  return cn(
+    color === 'green' &&
+      'bg-green-200 hover:bg-green-300 dark:bg-green-900/80 dark:hover:bg-green-900/90',
+    color === 'blue' &&
+      'bg-blue-200 hover:bg-blue-300 dark:bg-blue-900/80 dark:hover:bg-blue-900/90',
+    color === 'orange' &&
+      'bg-orange-200 hover:bg-orange-300 dark:bg-orange-900/80 dark:hover:bg-orange-900/90',
+    color === 'yellow' &&
+      'bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-900/80 dark:hover:bg-yellow-900/90',
+    color === 'gray' &&
+      'bg-gray-200 hover:bg-gray-300 dark:bg-gray-500/80 dark:hover:bg-gray-500/90',
+    color === 'purple' &&
+      'bg-purple-200 hover:bg-purple-300 dark:bg-purple-900/80 dark:hover:bg-purple-900/90',
+  );
 }
 
 interface DataTableProps<TData, TValue> {
@@ -88,6 +119,13 @@ interface DataTableProps<TData, TValue> {
   getRowRestricted?: (row: TData) => boolean;
   /** Renders extra content in a full-width row directly below the given row; return null/undefined to render nothing. */
   renderSubRow?: (row: TData) => ReactNode;
+  /**
+   * Renders a pinned footer row, keyed by column id so it stays aligned as
+   * columns are hidden or reordered. Columns with no entry render empty.
+   */
+  footerValues?: Record<string, ReactNode>;
+  /** Tints the footer row with the same palette the body rows use. */
+  footerColor?: RowColor | null;
 }
 
 function getVisibilityKey(tableId: string) {
@@ -282,6 +320,8 @@ export function DataTable<TData, TValue>({
   getRowId,
   getRowRestricted,
   renderSubRow,
+  footerValues,
+  footerColor,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     () => loadColumnVisibility(tableId, defaultColumnVisibility),
@@ -553,20 +593,7 @@ export function DataTable<TData, TValue>({
                       className={cn(
                         restricted
                           ? 'bg-muted/70 text-muted-foreground opacity-70 hover:bg-muted/90 dark:bg-muted/40 dark:hover:bg-muted/60'
-                          : cn(
-                              color === 'green' &&
-                                'bg-green-200 hover:bg-green-300 dark:bg-green-900/80 dark:hover:bg-green-900/90',
-                              color === 'blue' &&
-                                'bg-blue-200 hover:bg-blue-300 dark:bg-blue-900/80 dark:hover:bg-blue-900/90',
-                              color === 'orange' &&
-                                'bg-orange-200 hover:bg-orange-300 dark:bg-orange-900/80 dark:hover:bg-orange-900/90',
-                              color === 'yellow' &&
-                                'bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-900/80 dark:hover:bg-yellow-900/90',
-                              color === 'gray' &&
-                                'bg-gray-200 hover:bg-gray-300 dark:bg-gray-500/80 dark:hover:bg-gray-500/90',
-                              color === 'purple' &&
-                                'bg-purple-200 hover:bg-purple-300 dark:bg-purple-900/80 dark:hover:bg-purple-900/90',
-                            ),
+                          : rowColorClass(color),
                       )}
                       data-state={row.getIsSelected() && 'selected'}
                     >
@@ -614,6 +641,25 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
+          {footerValues && (
+            <TableFooter>
+              <TableRow
+                className={cn('font-medium', rowColorClass(footerColor))}
+              >
+                {table.getVisibleLeafColumns().map((column) => (
+                  <TableCell
+                    className="overflow-hidden text-ellipsis"
+                    key={column.id}
+                    style={{
+                      width: `${(column.getSize() / table.getTotalSize()) * 100}%`,
+                    }}
+                  >
+                    {footerValues[column.id] ?? null}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableFooter>
+          )}
         </Table>
       </div>
 

@@ -72,6 +72,12 @@ const TABS: TabDefinition[] = [
     showSections: true,
   },
   {
+    id: 'electionResult',
+    titleEntity: 'electionResult',
+    entityKeys: ['electionResult'],
+    fieldEntity: 'electionResult',
+  },
+  {
     id: 'genel',
     staticTitle: 'Genel',
     entityKeys: ['businessGroup', 'salesRepresentative'],
@@ -204,6 +210,7 @@ export function LabelsCard() {
    */
   const isColumnOnlyField = (entity: FieldEntityKey, field: FieldDefinition) =>
     field.kind === 'composed' ||
+    field.kind === 'static' ||
     (field.kind === 'inherited' && entity === 'businessGroupCard');
 
   const renderFieldRow = (
@@ -233,6 +240,19 @@ export function LabelsCard() {
         <LabelFieldRow
           badge={SOURCE_BADGE[field.fromEntity] ?? 'Devralınır'}
           defaultValue={resolved[field.key] ?? ''}
+          id={rowId}
+          key={field.key}
+          position={position}
+          unit={unit}
+        />
+      );
+    }
+
+    if (field.kind === 'static') {
+      return (
+        <LabelFieldRow
+          badge="Sabit"
+          defaultValue={field.default}
           id={rowId}
           key={field.key}
           position={position}

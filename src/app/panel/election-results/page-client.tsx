@@ -108,10 +108,17 @@ export function ElectionResultsPageClient() {
   });
 
   // Sorting/paginating can scroll the edited row off the page; close the
-  // editor rather than leave the form bound to an invisible row.
+  // editor rather than leave the form bound to an invisible row. Refusing to
+  // close would be worse than closing — but doing it silently when the row
+  // was dirty just as bad, so warn instead of staying quiet about it.
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the view, not the form
   useEffect(() => {
-    setEditingRowId(null);
+    setEditingRowId((current) => {
+      if (current !== null && form.formState.isDirty) {
+        toast.warning('Kaydedilmemiş değişiklikler iptal edildi');
+      }
+      return null;
+    });
   }, [pagination.pageIndex, pagination.pageSize, sorting, search]);
 
   return (

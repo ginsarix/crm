@@ -57,22 +57,48 @@ describe('ElectionResultUpdateSchema', () => {
     ).toBe(9_999_999);
   });
 
-  it('rejects a negative count', () => {
-    expect(() =>
-      ElectionResultUpdateSchema.parse({ ...base, gecerliOy: -1 }),
-    ).toThrow();
+  it('rejects a negative count with a Turkish message', () => {
+    const result = ElectionResultUpdateSchema.safeParse({
+      ...base,
+      gecerliOy: -1,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe('0 veya daha büyük olmalı');
   });
 
-  it('rejects a non-integer count', () => {
-    expect(() =>
-      ElectionResultUpdateSchema.parse({ ...base, gecerliOy: 1.5 }),
-    ).toThrow();
+  it('rejects a non-integer count with a Turkish message', () => {
+    const result = ElectionResultUpdateSchema.safeParse({
+      ...base,
+      gecerliOy: 1.5,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe('Tam sayı olmalı');
   });
 
-  it('rejects text that is not a number', () => {
-    expect(() =>
-      ElectionResultUpdateSchema.parse({ ...base, gecerliOy: 'abc' }),
-    ).toThrow();
+  it('rejects text that is not a number with a Turkish message', () => {
+    const result = ElectionResultUpdateSchema.safeParse({
+      ...base,
+      gecerliOy: 'abc',
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe('Sayı olmalı');
+  });
+
+  it('rejects a count above the Postgres Int32 max with a Turkish message', () => {
+    const result = ElectionResultUpdateSchema.safeParse({
+      ...base,
+      toplamOy: 2_147_483_648,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe('Çok büyük bir sayı');
+  });
+
+  it('accepts exactly the Postgres Int32 max', () => {
+    const result = ElectionResultUpdateSchema.parse({
+      ...base,
+      toplamOy: 2_147_483_647,
+    });
+    expect(result.toplamOy).toBe(2_147_483_647);
   });
 
   it('applies no cross-field constraints', () => {

@@ -89,6 +89,7 @@ export const createColumns = (
     {
       id: 'actions',
       enableHiding: false,
+      enableSorting: false,
       size: 90,
       cell: ({ row }) => {
         const isEditing = row.original.id === editing.editingRowId;

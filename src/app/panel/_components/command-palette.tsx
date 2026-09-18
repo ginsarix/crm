@@ -11,6 +11,7 @@ import {
   Settings,
   Sparkles,
   Users,
+  Vote,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -38,6 +39,11 @@ const pages = [
     icon: Building2,
     href: '/panel/business-group-cards',
     adminOnly: true,
+  },
+  {
+    key: 'electionResult',
+    icon: Vote,
+    href: '/panel/election-results',
   },
   {
     key: 'users',

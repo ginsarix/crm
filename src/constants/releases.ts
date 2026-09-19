@@ -21,6 +21,18 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-25',
+    version: '1.25',
+    date: '19 Eylül 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Seçim Sonuçları sayfası',
+        desc: 'Seçim sonuçlarını görüntüleyip satır bazında düzenleyebileceğiniz yeni bir sayfa eklendi.',
+      },
+    ],
+  },
+  {
     id: 'v1-24',
     version: '1.24',
     date: '28 Ağustos 2026',

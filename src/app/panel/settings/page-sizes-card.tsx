@@ -138,8 +138,10 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
           }),
         };
       });
-      // Refreshes both this card's dirty baseline and the option lists of
-      // every mounted table.
+      // Refreshes this card's dirty baseline. Tables read `pageSize` as a
+      // server-rendered prop threaded down from their route's page.tsx, not
+      // from this query, so they pick up the change on their next load
+      // rather than here.
       await utils.pageSize.get.invalidate();
     },
     onError: (error) => toast.error(error.message),

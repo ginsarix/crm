@@ -38,13 +38,23 @@ export function resolvePageSizes(rows: PageSizeConfigRow[]): ResolvedPageSizes {
   const overrides = new Map<PageSizeTableKey, PageSizeTableConfig>();
 
   for (const row of rows) {
-    if (!isTableKey(row.tableKey)) continue;
+    if (!isTableKey(row.tableKey)) {
+      console.warn(
+        `[page-sizes] discarding stored config for unknown tableKey "${row.tableKey}": not in the registry`,
+      );
+      continue;
+    }
 
     const parsed = PageSizeTableConfigSchema.safeParse({
       options: row.options,
       defaultValue: row.defaultValue,
     });
-    if (!parsed.success) continue;
+    if (!parsed.success) {
+      console.warn(
+        `[page-sizes] discarding stored config for tableKey "${row.tableKey}": ${parsed.error.issues[0]?.message ?? 'schema validation failed'}`,
+      );
+      continue;
+    }
 
     overrides.set(row.tableKey, {
       options: sorted(parsed.data.options),

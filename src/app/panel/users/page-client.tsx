@@ -44,6 +44,9 @@ export function UsersPageClient({
     pageIndex: 0,
     pageSize: pageSizes.user.defaultValue,
   });
+  // The largest configured option: at that size the whole result set is already
+  // on screen, so a save patches the cached page instead of refetching it.
+  const largestPageSize = Math.max(...pageSizes.user.options);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -167,8 +170,8 @@ export function UsersPageClient({
                 onOpenChange={setViewDialogOpen}
                 onUpdate={(updatedUser) => {
                   setSelectedUser(updatedUser);
-                  if (pagination.pageSize === 500) {
-                    // Largest page size — avoid re-fetching all 500 rows on
+                  if (pagination.pageSize === largestPageSize) {
+                    // Largest page size — avoid re-fetching the whole page on
                     // every save, patch the already-cached page instead
                     utils.user.get.setData(userQueryInput, (old) =>
                       old

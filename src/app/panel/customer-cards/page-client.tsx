@@ -66,6 +66,9 @@ export function CustomerCardsPageClient({
     pageIndex: 0,
     pageSize: pageSize.defaultValue,
   });
+  // The largest configured option: at that size the whole result set is already
+  // on screen, so a save patches the cached page instead of refetching it.
+  const largestPageSize = Math.max(...pageSize.options);
   const [selectedCustomerCard, setSelectedCustomerCard] =
     useState<CustomerCardRow | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -442,8 +445,8 @@ export function CustomerCardsPageClient({
             onOpenChange={handleViewDialogOpenChange}
             onUpdate={(updatedCustomerCard) => {
               setSelectedCustomerCard(updatedCustomerCard);
-              if (pagination.pageSize === 500) {
-                // Largest page size — avoid re-fetching all 500 rows on
+              if (pagination.pageSize === largestPageSize) {
+                // Largest page size — avoid re-fetching the whole page on
                 // every save, patch the already-cached page instead
                 utils.customerCard.get.setData(customerCardQueryInput, (old) =>
                   old

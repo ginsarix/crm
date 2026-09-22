@@ -85,15 +85,37 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
         pageSizeTableOrder.map((key) => [key, toDraft(pageSizes[key])]),
       ) as Drafts,
   );
+  // Which section's Kaydet is in flight, so saving one section doesn't
+  // disable — or flash "Kaydediliyor..." on — every other section's button.
+  const [savingKey, setSavingKey] = useState<PageSizeTableKey | null>(null);
 
   const updateMutation = api.pageSize.update.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (_data, variables) => {
       toast.success('Sayfa boyutu kaydedildi');
+      /**
+       * `variables.options`/`defaultValue` are what the server actually
+       * persisted — `fromDraft` already sorted `options` ascending before
+       * `mutate` was called. Resetting the draft to that value (rather than
+       * waiting on the refetch below) is what keeps this section's dirty
+       * check in sync: `sameDraft` compares element-by-index, so an
+       * unsorted-but-valid draft (e.g. adding a smaller option after
+       * removing the largest) would otherwise never match the
+       * now-ascending `saved` value and the section would stay dirty
+       * forever.
+       */
+      setDrafts((current) => ({
+        ...current,
+        [variables.tableKey]: toDraft({
+          options: variables.options,
+          defaultValue: variables.defaultValue,
+        }),
+      }));
       // Refreshes both this card's dirty baseline and the option lists of
       // every mounted table.
       await utils.pageSize.get.invalidate();
     },
     onError: (error) => toast.error(error.message),
+    onSettled: () => setSavingKey(null),
   });
 
   const edit = (key: PageSizeTableKey, next: DraftConfig) =>
@@ -109,6 +131,7 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
   const save = (key: PageSizeTableKey) => {
     const parsed = PageSizeTableConfigSchema.safeParse(fromDraft(drafts[key]));
     if (!parsed.success) return;
+    setSavingKey(key);
     updateMutation.mutate({ tableKey: key, ...parsed.data });
   };
 
@@ -122,6 +145,7 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
           const draft = drafts[key];
           const dirty = !sameDraft(draft, toDraft(saved[key]));
           const errors = rowErrors(draft);
+          const isSaving = savingKey === key;
 
           return (
             <div
@@ -145,8 +169,9 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
                       value === draft.defaultValue &&
                       draft.options.indexOf(value) === index
                     }
-                    // biome-ignore lint/suspicious/noArrayIndexKey: rows are never reordered while editing (the sort happens on save), so the index is a stable key here
+                    // biome-ignore lint/suspicious/noArrayIndexKey: removeOption does shift subsequent indices, but PageSizeRow and its Input/Button are fully controlled with no internal state, so a reused fiber at a shifted index simply re-renders with the new props — there's no stale state to leak
                     key={`${key}-${index}`}
+                    name={`page-size-default-${key}`}
                     onChange={(next) =>
                       edit(key, setOptionValue(draft, index, next))
                     }
@@ -194,14 +219,12 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
                   </Button>
                   <Button
                     className="cursor-pointer"
-                    disabled={
-                      !dirty || !isValid(draft) || updateMutation.isPending
-                    }
+                    disabled={!dirty || !isValid(draft) || isSaving}
                     onClick={() => save(key)}
                     size="sm"
                     type="button"
                   >
-                    {updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
+                    {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
                   </Button>
                 </div>
               </div>

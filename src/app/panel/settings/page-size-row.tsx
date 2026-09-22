@@ -9,6 +9,7 @@ export function PageSizeRow({
   canRemove,
   error,
   isDefault,
+  name,
   onChange,
   onRemove,
   onSetDefault,
@@ -17,6 +18,7 @@ export function PageSizeRow({
   canRemove: boolean;
   error?: string;
   isDefault: boolean;
+  name: string;
   onChange: (value: string) => void;
   onRemove: () => void;
   onSetDefault: () => void;
@@ -28,6 +30,7 @@ export function PageSizeRow({
         aria-label="Varsayılan"
         checked={isDefault}
         className="mt-3 cursor-pointer"
+        name={name}
         onChange={onSetDefault}
         type="radio"
       />

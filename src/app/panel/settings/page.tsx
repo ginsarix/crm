@@ -8,12 +8,15 @@ import SaleRepresentativesTable from './sale-representatives-table';
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const isAdmin = session?.user?.role === 'admin';
-  const labels = await api.label.get();
+  const [labels, pageSizes] = await Promise.all([
+    api.label.get(),
+    api.pageSize.get(),
+  ]);
 
   const prefetches = [
     api.salesRepresentative.getPaginated.prefetch({
       page: 1,
-      itemsPerPage: 25,
+      itemsPerPage: pageSizes.salesRepresentative.defaultValue,
       filter: { search: '' },
       sorting: [],
     }),
@@ -38,7 +41,9 @@ export default async function SettingsPage() {
             <div
               className={isAdmin ? 'grid grid-cols-1 gap-4 lg:grid-cols-2' : ''}
             >
-              <SaleRepresentativesTable />
+              <SaleRepresentativesTable
+                pageSize={pageSizes.salesRepresentative}
+              />
               {isAdmin && <BusinessGroupsTable />}
             </div>
             {isAdmin && <LabelsCard />}

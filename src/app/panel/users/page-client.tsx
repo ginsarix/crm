@@ -225,7 +225,10 @@ export function UsersPageClient({
           </TabsContent>
 
           <TabsContent value="report">
-            <UserReportTab />
+            <UserReportTab
+              actionsPageSize={pageSizes.userReportActions}
+              pageSize={pageSizes.userReport}
+            />
           </TabsContent>
         </Tabs>
       </div>

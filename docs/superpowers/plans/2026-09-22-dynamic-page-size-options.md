@@ -1492,7 +1492,15 @@ Every call site now passes config, so the fallback can go — and the four hardc
 - Consumes: every migrated call site from Tasks 5 and 6
 - Produces: `DataTableProps.pageSizeOptions` is `number[]`, no longer optional
 
-- [ ] **Step 1: Make the prop required**
+- [ ] **Step 1: Express pagination as all-or-nothing**
+
+> **Superseded during execution.** The step below assumed all call sites
+> paginate and told you to make `pageSizeOptions` unconditionally required.
+> There are ten call sites, and the Meslek Grupları table is unpaginated, so the
+> prop became part of a union instead: `pagination`, `setPagination` and
+> `pageSizeOptions` are all present or all absent. The default value is still
+> removed. See the spec's "DataTable" section for the implemented shape.
+
 
 In `src/app/_components/data-table.tsx`, change line 111 in `DataTableProps`:
 
@@ -2198,7 +2206,12 @@ After Task 11, the feature is complete when all of these hold:
 - [ ] `pnpm test` passes — registry, schema, resolver, mutate and router tests
 - [ ] `pnpm typecheck` passes with `pageSizeOptions` required on `DataTable`
 - [ ] `pnpm check` passes
-- [ ] `pnpm test:e2e` passes both specs
+- [ ] `pnpm test:e2e e2e/page-sizes.spec.ts` passes (verified stable: 9/9 runs)
+- [ ] `e2e/labels.spec.ts` is no worse than `main` — it fails on `main` too, from a
+      pre-existing hydration mismatch in `sidebar-nav.tsx` that the user has
+      confirmed as known and WONTFIX. Not this branch's to fix.
+- [ ] `pnpm build` succeeds
+- [ ] `git diff main..HEAD` on the four Meslek Grupları files is empty
 - [ ] `grep -rn "pageSize === 500" src/` returns nothing
 - [ ] `grep -rn "pageSizeOptions = \[" src/` returns nothing
 - [ ] A fresh database with no `PageSizeConfig` rows renders every table exactly as it did before this work

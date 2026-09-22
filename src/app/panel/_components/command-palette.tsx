@@ -213,7 +213,11 @@ export function CommandPalette() {
                       router.push(`/panel/customer-cards?id=${card.id}`),
                     )
                   }
-                  value={`card-${[card.name, card.sicil, card.businessGroup, card.gsm1].filter(Boolean).join(' ')}`}
+                  // The query is embedded so these always clear cmdk's
+                  // filter: the server matched on 15 fields (address, note,
+                  // gsm2/3, yetkililer...), and re-filtering against the four
+                  // shown here would discard legitimate hits
+                  value={`${query} card-${[card.name, card.sicil, card.businessGroup, card.gsm1].filter(Boolean).join(' ')}`}
                 >
                   <BookUser />
                   <div className="flex min-w-0 flex-col">

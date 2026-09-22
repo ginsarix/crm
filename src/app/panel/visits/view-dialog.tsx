@@ -293,6 +293,7 @@ export function ViewVisitDialog({
                       },
                     ]}
                     selectedKey={field.value}
+                    serverFiltered
                   />
                 )}
               />

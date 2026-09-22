@@ -60,6 +60,18 @@ describe('removeOption', () => {
     const result = removeOption(draft(['', '50', '100'], '100'), 2);
     expect(result.defaultValue).toBe('50');
   });
+
+  it('picks the actual smallest even when not in first position', () => {
+    const result = removeOption(draft(['100', '50', '25'], '100'), 0);
+    expect(result.options).toEqual(['50', '25']);
+    expect(result.defaultValue).toBe('25');
+  });
+
+  it('empties defaultValue when all remaining rows are unparseable', () => {
+    const result = removeOption(draft(['', '25'], '25'), 1);
+    expect(result.options).toEqual(['']);
+    expect(result.defaultValue).toBe('');
+  });
 });
 
 describe('addOption', () => {
@@ -79,6 +91,12 @@ describe('setDefaultOption', () => {
   it('moves the default to the given row', () => {
     const result = setDefaultOption(draft(['25', '50'], '25'), 1);
     expect(result.defaultValue).toBe('50');
+  });
+
+  it('returns unchanged when index is out of bounds', () => {
+    const original = draft(['25', '50'], '25');
+    const result = setDefaultOption(original, 5);
+    expect(result).toEqual(original);
   });
 });
 

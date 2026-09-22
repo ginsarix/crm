@@ -81,15 +81,15 @@ built-in config. The only place these numbers are typed.
 
 ```ts
 export const pageSizeTables = {
-  customerCard:        { options: [25, 50, 100, 500], defaultValue: 25 },
-  visit:               { options: [25, 50, 100, 500], defaultValue: 25 },
-  businessGroupCard:   { options: [50, 100, 500],     defaultValue: 50 },
-  electionResult:      { options: [25, 50, 100, 500], defaultValue: 25 },
-  user:                { options: [25, 50, 100, 500], defaultValue: 25 },
-  auditLog:            { options: [25, 50, 100, 500], defaultValue: 25 },
-  salesRepresentative: { options: [25, 50, 100, 500], defaultValue: 25 },
-  userReport:          { options: [25, 50, 100, 500], defaultValue: 25 },
-  userReportActions:   { options: [25, 50, 100, 500], defaultValue: 25 },
+  customerCard:        { titleEntity: 'customerCard',        options: [25, 50, 100, 500], defaultValue: 25 },
+  visit:               { titleEntity: 'visit',               options: [25, 50, 100, 500], defaultValue: 25 },
+  businessGroupCard:   { titleEntity: 'businessGroupCard',   options: [50, 100, 500],     defaultValue: 50 },
+  electionResult:      { titleEntity: 'electionResult',      options: [25, 50, 100, 500], defaultValue: 25 },
+  user:                { titleEntity: 'user',                options: [25, 50, 100, 500], defaultValue: 25 },
+  auditLog:            { titleEntity: 'auditLog',            options: [25, 50, 100, 500], defaultValue: 25 },
+  salesRepresentative: { titleEntity: 'salesRepresentative', options: [25, 50, 100, 500], defaultValue: 25 },
+  userReport:          { staticTitle: 'Kullanıcı Raporu',    options: [25, 50, 100, 500], defaultValue: 25 },
+  userReportActions:   { staticTitle: 'Rapor İşlemleri',     options: [25, 50, 100, 500], defaultValue: 25 },
 } as const;
 ```
 
@@ -152,13 +152,27 @@ the registry default; saving that deletes the row. One endpoint, and sparseness
 stays an invariant of the write path rather than something an admin must know to
 click a special button for.
 
-### Label registry additions
+### Table display names
 
-Two of the 9 tables have no entity behind them, so their display names in the
-editor cannot be composed. They become static entries in
-`src/shared/labels/registry.ts`, both `editable: false`:
-`userReport: 'Kullanıcı Raporu'` and `userReportActions: 'Rapor İşlemleri'`. The
-other 7 derive from their entity plural labels at runtime.
+Seven of the 9 tables map to an entity and take their editor name from that
+entity's plural label at runtime. The two Kullanıcılar report tables have no
+entity behind them.
+
+Rather than inventing new `PageKey` members for them — they are not pages, and
+`PageKey` is a strict union in `src/shared/labels/types.ts:18` — each registry
+entry carries either `titleEntity: EntityKey` or `staticTitle: string`:
+
+```ts
+customerCard:      { titleEntity: 'customerCard', options: [...], defaultValue: 25 },
+userReport:        { staticTitle: 'Kullanıcı Raporu', options: [...], defaultValue: 25 },
+userReportActions: { staticTitle: 'Rapor İşlemleri', options: [...], defaultValue: 25 },
+```
+
+This is the same shape `labels-card.tsx:44` already uses for its own tab
+definitions (`staticTitle?: string; titleEntity?: EntityKey`), so the pattern is
+established rather than new. The text still lives in a registry, satisfying the
+"route display text through a registry" rule; it simply lives in the page-size
+registry instead of the label one, because nothing else consumes it.
 
 ### Audit strings
 
@@ -320,9 +334,8 @@ button.
   the action, not by an error afterwards.
 - **Seçenek Ekle is disabled at 5**, with the count shown so the ceiling is not a
   surprise when the button greys out.
-- Table names come from `useLabels()` entity plurals for 7 of the 9; the two
-  Kullanıcılar report tables use their static registry entries
-  (`Kullanıcı Raporu`, `Rapor İşlemleri`).
+- Table names come from `useLabels()` entity plurals for the 7 entries with a
+  `titleEntity`; the two Kullanıcılar report tables render their `staticTitle`.
 
 ### Default tracking
 

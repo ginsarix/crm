@@ -21,6 +21,7 @@
 - **Option value bounds: integer 1–500 inclusive.** Matches the existing `itemsPerPage: z.number().min(1).max(500)` in every router. No router validation changes.
 - **Option count bounds: 1–5 inclusive.**
 - **Verification commands:** `pnpm test`, `pnpm typecheck`, `pnpm check` (Biome). Run all three before any commit that touches source.
+- **`pnpm check` already fails on `main`** with 6 pre-existing findings (`data-table.tsx:558`, `changelog/page.tsx:90` and `:274`, `report-device-breakdown.tsx:3` and `:16`, `visits/columns.tsx:119`). The gate is **no new Biome findings in files this branch creates or modifies** — a non-zero exit caused only by those six does not block a task, and fixing them is out of scope for this branch. Task 7 modifies `data-table.tsx`, which carries one of them; leave it alone.
 - **Do not remove the ~100ms artificial timing delay** in `src/server/api/trpc.ts` — it is intentional in dev.
 - **Branch and merge.** Work on `feat/dynamic-page-size-options`, never directly on `main`. Merge with a merge commit, never fast-forwarded:
   ```bash

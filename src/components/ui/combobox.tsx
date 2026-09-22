@@ -24,6 +24,7 @@ export function Combobox({
   label,
   className,
   loading,
+  serverFiltered,
 }: {
   id?: string;
   options: { key: string; label: string }[];
@@ -33,6 +34,13 @@ export function Combobox({
   label?: string;
   className?: string;
   loading?: boolean;
+  /**
+   * Set when `options` already come back filtered by a server-side search
+   * (via `onInputChange`). cmdk would otherwise re-filter them against the
+   * label alone, hiding rows the server matched on a field it cannot see —
+   * sicil, GSM, meslek grubu.
+   */
+  serverFiltered?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -57,7 +65,7 @@ export function Combobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command>
+        <Command shouldFilter={!serverFiltered}>
           <CommandInput
             onInput={(e) => onInputChange?.(e.currentTarget.value)}
             placeholder="Ara"

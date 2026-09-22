@@ -4,6 +4,7 @@ import { SearchIcon, XIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EntryFeedbackButtons } from '~/components/entry-feedback-buttons';
 import { type ChangeType, RELEASES } from '~/constants/releases';
+import { foldTurkish } from '~/lib/turkish-fold';
 
 const BADGE_CONFIG: Record<ChangeType, { label: string; className: string }> = {
   new: {
@@ -65,10 +66,10 @@ export default function ChangelogPage() {
   const matchesSearch = useCallback(
     (title: string, desc?: string) => {
       if (!search.trim()) return true;
-      const q = search.toLowerCase();
+      const q = foldTurkish(search);
       return (
-        title.toLowerCase().includes(q) ||
-        (!!desc && desc.toLowerCase().includes(q))
+        foldTurkish(title).includes(q) ||
+        (!!desc && foldTurkish(desc).includes(q))
       );
     },
     [search],

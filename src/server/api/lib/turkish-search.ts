@@ -1,7 +1,8 @@
 import { Prisma } from 'generated/prisma';
 
-const TR_UPPER = 'İIÇĞÖŞÜ';
-const TR_LOWER = 'iıçğöşü';
+const TR_SOURCE = 'İIıÇĞÖŞÜ';
+const TR_FOLDED = 'iiiçğöşü';
+const COMBINING_DOT_ABOVE = '\u0307';
 
 /**
  * Postgres's ILIKE / `mode: 'insensitive'` case-folding is bound to the
@@ -9,9 +10,18 @@ const TR_LOWER = 'iıçğöşü';
  * Turkish letters (ş/Ş, ç/Ç, ğ/Ğ, ö/Ö, ü/Ü, ı/I, i/İ) never match across
  * case. `translate()` remaps those letters to a canonical lowercase form
  * before `lower()` runs, on both the column and the search term.
+ *
+ * The fold is lenient: `İ`, `I` and `ı` all collapse onto `i`, so someone
+ * typing "isparta" without a Turkish keyboard still finds "ISPARTA". This
+ * canonical form is shared with the client-side `foldTurkish` in
+ * `src/lib/turkish-fold.ts` — keep the two in step, or a combobox filtering
+ * the results of one of these searches will disagree about what matched.
  */
 function foldedLike(column: Prisma.Sql, searchValue: string): Prisma.Sql {
-  return Prisma.sql`lower(translate(${column}, ${TR_UPPER}, ${TR_LOWER})) LIKE lower(translate(${`%${searchValue}%`}, ${TR_UPPER}, ${TR_LOWER}))`;
+  const fold = (value: Prisma.Sql) =>
+    Prisma.sql`replace(lower(translate(${value}, ${TR_SOURCE}, ${TR_FOLDED})), ${COMBINING_DOT_ABOVE}, '')`;
+
+  return Prisma.sql`${fold(column)} LIKE ${fold(Prisma.sql`${`%${searchValue}%`}`)}`;
 }
 
 /**

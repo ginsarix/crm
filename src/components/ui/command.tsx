@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
+import { turkishCommandFilter } from '~/lib/turkish-fold';
 import { cn } from '~/lib/utils';
 
 function Command({
@@ -23,6 +24,8 @@ function Command({
         className,
       )}
       data-slot="command"
+      // Turkish-aware by default; a caller can still override via props
+      filter={turkishCommandFilter}
       {...props}
     />
   );

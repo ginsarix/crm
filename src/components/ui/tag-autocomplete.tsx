@@ -3,6 +3,7 @@
 import { PlusIcon, XIcon } from 'lucide-react';
 import { useId, useMemo, useRef, useState } from 'react';
 import { Badge } from '~/components/ui/badge';
+import { foldTurkish } from '~/lib/turkish-fold';
 import { cn } from '~/lib/utils';
 
 export function TagAutocomplete({
@@ -31,10 +32,10 @@ export function TagAutocomplete({
   const [open, setOpen] = useState(false);
 
   const filteredSuggestions = useMemo(() => {
-    const query = inputValue.trim().toLowerCase();
+    const query = foldTurkish(inputValue.trim());
     return suggestions
       .filter((s) => !values.includes(s))
-      .filter((s) => (query === '' ? true : s.toLowerCase().includes(query)))
+      .filter((s) => (query === '' ? true : foldTurkish(s).includes(query)))
       .slice(0, 20);
   }, [suggestions, values, inputValue]);
 

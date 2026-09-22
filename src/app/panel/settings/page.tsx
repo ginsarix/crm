@@ -1,9 +1,8 @@
 import { headers } from 'next/headers';
 import { auth } from '~/server/better-auth';
 import { api, HydrateClient } from '~/trpc/server';
-import BusinessGroupsTable from './business-groups-table';
-import { LabelsCard } from './labels-card';
 import SaleRepresentativesTable from './sale-representatives-table';
+import { SettingsTabs } from './settings-tabs';
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -37,17 +36,13 @@ export default async function SettingsPage() {
         </div>
 
         <HydrateClient>
-          <div className="space-y-4">
-            <div
-              className={isAdmin ? 'grid grid-cols-1 gap-4 lg:grid-cols-2' : ''}
-            >
-              <SaleRepresentativesTable
-                pageSize={pageSizes.salesRepresentative}
-              />
-              {isAdmin && <BusinessGroupsTable />}
-            </div>
-            {isAdmin && <LabelsCard />}
-          </div>
+          {isAdmin ? (
+            <SettingsTabs pageSizes={pageSizes} />
+          ) : (
+            <SaleRepresentativesTable
+              pageSize={pageSizes.salesRepresentative}
+            />
+          )}
         </HydrateClient>
       </div>
     </div>

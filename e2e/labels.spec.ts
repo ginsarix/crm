@@ -22,6 +22,7 @@ test.describe('admin-editable labels', () => {
 
     try {
       await page.goto('/panel/settings');
+      await page.getByRole('tab', { name: 'Etiketler' }).click();
       await page.getByRole('tab', { name: 'Cari Kartları' }).click();
 
       // Exact match: "2. Alan" is otherwise a substring of "12. Alan".
@@ -43,6 +44,7 @@ test.describe('admin-editable labels', () => {
       ).toBeVisible();
     } finally {
       await page.goto('/panel/settings');
+      await page.getByRole('tab', { name: 'Etiketler' }).click();
       await page.getByRole('tab', { name: /Cari/ }).click();
       await page
         .getByRole('button', { name: 'Varsayılanları Getir' })

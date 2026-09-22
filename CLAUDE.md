@@ -80,6 +80,19 @@ Strings are left hardcoded only when composing them would need a Turkish suffix 
 
 See the `release-checklist` skill for the release process (keeping `app-version.ts` and `releases.ts` in sync).
 
+### Git
+
+Branch work merges into `main` with a **merge commit** — never fast-forwarded, so the branch stays visible as a unit:
+
+```bash
+git merge --no-ff <branch> -m "Merge branch '<branch>'"
+git branch -d <branch>
+```
+
+`git log --oneline` on `main` reads as linear because feature branches are short, which makes `--ff-only` look like the matching choice. It isn't — check `git log --merges` rather than the last few subject lines.
+
+Branches are named `feat/...` or `fix/...` (kebab-case).
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

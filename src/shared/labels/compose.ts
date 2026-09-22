@@ -64,6 +64,7 @@ export function auditActionLabels(labels: ResolvedLabels) {
     ANNOUNCEMENT_DELETED: labelCompose.deleted(entity.announcement),
 
     LABEL_UPDATED: 'Etiketler Güncellendi',
+    PAGE_SIZE_UPDATED: 'Sayfa Boyutu Güncellendi',
   };
 }
 
@@ -84,5 +85,6 @@ export function resourceTypeLabels(labels: ResolvedLabels) {
     SALES_REPRESENTATIVE: entity.salesRepresentative.singular,
     ANNOUNCEMENT: entity.announcement.singular,
     LABEL: 'Etiket',
+    PAGE_SIZE: 'Sayfa Boyutu',
   };
 }

@@ -73,4 +73,19 @@ describe('resolvePageSizes', () => {
       ]),
     ).not.toThrow();
   });
+
+  it('does not mutate the registry across repeated calls', () => {
+    const registryOptions = pageSizeTables.customerCard.options;
+    const before = [...registryOptions];
+    const resolved = resolvePageSizes([]);
+    resolvePageSizes([
+      { tableKey: 'visit', options: [100, 10], defaultValue: 10 },
+    ]);
+    // The resolved config must be a fresh copy, never the registry's own
+    // array — an in-place sort would return the same reference here.
+    expect(resolved.customerCard.options).not.toBe(registryOptions);
+    expect(pageSizeTables.customerCard.options).toEqual(before);
+    // visit and customerCard share one array reference in the registry
+    expect(pageSizeTables.visit.options).toEqual(before);
+  });
 });

@@ -25,7 +25,7 @@ export function BusinessGroupCardsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: 50,
   });
   const [search, setSearch] = useState('');
   const [searchScope, setSearchScope] =
@@ -100,6 +100,7 @@ export function BusinessGroupCardsPageClient() {
               }}
               exportFilename="meslek_grubu_kartlari"
               pageCount={data?.pagination?.totalPages ?? -1}
+              pageSizeOptions={[50, 100, 500]}
               pagination={pagination}
               setPagination={setPagination}
               setSorting={setSorting}

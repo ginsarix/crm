@@ -108,6 +108,7 @@ interface DataTableProps<TData, TValue> {
   className?: string;
   pageCount?: number;
   totalCount?: number;
+  pageSizeOptions?: number[];
   tableId?: string;
   defaultColumnVisibility?: VisibilityState;
   exportFilename?: string;
@@ -311,6 +312,7 @@ export function DataTable<TData, TValue>({
   className,
   pageCount = -1,
   totalCount,
+  pageSizeOptions = [25, 50, 100, 500],
   tableId = 'default',
   defaultColumnVisibility = {},
   exportFilename,
@@ -685,7 +687,7 @@ export function DataTable<TData, TValue>({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {[25, 50, 100, 500].map((size) => (
+                {pageSizeOptions.map((size) => (
                   <SelectItem key={size} value={String(size)}>
                     {size}
                   </SelectItem>

@@ -22,7 +22,12 @@
 - **Option count bounds: 1–5 inclusive.**
 - **Verification commands:** `pnpm test`, `pnpm typecheck`, `pnpm check` (Biome). Run all three before any commit that touches source.
 - **Do not remove the ~100ms artificial timing delay** in `src/server/api/trpc.ts` — it is intentional in dev.
-- **No release/version bump** is part of this work. Leave `src/constants/app-version.ts` and `releases.ts` alone.
+- **Branch and merge.** Work on `feat/dynamic-page-size-options`, never directly on `main`. Merge with a merge commit, never fast-forwarded:
+  ```bash
+  git merge --no-ff feat/dynamic-page-size-options -m "Merge branch 'feat/dynamic-page-size-options'"
+  git branch -d feat/dynamic-page-size-options
+  ```
+- **No release/version bump, and no changelog entry.** Leave `src/constants/app-version.ts` and `releases.ts` alone. Per the `release-checklist` skill's three tests, this feature ships silently: the editor and the settings tab shell are admin-facing, so they fail test (2), and the newly-guaranteed ascending dropdown order fails test (3) because every current option list is already ascending — nothing looks different to a user on their next visit. The entry is earned later, by whatever an admin *configures*, not by shipping the ability to configure it.
 
 ---
 
@@ -73,6 +78,18 @@
 | `src/app/panel/settings/page.tsx` | Fetch config, branch admin/non-admin |
 | `src/app/panel/settings/sale-representatives-table.tsx:41` | Accepts config |
 | `e2e/labels.spec.ts:25,47` | Click the `Etiketler` outer tab first |
+
+---
+
+### Task 0: Branch
+
+- [ ] **Step 1: Cut the feature branch**
+
+```bash
+git switch -c feat/dynamic-page-size-options
+```
+
+Every task below commits onto this branch. Task 11 merges it.
 
 ---
 
@@ -2152,9 +2169,30 @@ git commit -m "test: add end-to-end coverage for configurable page sizes"
 
 ---
 
+---
+
+### Task 11: Merge
+
+- [ ] **Step 1: Run the full suite one more time on the branch**
+
+Run: `pnpm test && pnpm typecheck && pnpm check && pnpm test:e2e`
+Expected: all green.
+
+- [ ] **Step 2: Merge with a merge commit**
+
+```bash
+git switch main
+git merge --no-ff feat/dynamic-page-size-options -m "Merge branch 'feat/dynamic-page-size-options'"
+git branch -d feat/dynamic-page-size-options
+```
+
+Never `--ff-only`. `git log --oneline` on `main` reads linear because feature branches are short, which makes fast-forward look like the matching choice; check `git log --merges` rather than the last few subject lines.
+
+---
+
 ## Verification
 
-After Task 10, the feature is complete when all of these hold:
+After Task 11, the feature is complete when all of these hold:
 
 - [ ] `pnpm test` passes — registry, schema, resolver, mutate and router tests
 - [ ] `pnpm typecheck` passes with `pageSizeOptions` required on `DataTable`
@@ -2165,3 +2203,5 @@ After Task 10, the feature is complete when all of these hold:
 - [ ] A fresh database with no `PageSizeConfig` rows renders every table exactly as it did before this work
 - [ ] An admin can configure each of the 9 tables and see the change take effect on its page
 - [ ] A non-admin sees no tab strip on `/panel/settings` and cannot reach the editor
+- [ ] `git log --merges -1` shows the feature branch's merge commit on `main`
+- [ ] `src/constants/app-version.ts` and `src/constants/releases.ts` are untouched

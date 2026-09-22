@@ -445,8 +445,3 @@ is clicked. A click on the outer tab must be inserted in both places.
 
 Not tested: the tab shell's URL syncing and the card's rendering. Both need
 component-test infrastructure to reach and are thin enough to verify by hand.
-
-## Release
-
-Version bump and changelog entry per the `release-checklist` skill —
-`src/constants/app-version.ts` and `src/constants/releases.ts` kept in sync.

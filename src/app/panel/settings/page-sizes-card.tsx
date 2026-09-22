@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
@@ -85,37 +85,71 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
         pageSizeTableOrder.map((key) => [key, toDraft(pageSizes[key])]),
       ) as Drafts,
   );
-  // Which section's Kaydet is in flight, so saving one section doesn't
-  // disable — or flash "Kaydediliyor..." on — every other section's button.
-  const [savingKey, setSavingKey] = useState<PageSizeTableKey | null>(null);
+  // Which sections have a Kaydet in flight, so saving one section doesn't
+  // disable — or flash "Kaydediliyor..." on — any other section's button,
+  // and two overlapping saves each track their own state instead of one
+  // clobbering the other.
+  const [savingKeys, setSavingKeys] = useState<Set<PageSizeTableKey>>(
+    () => new Set(),
+  );
+  /**
+   * The draft submitted per table key, captured at `save()` time. Not
+   * state — it must not trigger a render — just a way for `onSuccess` to
+   * tell "the draft I submitted" apart from "whatever the draft is now".
+   */
+  const submittedRef = useRef<Partial<Record<PageSizeTableKey, DraftConfig>>>(
+    {},
+  );
 
   const updateMutation = api.pageSize.update.useMutation({
     onSuccess: async (_data, variables) => {
       toast.success('Sayfa boyutu kaydedildi');
-      /**
-       * `variables.options`/`defaultValue` are what the server actually
-       * persisted — `fromDraft` already sorted `options` ascending before
-       * `mutate` was called. Resetting the draft to that value (rather than
-       * waiting on the refetch below) is what keeps this section's dirty
-       * check in sync: `sameDraft` compares element-by-index, so an
-       * unsorted-but-valid draft (e.g. adding a smaller option after
-       * removing the largest) would otherwise never match the
-       * now-ascending `saved` value and the section would stay dirty
-       * forever.
-       */
-      setDrafts((current) => ({
-        ...current,
-        [variables.tableKey]: toDraft({
-          options: variables.options,
-          defaultValue: variables.defaultValue,
-        }),
-      }));
+      setDrafts((current) => {
+        const submitted = submittedRef.current[variables.tableKey];
+        const stillUnchanged =
+          submitted !== undefined &&
+          sameDraft(current[variables.tableKey], submitted);
+        /**
+         * Only resync the draft if it still equals what was submitted. The
+         * inputs stay interactive during the round trip (disabling them
+         * mid-keystroke would be worse), so the admin may have kept
+         * editing this section while the request was in flight — in which
+         * case overwriting `drafts` here would silently discard that edit
+         * with no warning and no dirty dot to reveal the loss. If they did
+         * edit, the section is genuinely dirty again, correctly shows as
+         * such, and the next save resyncs it.
+         *
+         * When it IS still unchanged, `variables.options`/`defaultValue`
+         * are what the server actually persisted — `fromDraft` already
+         * sorted `options` ascending before `mutate` was called — so
+         * resetting to that value (rather than waiting on the refetch
+         * below) is what keeps `sameDraft`'s element-by-index comparison
+         * in sync: an unsorted-but-valid draft (e.g. adding a smaller
+         * option after removing the largest) would otherwise never match
+         * the now-ascending `saved` value and the section would stay
+         * dirty forever.
+         */
+        if (!stillUnchanged) return current;
+        return {
+          ...current,
+          [variables.tableKey]: toDraft({
+            options: variables.options,
+            defaultValue: variables.defaultValue,
+          }),
+        };
+      });
       // Refreshes both this card's dirty baseline and the option lists of
       // every mounted table.
       await utils.pageSize.get.invalidate();
     },
     onError: (error) => toast.error(error.message),
-    onSettled: () => setSavingKey(null),
+    onSettled: (_data, _error, variables) => {
+      setSavingKeys((current) => {
+        const next = new Set(current);
+        next.delete(variables.tableKey);
+        return next;
+      });
+    },
   });
 
   const edit = (key: PageSizeTableKey, next: DraftConfig) =>
@@ -131,7 +165,8 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
   const save = (key: PageSizeTableKey) => {
     const parsed = PageSizeTableConfigSchema.safeParse(fromDraft(drafts[key]));
     if (!parsed.success) return;
-    setSavingKey(key);
+    submittedRef.current[key] = drafts[key];
+    setSavingKeys((current) => new Set(current).add(key));
     updateMutation.mutate({ tableKey: key, ...parsed.data });
   };
 
@@ -145,7 +180,7 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
           const draft = drafts[key];
           const dirty = !sameDraft(draft, toDraft(saved[key]));
           const errors = rowErrors(draft);
-          const isSaving = savingKey === key;
+          const isSaving = savingKeys.has(key);
 
           return (
             <div

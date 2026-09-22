@@ -43,10 +43,15 @@ test.describe('admin-configurable page sizes', () => {
     try {
       await page.goto('/panel/settings?tab=page-sizes');
 
-      // Reduce Cari Kartları to a distinctive, deliberately unsorted set so
-      // the ascending-on-save guarantee is actually exercised: the router
-      // sorts on write, and out-of-order input is what proves that rather
-      // than assumes it.
+      // Reduce Cari Kartları to a distinctive, deliberately unsorted set —
+      // typed as 20 then 10 — so the assertions below exercise the full
+      // save-then-render path with input that isn't already in its final
+      // order, and prove the table ends up showing the options ascending
+      // regardless of entry order. Options actually pass through three
+      // separate sorts on the way there (client-side in `fromDraft`, the
+      // router's write, and the resolver's read), so this doesn't isolate
+      // or prove the router's own sort-on-write contract specifically —
+      // that's covered by `src/shared/page-sizes/normalize.test.ts`.
       const inputs = section.getByLabel('Sayfa Başı Satır Sayısı');
       await expect(inputs.first()).toBeVisible();
 

@@ -7,6 +7,7 @@ import { labelCompose } from '~/shared/labels/compose';
 import type { ResolvedPageSizes } from '~/shared/page-sizes/types';
 import BusinessGroupsTable from './business-groups-table';
 import { LabelsCard } from './labels-card';
+import { PageSizesCard } from './page-sizes-card';
 import SaleRepresentativesTable from './sale-representatives-table';
 
 const TAB_SLUGS = [
@@ -66,8 +67,7 @@ export function SettingsTabs({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
       </TabsContent>
 
       <TabsContent value="page-sizes">
-        {/* Replaced by <PageSizesCard /> in Task 9 */}
-        <div />
+        <PageSizesCard pageSizes={pageSizes} />
       </TabsContent>
     </Tabs>
   );

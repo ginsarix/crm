@@ -85,7 +85,10 @@ describe('resolvePageSizes', () => {
     // array — an in-place sort would return the same reference here.
     expect(resolved.customerCard.options).not.toBe(registryOptions);
     expect(pageSizeTables.customerCard.options).toEqual(before);
-    // visit and customerCard share one array reference in the registry
-    expect(pageSizeTables.visit.options).toEqual(before);
+    // visit and customerCard share one array reference in the registry, so a
+    // mutation via either key would show up on the other.
+    expect(pageSizeTables.visit.options).toBe(
+      pageSizeTables.customerCard.options,
+    );
   });
 });

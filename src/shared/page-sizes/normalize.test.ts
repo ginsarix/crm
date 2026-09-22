@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeUpdate } from './page-size';
+import { normalizeUpdate } from './normalize';
 
 describe('normalizeUpdate', () => {
   it('sorts options ascending', () => {

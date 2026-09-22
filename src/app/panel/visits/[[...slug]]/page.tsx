@@ -2,11 +2,14 @@ import { api, HydrateClient } from '~/trpc/server';
 import { VisitsPageClient } from '../page-client';
 
 export default async function VisitsPage() {
-  await api.visit.get.prefetch({});
+  const [, pageSizes] = await Promise.all([
+    api.visit.get.prefetch({}),
+    api.pageSize.get(),
+  ]);
 
   return (
     <HydrateClient>
-      <VisitsPageClient />
+      <VisitsPageClient pageSize={pageSizes.visit} />
     </HydrateClient>
   );
 }

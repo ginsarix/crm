@@ -26,6 +26,7 @@ import { useAuditLogStream } from '~/hooks/use-audit-log-stream';
 import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
 import { labelCompose } from '~/shared/labels/compose';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { BulkActionsBar } from '../_components/bulk-actions-bar';
@@ -37,11 +38,15 @@ type AuditLogWithUser = AuditLog & {
   user: Pick<User, 'id' | 'name' | 'email' | 'image'> | null;
 };
 
-export function AuditLogsPageClient() {
+export function AuditLogsPageClient({
+  pageSize,
+}: {
+  pageSize: PageSizeTableConfig;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSize.defaultValue,
   });
   const [selectedAuditLog, setSelectedAuditLog] =
     useState<AuditLogWithUser | null>(null);
@@ -162,6 +167,7 @@ export function AuditLogsPageClient() {
               data={data?.data ?? []}
               onRowSelectionChange={setRowSelection}
               pageCount={data?.pagination?.totalPages ?? -1}
+              pageSizeOptions={pageSize.options}
               pagination={pagination}
               rowSelection={rowSelection}
               setPagination={setPagination}

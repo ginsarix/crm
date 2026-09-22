@@ -8,11 +8,14 @@ export default async function AuditLogsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session?.user?.role !== 'admin') redirect('/panel/dashboard');
 
-  await api.auditLog.get.prefetch({});
+  const [, pageSizes] = await Promise.all([
+    api.auditLog.get.prefetch({}),
+    api.pageSize.get(),
+  ]);
 
   return (
     <HydrateClient>
-      <AuditLogsPageClient />
+      <AuditLogsPageClient pageSize={pageSizes.auditLog} />
     </HydrateClient>
   );
 }

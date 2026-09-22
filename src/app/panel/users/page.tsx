@@ -8,11 +8,14 @@ export default async function UsersPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session?.user?.role !== 'admin') redirect('/panel/dashboard');
 
-  await api.user.get.prefetch({});
+  const [, pageSizes] = await Promise.all([
+    api.user.get.prefetch({}),
+    api.pageSize.get(),
+  ]);
 
   return (
     <HydrateClient>
-      <UsersPageClient />
+      <UsersPageClient pageSizes={pageSizes} />
     </HydrateClient>
   );
 }

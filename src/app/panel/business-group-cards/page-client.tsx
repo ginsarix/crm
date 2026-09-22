@@ -8,6 +8,7 @@ import { useLabels } from '~/hooks/use-labels';
 import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { labelCompose } from '~/shared/labels/compose';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { api } from '~/trpc/react';
 
 import { DataTable } from '../../_components/data-table';
@@ -20,12 +21,16 @@ type BusinessGroupCardSearchScope =
   | 'all'
   | (typeof columnMap.businessGroupCard)[number];
 
-export function BusinessGroupCardsPageClient() {
+export function BusinessGroupCardsPageClient({
+  pageSize,
+}: {
+  pageSize: PageSizeTableConfig;
+}) {
   const labels = useLabels();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 50,
+    pageSize: pageSize.defaultValue,
   });
   const [search, setSearch] = useState('');
   const [searchScope, setSearchScope] =
@@ -100,7 +105,7 @@ export function BusinessGroupCardsPageClient() {
               }}
               exportFilename="meslek_grubu_kartlari"
               pageCount={data?.pagination?.totalPages ?? -1}
-              pageSizeOptions={[50, 100, 500]}
+              pageSizeOptions={pageSize.options}
               pagination={pagination}
               setPagination={setPagination}
               setSorting={setSorting}

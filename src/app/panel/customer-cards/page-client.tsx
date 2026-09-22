@@ -28,6 +28,7 @@ import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
 import { labelCompose } from '~/shared/labels/compose';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
 import { DistrictValidation } from '~/shared/zod-schemas/district';
 import { StatusValidation } from '~/shared/zod-schemas/status';
@@ -51,7 +52,11 @@ const ColorValidation = z.enum([
   'all',
 ]);
 
-export function CustomerCardsPageClient() {
+export function CustomerCardsPageClient({
+  pageSize,
+}: {
+  pageSize: PageSizeTableConfig;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const labels = useLabels();
@@ -59,7 +64,7 @@ export function CustomerCardsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSize.defaultValue,
   });
   const [selectedCustomerCard, setSelectedCustomerCard] =
     useState<CustomerCardRow | null>(null);
@@ -419,6 +424,7 @@ export function CustomerCardsPageClient() {
               getRowRestricted={(row) => row.isRestricted === true}
               onRowSelectionChange={setRowSelection}
               pageCount={data?.pagination?.totalPages ?? -1}
+              pageSizeOptions={pageSize.options}
               pagination={pagination}
               rowSelection={rowSelection}
               setPagination={setPagination}

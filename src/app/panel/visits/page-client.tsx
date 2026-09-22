@@ -25,6 +25,7 @@ import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
 import { labelCompose } from '~/shared/labels/compose';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { api } from '~/trpc/react';
 import type { RouterOutputs } from '~/trpc/types';
 
@@ -39,7 +40,11 @@ import { FilterControls } from './filter-controls';
 import RelatedVisitsDialog from './related-visits-dialog';
 import { ViewVisitDialog } from './view-dialog';
 
-export function VisitsPageClient() {
+export function VisitsPageClient({
+  pageSize,
+}: {
+  pageSize: PageSizeTableConfig;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const labels = useLabels();
@@ -47,7 +52,7 @@ export function VisitsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSize.defaultValue,
   });
   const [selectedVisit, setSelectedVisit] =
     useState<VisitWithCustomerCard | null>(null);
@@ -247,6 +252,7 @@ export function VisitsPageClient() {
               getRowRestricted={(row) => row.isRestricted === true}
               onRowSelectionChange={setRowSelection}
               pageCount={data?.pagination?.totalPages ?? -1}
+              pageSizeOptions={pageSize.options}
               pagination={pagination}
               rowSelection={rowSelection}
               setPagination={setPagination}

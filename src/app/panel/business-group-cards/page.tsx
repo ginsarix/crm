@@ -8,11 +8,14 @@ export default async function BusinessGroupCardsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session?.user?.role !== 'admin') redirect('/panel/dashboard');
 
-  await api.businessGroupCard.get.prefetch({});
+  const [, pageSizes] = await Promise.all([
+    api.businessGroupCard.get.prefetch({}),
+    api.pageSize.get(),
+  ]);
 
   return (
     <HydrateClient>
-      <BusinessGroupCardsPageClient />
+      <BusinessGroupCardsPageClient pageSize={pageSizes.businessGroupCard} />
     </HydrateClient>
   );
 }

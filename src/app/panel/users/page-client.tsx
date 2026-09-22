@@ -24,6 +24,7 @@ import { Spinner } from '~/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
+import type { ResolvedPageSizes } from '~/shared/page-sizes/types';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { BulkActionsBar } from '../_components/bulk-actions-bar';
@@ -33,11 +34,15 @@ import { FilterControls } from './filter-controls';
 import { UserReportTab } from './report-tab';
 import { ViewUserDialog } from './view-dialog';
 
-export function UsersPageClient() {
+export function UsersPageClient({
+  pageSizes,
+}: {
+  pageSizes: ResolvedPageSizes;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSizes.user.defaultValue,
   });
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -145,6 +150,7 @@ export function UsersPageClient() {
                   exportFilename="kullanıcılar"
                   onRowSelectionChange={setRowSelection}
                   pageCount={data?.pagination?.totalPages ?? -1}
+                  pageSizeOptions={pageSizes.user.options}
                   pagination={pagination}
                   rowSelection={rowSelection}
                   setPagination={setPagination}

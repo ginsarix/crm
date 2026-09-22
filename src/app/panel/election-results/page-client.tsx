@@ -17,6 +17,7 @@ import {
 import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
 import { labelCompose } from '~/shared/labels/compose';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import {
   ElectionResultUpdateSchema,
   electionResultCountKeys,
@@ -28,12 +29,16 @@ import type { ElectionResultRow } from './columns';
 import { createColumns } from './columns';
 import { FilterControls } from './filter-controls';
 
-export function ElectionResultsPageClient() {
+export function ElectionResultsPageClient({
+  pageSize,
+}: {
+  pageSize: PageSizeTableConfig;
+}) {
   const labels = useLabels();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSize.defaultValue,
   });
   const [search, setSearch] = useState('');
 
@@ -189,6 +194,7 @@ export function ElectionResultsPageClient() {
               footerColor={data?.totals.color}
               footerValues={footerValues}
               pageCount={data?.pagination?.totalPages ?? -1}
+              pageSizeOptions={pageSize.options}
               pagination={pagination}
               setPagination={setPagination}
               setSorting={setSorting}

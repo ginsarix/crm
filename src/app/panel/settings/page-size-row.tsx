@@ -1,9 +1,15 @@
 'use client';
 
-import { Trash2 } from 'lucide-react';
+import { InfoIcon, Trash2 } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip';
 import { cn } from '~/lib/utils';
 
 export function PageSizeRow({
@@ -45,10 +51,24 @@ export function PageSizeRow({
             value={value}
           />
           {/* Mirrors the checked radio for people who read the row rather than
-              the column — the radio alone is easy to miss at a glance. */}
+              the column — the radio alone is easy to miss at a glance. The
+              tooltip rides on the chip so the explanation sits with the thing
+              it explains, and only appears on the row it applies to. */}
           {isDefault && (
-            <Badge className="font-normal" variant="secondary">
+            <Badge className="gap-1 font-normal" variant="secondary">
               Varsayılan
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <InfoIcon className="size-3 shrink-0 cursor-help text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[260px]">
+                    <p className="text-xs">
+                      Bu liste açıldığında kullanılacak sayfa boyutu.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </Badge>
           )}
         </div>

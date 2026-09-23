@@ -11,6 +11,7 @@ import {
 } from '~/components/ui/dialog';
 import { Spinner } from '~/components/ui/spinner';
 import { useLabels } from '~/hooks/use-labels';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { createColumns } from '../audit-logs/columns';
@@ -27,6 +28,7 @@ interface ReportActionsDialogProps {
   userName: string;
   ipAddress?: string;
   deviceId?: string | null;
+  pageSize: PageSizeTableConfig;
 }
 
 export function ReportActionsDialog({
@@ -36,11 +38,12 @@ export function ReportActionsDialog({
   userName,
   ipAddress,
   deviceId,
+  pageSize,
 }: ReportActionsDialogProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSize.defaultValue,
   });
   const [selectedAuditLog, setSelectedAuditLog] =
     useState<AuditLogWithUser | null>(null);
@@ -84,6 +87,7 @@ export function ReportActionsDialog({
             columns={columns}
             data={data?.data ?? []}
             pageCount={data?.pagination?.totalPages ?? -1}
+            pageSizeOptions={pageSize.options}
             pagination={pagination}
             setPagination={setPagination}
             setSorting={setSorting}

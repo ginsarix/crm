@@ -24,6 +24,7 @@ import { Spinner } from '~/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
+import type { ResolvedPageSizes } from '~/shared/page-sizes/types';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { BulkActionsBar } from '../_components/bulk-actions-bar';
@@ -33,12 +34,19 @@ import { FilterControls } from './filter-controls';
 import { UserReportTab } from './report-tab';
 import { ViewUserDialog } from './view-dialog';
 
-export function UsersPageClient() {
+export function UsersPageClient({
+  pageSizes,
+}: {
+  pageSizes: ResolvedPageSizes;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSizes.user.defaultValue,
   });
+  // The largest configured option: at that size the whole result set is already
+  // on screen, so a save patches the cached page instead of refetching it.
+  const largestPageSize = Math.max(...pageSizes.user.options);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -145,6 +153,7 @@ export function UsersPageClient() {
                   exportFilename="kullanıcılar"
                   onRowSelectionChange={setRowSelection}
                   pageCount={data?.pagination?.totalPages ?? -1}
+                  pageSizeOptions={pageSizes.user.options}
                   pagination={pagination}
                   rowSelection={rowSelection}
                   setPagination={setPagination}
@@ -161,8 +170,8 @@ export function UsersPageClient() {
                 onOpenChange={setViewDialogOpen}
                 onUpdate={(updatedUser) => {
                   setSelectedUser(updatedUser);
-                  if (pagination.pageSize === 500) {
-                    // Largest page size — avoid re-fetching all 500 rows on
+                  if (pagination.pageSize === largestPageSize) {
+                    // Largest page size — avoid re-fetching the whole page on
                     // every save, patch the already-cached page instead
                     utils.user.get.setData(userQueryInput, (old) =>
                       old
@@ -219,7 +228,10 @@ export function UsersPageClient() {
           </TabsContent>
 
           <TabsContent value="report">
-            <UserReportTab />
+            <UserReportTab
+              actionsPageSize={pageSizes.userReportActions}
+              pageSize={pageSizes.userReport}
+            />
           </TabsContent>
         </Tabs>
       </div>

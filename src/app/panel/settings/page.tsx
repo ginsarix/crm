@@ -1,19 +1,21 @@
 import { headers } from 'next/headers';
 import { auth } from '~/server/better-auth';
 import { api, HydrateClient } from '~/trpc/server';
-import BusinessGroupsTable from './business-groups-table';
-import { LabelsCard } from './labels-card';
 import SaleRepresentativesTable from './sale-representatives-table';
+import { SettingsTabs } from './settings-tabs';
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const isAdmin = session?.user?.role === 'admin';
-  const labels = await api.label.get();
+  const [labels, pageSizes] = await Promise.all([
+    api.label.get(),
+    api.pageSize.get(),
+  ]);
 
   const prefetches = [
     api.salesRepresentative.getPaginated.prefetch({
       page: 1,
-      itemsPerPage: 25,
+      itemsPerPage: pageSizes.salesRepresentative.defaultValue,
       filter: { search: '' },
       sorting: [],
     }),
@@ -34,15 +36,13 @@ export default async function SettingsPage() {
         </div>
 
         <HydrateClient>
-          <div className="space-y-4">
-            <div
-              className={isAdmin ? 'grid grid-cols-1 gap-4 lg:grid-cols-2' : ''}
-            >
-              <SaleRepresentativesTable />
-              {isAdmin && <BusinessGroupsTable />}
-            </div>
-            {isAdmin && <LabelsCard />}
-          </div>
+          {isAdmin ? (
+            <SettingsTabs pageSizes={pageSizes} />
+          ) : (
+            <SaleRepresentativesTable
+              pageSize={pageSizes.salesRepresentative}
+            />
+          )}
         </HydrateClient>
       </div>
     </div>

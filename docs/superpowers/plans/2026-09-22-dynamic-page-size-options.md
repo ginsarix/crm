@@ -21,6 +21,7 @@
 - **Option value bounds: integer 1–500 inclusive.** Matches the existing `itemsPerPage: z.number().min(1).max(500)` in every router. No router validation changes.
 - **Option count bounds: 1–5 inclusive.**
 - **Verification commands:** `pnpm test`, `pnpm typecheck`, `pnpm check` (Biome). Run all three before any commit that touches source.
+- **`pnpm check` already fails on `main`** with 6 pre-existing findings (`data-table.tsx:558`, `changelog/page.tsx:90` and `:274`, `report-device-breakdown.tsx:3` and `:16`, `visits/columns.tsx:119`). The gate is **no new Biome findings in files this branch creates or modifies** — a non-zero exit caused only by those six does not block a task, and fixing them is out of scope for this branch. Task 7 modifies `data-table.tsx`, which carries one of them; leave it alone.
 - **Do not remove the ~100ms artificial timing delay** in `src/server/api/trpc.ts` — it is intentional in dev.
 - **Branch and merge.** Work on `feat/dynamic-page-size-options`, never directly on `main`. Merge with a merge commit, never fast-forwarded:
   ```bash
@@ -1491,7 +1492,15 @@ Every call site now passes config, so the fallback can go — and the four hardc
 - Consumes: every migrated call site from Tasks 5 and 6
 - Produces: `DataTableProps.pageSizeOptions` is `number[]`, no longer optional
 
-- [ ] **Step 1: Make the prop required**
+- [ ] **Step 1: Express pagination as all-or-nothing**
+
+> **Superseded during execution.** The step below assumed all call sites
+> paginate and told you to make `pageSizeOptions` unconditionally required.
+> There are ten call sites, and the Meslek Grupları table is unpaginated, so the
+> prop became part of a union instead: `pagination`, `setPagination` and
+> `pageSizeOptions` are all present or all absent. The default value is still
+> removed. See the spec's "DataTable" section for the implemented shape.
+
 
 In `src/app/_components/data-table.tsx`, change line 111 in `DataTableProps`:
 
@@ -2197,7 +2206,12 @@ After Task 11, the feature is complete when all of these hold:
 - [ ] `pnpm test` passes — registry, schema, resolver, mutate and router tests
 - [ ] `pnpm typecheck` passes with `pageSizeOptions` required on `DataTable`
 - [ ] `pnpm check` passes
-- [ ] `pnpm test:e2e` passes both specs
+- [ ] `pnpm test:e2e e2e/page-sizes.spec.ts` passes (verified stable: 9/9 runs)
+- [ ] `e2e/labels.spec.ts` is no worse than `main` — it fails on `main` too, from a
+      pre-existing hydration mismatch in `sidebar-nav.tsx` that the user has
+      confirmed as known and WONTFIX. Not this branch's to fix.
+- [ ] `pnpm build` succeeds
+- [ ] `git diff main..HEAD` on the four Meslek Grupları files is empty
 - [ ] `grep -rn "pageSize === 500" src/` returns nothing
 - [ ] `grep -rn "pageSizeOptions = \[" src/` returns nothing
 - [ ] A fresh database with no `PageSizeConfig` rows renders every table exactly as it did before this work

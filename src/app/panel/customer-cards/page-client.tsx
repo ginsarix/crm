@@ -28,6 +28,7 @@ import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
 import { labelCompose } from '~/shared/labels/compose';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
 import { DistrictValidation } from '~/shared/zod-schemas/district';
 import { StatusValidation } from '~/shared/zod-schemas/status';
@@ -51,7 +52,11 @@ const ColorValidation = z.enum([
   'all',
 ]);
 
-export function CustomerCardsPageClient() {
+export function CustomerCardsPageClient({
+  pageSize,
+}: {
+  pageSize: PageSizeTableConfig;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const labels = useLabels();
@@ -59,8 +64,11 @@ export function CustomerCardsPageClient() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSize.defaultValue,
   });
+  // The largest configured option: at that size the whole result set is already
+  // on screen, so a save patches the cached page instead of refetching it.
+  const largestPageSize = Math.max(...pageSize.options);
   const [selectedCustomerCard, setSelectedCustomerCard] =
     useState<CustomerCardRow | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -419,6 +427,7 @@ export function CustomerCardsPageClient() {
               getRowRestricted={(row) => row.isRestricted === true}
               onRowSelectionChange={setRowSelection}
               pageCount={data?.pagination?.totalPages ?? -1}
+              pageSizeOptions={pageSize.options}
               pagination={pagination}
               rowSelection={rowSelection}
               setPagination={setPagination}
@@ -436,8 +445,8 @@ export function CustomerCardsPageClient() {
             onOpenChange={handleViewDialogOpenChange}
             onUpdate={(updatedCustomerCard) => {
               setSelectedCustomerCard(updatedCustomerCard);
-              if (pagination.pageSize === 500) {
-                // Largest page size — avoid re-fetching all 500 rows on
+              if (pagination.pageSize === largestPageSize) {
+                // Largest page size — avoid re-fetching the whole page on
                 // every save, patch the already-cached page instead
                 utils.customerCard.get.setData(customerCardQueryInput, (old) =>
                   old

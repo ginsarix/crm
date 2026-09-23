@@ -98,17 +98,14 @@ function rowColorClass(color: RowColor | null | undefined) {
   );
 }
 
-interface DataTableProps<TData, TValue> {
+interface DataTableBaseProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   sorting?: SortingState;
-  pagination?: PaginationState;
   setSorting?: OnChangeFn<SortingState>;
-  setPagination?: OnChangeFn<PaginationState>;
   className?: string;
   pageCount?: number;
   totalCount?: number;
-  pageSizeOptions?: number[];
   tableId?: string;
   defaultColumnVisibility?: VisibilityState;
   exportFilename?: string;
@@ -128,6 +125,30 @@ interface DataTableProps<TData, TValue> {
   /** Tints the footer row with the same palette the body rows use. */
   footerColor?: RowColor | null;
 }
+
+/**
+ * Pagination is all-or-nothing: a table either paginates — in which case it
+ * must declare its own `pageSizeOptions` rather than silently falling back to
+ * defaults that may no longer mean anything — or it doesn't paginate at all.
+ * `business-groups-table.tsx` (Meslek Grupları) is the real case that
+ * motivates this: it renders every row with no rows-per-page control, so it
+ * passes none of these three props, and the type says that's a legitimate
+ * shape rather than a table that forgot to wire pagination up.
+ */
+type DataTablePaginationProps =
+  | {
+      pagination: PaginationState;
+      setPagination: OnChangeFn<PaginationState>;
+      pageSizeOptions: number[];
+    }
+  | {
+      pagination?: never;
+      setPagination?: never;
+      pageSizeOptions?: never;
+    };
+
+type DataTableProps<TData, TValue> = DataTableBaseProps<TData, TValue> &
+  DataTablePaginationProps;
 
 function getVisibilityKey(tableId: string) {
   return `table-columns-${tableId}`;
@@ -312,7 +333,7 @@ export function DataTable<TData, TValue>({
   className,
   pageCount = -1,
   totalCount,
-  pageSizeOptions = [25, 50, 100, 500],
+  pageSizeOptions,
   tableId = 'default',
   defaultColumnVisibility = {},
   exportFilename,
@@ -506,7 +527,7 @@ export function DataTable<TData, TValue>({
         className={cn(
           'overflow-x-auto rounded-lg rounded-t-none border bg-card',
           className,
-          pagination && setPagination && 'rounded-b-none',
+          pagination && 'rounded-b-none',
         )}
       >
         <Table
@@ -666,7 +687,7 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      {pagination && setPagination && (
+      {pagination && (
         <div className="flex items-center justify-between rounded-b-lg border-x border-b bg-card px-4 py-3">
           <div className="flex items-center gap-2">
             {totalCount !== undefined && (

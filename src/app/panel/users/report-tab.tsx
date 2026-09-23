@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Spinner } from '~/components/ui/spinner';
 import type { columnMap } from '~/lib/column-map';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { api } from '~/trpc/react';
 import { DataTable } from '../../_components/data-table';
 import { FilterControls } from './filter-controls';
@@ -19,11 +20,17 @@ interface ActionsTarget {
   deviceId?: string | null;
 }
 
-export function UserReportTab() {
+export function UserReportTab({
+  actionsPageSize,
+  pageSize,
+}: {
+  actionsPageSize: PageSizeTableConfig;
+  pageSize: PageSizeTableConfig;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSize.defaultValue,
   });
   const [search, setSearch] = useState('');
   const [searchScope, setSearchScope] = useState<
@@ -83,6 +90,7 @@ export function UserReportTab() {
             columns={columns}
             data={data?.data ?? []}
             pageCount={data?.pagination?.totalPages ?? -1}
+            pageSizeOptions={pageSize.options}
             pagination={pagination}
             renderSubRow={(row) =>
               row.id === expandedUserId ? (
@@ -117,6 +125,7 @@ export function UserReportTab() {
           }`}
           onOpenChange={setActionsOpen}
           open={actionsOpen}
+          pageSize={actionsPageSize}
           userId={actionsTarget.userId}
           userName={actionsTarget.userName}
         />

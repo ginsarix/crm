@@ -8,6 +8,7 @@ import { useLabels } from '~/hooks/use-labels';
 import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { labelCompose } from '~/shared/labels/compose';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { api } from '~/trpc/react';
 
 import { DataTable } from '../../_components/data-table';
@@ -20,13 +21,20 @@ type BusinessGroupCardSearchScope =
   | 'all'
   | (typeof columnMap.businessGroupCard)[number];
 
-export function BusinessGroupCardsPageClient() {
+export function BusinessGroupCardsPageClient({
+  pageSize,
+}: {
+  pageSize: PageSizeTableConfig;
+}) {
   const labels = useLabels();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 50,
+    pageSize: pageSize.defaultValue,
   });
+  // The largest configured option: at that size the whole result set is already
+  // on screen, so a save patches the cached page instead of refetching it.
+  const largestPageSize = Math.max(...pageSize.options);
   const [search, setSearch] = useState('');
   const [searchScope, setSearchScope] =
     useState<BusinessGroupCardSearchScope>('all');
@@ -100,7 +108,7 @@ export function BusinessGroupCardsPageClient() {
               }}
               exportFilename="meslek_grubu_kartlari"
               pageCount={data?.pagination?.totalPages ?? -1}
-              pageSizeOptions={[50, 100, 500]}
+              pageSizeOptions={pageSize.options}
               pagination={pagination}
               setPagination={setPagination}
               setSorting={setSorting}
@@ -117,8 +125,8 @@ export function BusinessGroupCardsPageClient() {
             onOpenChange={setEditDialogOpen}
             onUpdate={(updated) => {
               setSelectedRow(updated);
-              if (pagination.pageSize === 500) {
-                // Largest page size — avoid re-fetching all 500 rows on
+              if (pagination.pageSize === largestPageSize) {
+                // Largest page size — avoid re-fetching the whole page on
                 // every save, patch the already-cached page instead
                 utils.businessGroupCard.get.setData(
                   businessGroupCardQueryInput,

@@ -164,6 +164,14 @@ model LabelOverride {
   updatedById String?
 }
 
+model PageSizeConfig {
+  tableKey     String   @id
+  options      Json
+  defaultValue Int
+  updatedAt    DateTime @updatedAt
+  updatedById  String?
+}
+
 enum Color {
   green
   blue

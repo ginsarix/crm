@@ -7,6 +7,7 @@ import { customerCardRouter } from '~/server/api/routers/customer-card';
 import { electionResultRouter } from '~/server/api/routers/election-result';
 import { feedbackRouter } from '~/server/api/routers/feedback';
 import { labelRouter } from '~/server/api/routers/label';
+import { pageSizeRouter } from '~/server/api/routers/page-size';
 import { salesRepresentativeRouter } from '~/server/api/routers/sales-representative';
 import { savedFilterRouter } from '~/server/api/routers/saved-filter';
 import { userRouter } from '~/server/api/routers/user';
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   electionResult: electionResultRouter,
   feedback: feedbackRouter,
   label: labelRouter,
+  pageSize: pageSizeRouter,
   user: userRouter,
   userReport: userReportRouter,
   visit: visitRouter,

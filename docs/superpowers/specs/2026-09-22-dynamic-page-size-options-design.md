@@ -16,7 +16,15 @@ new editor alongside the existing cards.
 
 ## Scope
 
-All 9 `DataTable` call sites become configurable:
+There are **ten** `DataTable` call sites. Nine are paginated and become
+configurable; the tenth, the Meslek Grupları table
+(`src/app/panel/settings/business-groups-table.tsx`), passes no
+`pagination`/`setPagination` and so renders no rows-per-page control at all. It
+is deliberately **out of scope** and receives no changes from this feature —
+confirmed by the user. (Note `businessGroupCard` / Meslek Grubu Kartları is a
+different table and IS in scope.)
+
+The nine configurable call sites:
 
 | Table key             | Call site                                              |
 | --------------------- | ------------------------------------------------------ |
@@ -215,10 +223,21 @@ Route breakdown:
 ### `DataTable`
 
 `src/app/_components/data-table.tsx:315` loses its
-`pageSizeOptions = [25, 50, 100, 500]` default and makes the prop **required**. A
-table that forgets to pass config should fail typecheck, not silently fall back
-to numbers that no longer mean anything. This turns the migration into a
-compiler-enforced checklist across the 9 sites.
+`pageSizeOptions = [25, 50, 100, 500]` default, and the props type expresses the
+real invariant: **pagination is all-or-nothing**. `pagination`, `setPagination`
+and `pageSizeOptions` are either all present or all absent, as a union:
+
+```ts
+type DataTablePaginationProps =
+  | { pagination: PaginationState; setPagination: OnChangeFn<PaginationState>; pageSizeOptions: number[] }
+  | { pagination?: never; setPagination?: never; pageSizeOptions?: never };
+```
+
+An unconditionally required prop was the original plan, on the mistaken premise
+that all call sites paginate. The Meslek Grupları table does not, and forcing it
+to supply a meaningless options array to satisfy the compiler would be a lie in
+the type system. The union keeps the migration compiler-enforced for the nine
+paginated tables while leaving the unpaginated one honest.
 
 ### The `=== 500` cache-patch checks
 

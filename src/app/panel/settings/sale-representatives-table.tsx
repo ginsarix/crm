@@ -28,17 +28,22 @@ import {
 import { useLabels } from '~/hooks/use-labels';
 import { cn } from '~/lib/utils';
 import { labelCompose } from '~/shared/labels/compose';
+import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { api } from '~/trpc/react';
 import { CreateSaleRepresentativeDialog } from './create-sale-representative-dialog';
 import { createColumns } from './sale-representatives-columns';
 import { ViewSaleRepresentativeDialog } from './view-sale-representative-dialog';
 
-export default function SaleRepresentativesTable() {
+export default function SaleRepresentativesTable({
+  pageSize,
+}: {
+  pageSize: PageSizeTableConfig;
+}) {
   const labels = useLabels();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: pageSize.defaultValue,
   });
   const [selectedSalesRepresentative, setSelectedSalesRepresentative] =
     useState<SalesRepresentative | null>(null);
@@ -135,6 +140,7 @@ export default function SaleRepresentativesTable() {
         exportFilename="satis_temsilcileri"
         onRowSelectionChange={setRowSelection}
         pageCount={data?.pagination?.totalPages ?? -1}
+        pageSizeOptions={pageSize.options}
         pagination={pagination}
         rowSelection={rowSelection}
         setPagination={setPagination}

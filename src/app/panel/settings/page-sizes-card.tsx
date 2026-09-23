@@ -1,10 +1,16 @@
 'use client';
 
-import { Plus } from 'lucide-react';
+import { InfoIcon, Plus } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip';
 import { useLabels } from '~/hooks/use-labels';
 import { labelCompose } from '~/shared/labels/compose';
 import {
@@ -195,6 +201,30 @@ export function PageSizesCard({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
                 {dirty && (
                   <span className="inline-block size-1.5 rounded-full bg-primary" />
                 )}
+              </div>
+
+              {/* Column header for the radios. Left-aligned with the radio
+                  itself rather than indented — the label is wider than the
+                  control it heads, so any spacer pushes it over the value
+                  column and reads as though it labels the inputs. */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium text-muted-foreground text-xs">
+                    Varsayılan
+                  </span>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <InfoIcon className="size-3.5 shrink-0 cursor-help text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[260px]">
+                        <p className="text-xs">
+                          Bu liste açıldığında kullanılacak sayfa boyutu.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
 
               <div className="space-y-2">

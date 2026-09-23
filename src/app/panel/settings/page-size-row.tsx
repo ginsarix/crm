@@ -1,6 +1,7 @@
 'use client';
 
 import { Trash2 } from 'lucide-react';
+import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { cn } from '~/lib/utils';
@@ -35,13 +36,22 @@ export function PageSizeRow({
         type="radio"
       />
       <div className="flex-1">
-        <Input
-          aria-label="Sayfa Başı Satır Sayısı"
-          className={cn('w-28', error && 'border-destructive')}
-          inputMode="numeric"
-          onChange={(event) => onChange(event.target.value)}
-          value={value}
-        />
+        <div className="flex items-center gap-2">
+          <Input
+            aria-label="Sayfa Başı Satır Sayısı"
+            className={cn('w-28', error && 'border-destructive')}
+            inputMode="numeric"
+            onChange={(event) => onChange(event.target.value)}
+            value={value}
+          />
+          {/* Mirrors the checked radio for people who read the row rather than
+              the column — the radio alone is easy to miss at a glance. */}
+          {isDefault && (
+            <Badge className="font-normal" variant="secondary">
+              Varsayılan
+            </Badge>
+          )}
+        </div>
         {error && <p className="mt-1 text-destructive text-xs">{error}</p>}
       </div>
       <Button

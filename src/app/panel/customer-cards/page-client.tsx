@@ -22,11 +22,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { Spinner } from '~/components/ui/spinner';
 import { useLabels } from '~/hooks/use-labels';
 import type { columnMap } from '~/lib/column-map';
 import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
+import { VOTES_SELECT_MAP } from '~/shared/constants';
 import { labelCompose } from '~/shared/labels/compose';
 import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
@@ -76,6 +84,12 @@ export function CustomerCardsPageClient({
   type BulkColor = 'green' | 'blue' | 'orange' | 'yellow' | 'gray' | 'purple';
   const [bulkColor, setBulkColor] = useState<BulkColor | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  // '__null__' is the Boş option, same sentinel the view/create dialogs use.
+  const [bulkVote, setBulkVote] = useState<
+    $Enums.Vote | '__null__' | undefined
+  >(undefined);
+  const { data: appSettings } = api.appSetting.get.useQuery();
+  const bulkMode = appSettings?.customerCardBulkMode;
 
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === 'admin';
@@ -211,6 +225,18 @@ export function CustomerCardsPageClient({
     onError: () => toast.error('Renk güncellenirken hata oluştu'),
   });
 
+  const bulkUpdateVoteMutation = api.customerCard.bulkUpdateVote.useMutation({
+    onSuccess: (result) => {
+      utils.customerCard.get.invalidate();
+      toast.success(
+        `${result.count} ${labels.entity.customerCard.singular} güncellendi`,
+      );
+      setRowSelection({});
+      setBulkVote(undefined);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
   const bulkDeleteMutation = api.customerCard.bulkDelete.useMutation({
     onSuccess: (result) => {
       utils.customerCard.get.invalidate();
@@ -308,41 +334,80 @@ export function CustomerCardsPageClient({
       count={selectedIds.length}
       onClear={() => setRowSelection({})}
     >
-      <ColorControl
-        color={
-          (bulkColor ?? 'all') as
-            | 'green'
-            | 'blue'
-            | 'orange'
-            | 'yellow'
-            | 'gray'
-            | 'purple'
-            | 'all'
-        }
-        setColor={(c) => setBulkColor(c === 'all' ? null : (c as BulkColor))}
-      />
-      <Button
-        disabled={!bulkColor || bulkUpdateColorMutation.isPending}
-        onClick={() =>
-          bulkUpdateColorMutation.mutate({
-            ids: selectedIds,
-            color: bulkColor as $Enums.Color,
-          })
-        }
-        size="sm"
-      >
-        {bulkUpdateColorMutation.isPending ? 'Uygulanıyor...' : 'Uygula'}
-      </Button>
-      {isAdmin && (
-        <Button
-          onClick={() => setDeleteConfirmOpen(true)}
-          size="sm"
-          variant="destructive"
+      {/* Arrays, not fragments: BulkActionsBar animates each direct child
+          separately, and Children.map flattens arrays but not fragments. */}
+      {bulkMode === 'vote' && [
+        <Select
+          key="vote"
+          onValueChange={(v) => setBulkVote(v as $Enums.Vote | '__null__')}
+          value={bulkVote ?? ''}
         >
-          <Trash2 className="h-4 w-4" />
-          Sil
-        </Button>
-      )}
+          <SelectTrigger className="h-8 w-40" size="sm">
+            <SelectValue placeholder={labels.field.customerCard.vote} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__null__">Boş</SelectItem>
+            {VOTES_SELECT_MAP.map((v) => (
+              <SelectItem key={v.value} value={v.value}>
+                {v.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>,
+        <Button
+          disabled={!bulkVote || bulkUpdateVoteMutation.isPending}
+          key="apply"
+          onClick={() =>
+            bulkUpdateVoteMutation.mutate({
+              ids: selectedIds,
+              vote: bulkVote === '__null__' ? null : (bulkVote ?? null),
+            })
+          }
+          size="sm"
+        >
+          {bulkUpdateVoteMutation.isPending ? 'Uygulanıyor...' : 'Uygula'}
+        </Button>,
+      ]}
+      {bulkMode === 'color_delete' && [
+        <ColorControl
+          color={
+            (bulkColor ?? 'all') as
+              | 'green'
+              | 'blue'
+              | 'orange'
+              | 'yellow'
+              | 'gray'
+              | 'purple'
+              | 'all'
+          }
+          key="color"
+          setColor={(c) => setBulkColor(c === 'all' ? null : (c as BulkColor))}
+        />,
+        <Button
+          disabled={!bulkColor || bulkUpdateColorMutation.isPending}
+          key="apply"
+          onClick={() =>
+            bulkUpdateColorMutation.mutate({
+              ids: selectedIds,
+              color: bulkColor as $Enums.Color,
+            })
+          }
+          size="sm"
+        >
+          {bulkUpdateColorMutation.isPending ? 'Uygulanıyor...' : 'Uygula'}
+        </Button>,
+        isAdmin && (
+          <Button
+            key="delete"
+            onClick={() => setDeleteConfirmOpen(true)}
+            size="sm"
+            variant="destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+            Sil
+          </Button>
+        ),
+      ]}
     </BulkActionsBar>
   );
 

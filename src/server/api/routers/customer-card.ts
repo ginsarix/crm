@@ -1,12 +1,14 @@
 import { TRPCError } from '@trpc/server';
-import type { Prisma } from 'generated/prisma';
+import type { Prisma, PrismaClient } from 'generated/prisma';
 import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
-import { COLOR_DISPLAY_NAME_MAP } from '~/shared/constants';
+import { COLOR_DISPLAY_NAME_MAP, VOTES_SELECT_MAP } from '~/shared/constants';
+import type { CustomerCardBulkMode } from '~/shared/zod-schemas/app-setting';
 import {
   CustomerCardCreateSchema,
   CustomerCardFindManySelectSchema,
 } from '~/shared/zod-schemas/customer-card';
+import { VoteValidation } from '~/shared/zod-schemas/vote';
 import { getActiveGraySubtractionBusinessGroupName } from '../lib/gray-subtraction-business-group';
 import { getPassiveBusinessGroupNames } from '../lib/passive-business-groups';
 import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
@@ -16,6 +18,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from '../trpc';
+import { getAppSettings } from './app-setting';
 
 // Fields eligible for the "boş alan" (missing-value) filter — every
 // customerCard column except id/createdAt/updatedAt (technical fields) and
@@ -23,6 +26,21 @@ import {
 const emptyFields = columnMap.customerCard.filter(
   (key) => !['id', 'createdAt', 'updatedAt', 'color'].includes(key),
 );
+
+/**
+ * The "Genel" settings tab decides which bulk actions the multi-select bar
+ * offers. Enforced here too so a stale tab or a hand-crafted request cannot
+ * use the actions the admin switched off.
+ */
+async function assertBulkMode(db: PrismaClient, allowed: CustomerCardBulkMode) {
+  const { customerCardBulkMode } = await getAppSettings(db);
+  if (customerCardBulkMode !== allowed) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Bu toplu işlem ayarlardan kapatılmış',
+    });
+  }
+}
 
 // Enum fields have no empty-string variant — "empty" means null for these
 const emptyEnumFields = ['district', 'status', 'authorizationDocument', 'vote'];
@@ -537,6 +555,7 @@ export const customerCardRouter = createTRPCRouter({
   bulkDelete: adminProcedure
     .input(z.object({ ids: z.array(z.string()).min(1) }))
     .mutation(async ({ ctx, input }) => {
+      await assertBulkMode(ctx.db, 'color_delete');
       try {
         const result = await ctx.db.customerCard.deleteMany({
           where: { id: { in: input.ids } },
@@ -573,6 +592,7 @@ export const customerCardRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await assertBulkMode(ctx.db, 'color_delete');
       try {
         const result = await ctx.db.customerCard.updateMany({
           where: { id: { in: input.ids } },
@@ -597,6 +617,49 @@ export const customerCardRouter = createTRPCRouter({
           'FAILURE',
           error instanceof Error ? error.message : 'Bilinmeyen hata',
           `Toplu renk güncellemesi başarısız`,
+        );
+        throw error;
+      }
+    }),
+
+  bulkUpdateVote: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string()).min(1),
+        vote: VoteValidation.nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertBulkMode(ctx.db, 'vote');
+      try {
+        const result = await ctx.db.customerCard.updateMany({
+          where: { id: { in: input.ids } },
+          data: { vote: input.vote },
+        });
+        const voteLabel = VOTES_SELECT_MAP.find(
+          (v) => v.value === input.vote,
+        )?.label;
+        await createAuditLog(
+          ctx,
+          'CUSTOMER_CARD_UPDATED',
+          'CUSTOMER_CARD',
+          input.ids.join(','),
+          'SUCCESS',
+          undefined,
+          voteLabel
+            ? `${result.count} cari kartın oyu "${voteLabel}" olarak güncellendi (toplu)`
+            : `${result.count} cari kartın oyu temizlendi (toplu)`,
+        );
+        return result;
+      } catch (error) {
+        await createAuditLog(
+          ctx,
+          'CUSTOMER_CARD_UPDATED',
+          'CUSTOMER_CARD',
+          input.ids.join(','),
+          'FAILURE',
+          error instanceof Error ? error.message : 'Bilinmeyen hata',
+          `Toplu oy güncellemesi başarısız`,
         );
         throw error;
       }

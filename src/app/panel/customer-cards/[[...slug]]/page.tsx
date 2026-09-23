@@ -3,8 +3,9 @@ import { api, HydrateClient } from '~/trpc/server';
 import { CustomerCardsPageClient } from '../page-client';
 
 export default async function CustomerCardsPage() {
-  const [, , , pageSizes] = await Promise.all([
+  const [, , , , pageSizes] = await Promise.all([
     api.customerCard.get.prefetch({}),
+    api.appSetting.get.prefetch(),
     api.businessGroup.get.prefetch(),
     api.salesRepresentative.get.prefetch(),
     // `api.pageSize.get()` is a direct call, not a prefetch — unlike the

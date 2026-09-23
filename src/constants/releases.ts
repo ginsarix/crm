@@ -21,6 +21,23 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 'v1-26',
+    version: '1.26',
+    date: '27 Eylül 2026',
+    changes: [
+      {
+        type: 'new',
+        title: 'Cari kartlarda toplu oy değiştirme',
+        desc: 'Birden fazla cari kart seçildiğinde sunulan işlemler artık yöneticiler tarafından 2 farklı ihtiyaca göre değiştirilebiliyor: renk ve silme ya da yalnızca Oy (Geldi/Gelmedi/Boş) güncellemesi.',
+      },
+      {
+        type: 'fix',
+        title: 'Seçim kutularında Türkçe karakterli arama düzeltildi',
+        desc: 'Seçim kutuları, komut paleti ve öneri listelerinde "hacibektas" ya da "ışık" gibi yazımlar artık HACIBEKTAŞ ve IŞIK gibi kayıtları da buluyor.',
+      },
+    ],
+  },
+  {
     id: 'v1-25',
     version: '1.25',
     date: '19 Eylül 2026',

@@ -65,6 +65,7 @@ export function auditActionLabels(labels: ResolvedLabels) {
 
     LABEL_UPDATED: 'Etiketler Güncellendi',
     PAGE_SIZE_UPDATED: 'Sayfa Boyutu Güncellendi',
+    GENERAL_SETTINGS_UPDATED: 'Genel Ayarlar Güncellendi',
   };
 }
 

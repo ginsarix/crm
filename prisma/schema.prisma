@@ -148,6 +148,22 @@ model DashboardConfig {
   updatedAt DateTime @updatedAt
 }
 
+/// Singleton row for the "Genel" settings tab. A missing row means every
+/// setting is at its default.
+model AppSetting {
+  id                   String               @id @default("singleton")
+  customerCardBulkMode CustomerCardBulkMode @default(color_delete)
+  updatedAt            DateTime             @updatedAt
+  updatedById          String?
+}
+
+/// What the customer-card multi-select bar offers: the color picker plus
+/// delete, or only setting `vote`.
+enum CustomerCardBulkMode {
+  color_delete
+  vote
+}
+
 model SalesRepresentative {
   id        String   @id @default(cuid())
   name      String

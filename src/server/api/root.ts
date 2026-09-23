@@ -1,5 +1,6 @@
 import { activityRouter } from '~/server/api/routers/activity';
 import { announcementRouter } from '~/server/api/routers/announcement';
+import { appSettingRouter } from '~/server/api/routers/app-setting';
 import { auditLogRouter } from '~/server/api/routers/audit-log';
 import { businessGroupRouter } from '~/server/api/routers/business-group';
 import { businessGroupCardRouter } from '~/server/api/routers/business-group-card';
@@ -24,6 +25,7 @@ import { dashboardConfigRouter } from './routers/dashboard-config';
 export const appRouter = createTRPCRouter({
   activity: activityRouter,
   announcement: announcementRouter,
+  appSetting: appSettingRouter,
   auditLog: auditLogRouter,
   businessGroup: businessGroupRouter,
   businessGroupCard: businessGroupCardRouter,

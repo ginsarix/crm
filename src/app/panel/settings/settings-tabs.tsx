@@ -6,11 +6,13 @@ import { useLabels } from '~/hooks/use-labels';
 import { labelCompose } from '~/shared/labels/compose';
 import type { ResolvedPageSizes } from '~/shared/page-sizes/types';
 import BusinessGroupsTable from './business-groups-table';
+import { GeneralCard } from './general-card';
 import { LabelsCard } from './labels-card';
 import { PageSizesCard } from './page-sizes-card';
 import SaleRepresentativesTable from './sale-representatives-table';
 
 const TAB_SLUGS = [
+  'general',
   'sales-representatives',
   'business-groups',
   'labels',
@@ -26,7 +28,7 @@ export function SettingsTabs({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
   const labels = useLabels();
   const searchParams = useSearchParams();
   const param = searchParams.get('tab');
-  const active: TabSlug = isTabSlug(param) ? param : 'sales-representatives';
+  const active: TabSlug = isTabSlug(param) ? param : 'general';
 
   /**
    * `window.history.replaceState` rather than `router.replace`: this is the
@@ -44,6 +46,7 @@ export function SettingsTabs({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
   return (
     <Tabs onValueChange={handleChange} value={active}>
       <TabsList className="mb-4">
+        <TabsTrigger value="general">Genel</TabsTrigger>
         <TabsTrigger value="sales-representatives">
           {labelCompose.tableTitle(labels.entity.salesRepresentative)}
         </TabsTrigger>
@@ -53,6 +56,10 @@ export function SettingsTabs({ pageSizes }: { pageSizes: ResolvedPageSizes }) {
         <TabsTrigger value="labels">Etiketler</TabsTrigger>
         <TabsTrigger value="page-sizes">Sayfa Boyutu</TabsTrigger>
       </TabsList>
+
+      <TabsContent value="general">
+        <GeneralCard />
+      </TabsContent>
 
       <TabsContent value="sales-representatives">
         <SaleRepresentativesTable pageSize={pageSizes.salesRepresentative} />

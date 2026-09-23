@@ -20,7 +20,12 @@ export default async function SettingsPage() {
       sorting: [],
     }),
   ];
-  if (isAdmin) prefetches.push(api.businessGroup.get.prefetch());
+  if (isAdmin) {
+    prefetches.push(
+      api.businessGroup.get.prefetch(),
+      api.appSetting.get.prefetch(),
+    );
+  }
   await Promise.all(prefetches);
 
   return (

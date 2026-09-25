@@ -2,6 +2,7 @@ import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import type { NextRequest } from 'next/server';
 
 import { env } from '~/env';
+import { TRPC_MAX_BATCH_SIZE } from '~/lib/trpc-batch';
 import { appRouter } from '~/server/api/root';
 import { createTRPCContext } from '~/server/api/trpc';
 
@@ -20,6 +21,10 @@ const handler = (req: NextRequest) =>
     endpoint: '/api/trpc',
     req,
     router: appRouter,
+    // Caps how many calls one HTTP request can carry, so a single request
+    // can't fan out into hundreds of expensive procedure runs. The client
+    // link splits batches at the same limit.
+    maxBatchSize: TRPC_MAX_BATCH_SIZE,
     createContext: () => createContext(req),
     onError:
       env.NODE_ENV === 'development'

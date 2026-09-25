@@ -6,6 +6,7 @@ import { createTRPCReact } from '@trpc/react-query';
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { useState } from 'react';
 import SuperJSON from 'superjson';
+import { TRPC_MAX_BATCH_SIZE } from '~/lib/trpc-batch';
 
 import type { AppRouter } from '~/server/api/root';
 import { createQueryClient } from './query-client';
@@ -51,6 +52,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
         }),
         httpBatchStreamLink({
           transformer: SuperJSON,
+          maxItems: TRPC_MAX_BATCH_SIZE,
           url: `${getBaseUrl()}/api/trpc`,
           headers: () => {
             const headers = new Headers();

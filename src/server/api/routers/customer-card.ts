@@ -42,6 +42,54 @@ async function assertBulkMode(db: PrismaClient, allowed: CustomerCardBulkMode) {
   }
 }
 
+/**
+ * Non-admins may only bulk-edit cards in their assigned business groups —
+ * the same rule the single-card `update` enforces. Returns the scope filter
+ * to repeat on the updateMany itself, so a card moved between the check and
+ * the write still can't slip through.
+ */
+async function assertBulkScope(
+  ctx: {
+    db: PrismaClient;
+    session: { user: { id: string; role?: string | null } };
+  },
+  ids: string[],
+): Promise<Prisma.CustomerCardWhereInput> {
+  if (ctx.session.user.role === 'admin') return {};
+
+  const assignedGroups = await ctx.db.businessGroup.findMany({
+    where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+    select: { name: true },
+  });
+  const allowedNames = assignedGroups.map((g) => g.name);
+
+  // Explicit null branch — NOT IN treats a NULL group as unknown, so a
+  // group-less card would otherwise pass this check unnoticed.
+  const outOfScope = await ctx.db.customerCard.count({
+    where: {
+      id: { in: ids },
+      OR: [{ businessGroup: null }, { businessGroup: { notIn: allowedNames } }],
+    },
+  });
+  if (outOfScope > 0) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Seçilen kartların bazıları yetki alanınızın dışında',
+    });
+  }
+  return { businessGroup: { in: allowedNames } };
+}
+
+/**
+ * "id=value" pairs of the values a bulk edit overwrites, so the audit entry
+ * holds enough to undo it.
+ */
+function formatPreviousValues(
+  rows: { id: string; value: string | null }[],
+): string {
+  return rows.map((r) => `${r.id}=${r.value ?? '-'}`).join(', ');
+}
+
 // Enum fields have no empty-string variant — "empty" means null for these
 const emptyEnumFields = ['district', 'status', 'authorizationDocument', 'vote'];
 
@@ -291,8 +339,13 @@ export const customerCardRouter = createTRPCRouter({
       // Build orderBy clause
       const orderBy: Prisma.CustomerCardOrderByWithRelationInput[] = [];
 
+      // Sorting by color would order out-of-scope rows by their real color
+      // and so reveal it — only allowed when every returned row is in scope.
+      const canSortByColor = isAdmin || !input.includeRestricted;
+
       if (input.sorting && input.sorting.length > 0) {
         for (const sort of input.sorting) {
+          if (sort.id === 'color' && !canSortByColor) continue;
           if (sortableFields.includes(sort.id as SortableField)) {
             orderBy.push({
               [sort.id]: sort.desc ? 'desc' : 'asc',
@@ -358,10 +411,12 @@ export const customerCardRouter = createTRPCRouter({
               ],
             });
           } else {
+            // Only in-scope cards can match a real color. Layered as an AND
+            // so it also holds when a businessGroup filter for some other
+            // group is set — otherwise that group's cards of this color
+            // would come back and give their real color away.
             whereClause.color = requestedColor;
-            if (!whereClause.businessGroup) {
-              whereClause.businessGroup = { in: allowedNames };
-            }
+            andConditions.push({ businessGroup: { in: allowedNames } });
           }
         } else {
           whereClause.color = requestedColor;
@@ -385,12 +440,16 @@ export const customerCardRouter = createTRPCRouter({
       const totalPages = Math.ceil(totalItems / input.itemsPerPage);
 
       return {
-        data: data.map((card) => ({
-          ...card,
-          isRestricted: allowedNames
+        data: data.map((card) => {
+          const isRestricted = allowedNames
             ? !card.businessGroup || !allowedNames.includes(card.businessGroup)
-            : false,
-        })),
+            : false;
+          // An out-of-scope card's real color isn't visible to the user —
+          // it's reported as gray, matching the color filter and counts.
+          return isRestricted && 'color' in card
+            ? { ...card, color: 'gray' as const, isRestricted }
+            : { ...card, isRestricted };
+        }),
         pagination: {
           totalItems,
           totalPages,
@@ -423,7 +482,10 @@ export const customerCardRouter = createTRPCRouter({
         !customerCard.businessGroup ||
         !allowedNames.includes(customerCard.businessGroup);
 
-      return { ...customerCard, isRestricted };
+      // Same masking as `get` — an out-of-scope card's color reads as gray.
+      return isRestricted
+        ? { ...customerCard, color: 'gray' as const, isRestricted }
+        : { ...customerCard, isRestricted };
     }),
   create: protectedProcedure
     .input(CustomerCardCreateSchema)
@@ -594,8 +656,14 @@ export const customerCardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await assertBulkMode(ctx.db, 'color_delete');
       try {
+        const scope = await assertBulkScope(ctx, input.ids);
+        const where = { id: { in: input.ids }, ...scope };
+        const previous = await ctx.db.customerCard.findMany({
+          where,
+          select: { id: true, color: true },
+        });
         const result = await ctx.db.customerCard.updateMany({
-          where: { id: { in: input.ids } },
+          where,
           data: { color: input.color },
         });
         await createAuditLog(
@@ -605,7 +673,7 @@ export const customerCardRouter = createTRPCRouter({
           input.ids.join(','),
           'SUCCESS',
           undefined,
-          `${result.count} cari kartın rengi "${COLOR_DISPLAY_NAME_MAP[input.color]}" olarak güncellendi (toplu)`,
+          `${result.count} cari kartın rengi "${COLOR_DISPLAY_NAME_MAP[input.color]}" olarak güncellendi (toplu). Önceki renkler: ${formatPreviousValues(previous.map((c) => ({ id: c.id, value: c.color })))}`,
         );
         return result;
       } catch (error) {
@@ -632,10 +700,19 @@ export const customerCardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await assertBulkMode(ctx.db, 'vote');
       try {
+        const scope = await assertBulkScope(ctx, input.ids);
+        const where = { id: { in: input.ids }, ...scope };
+        const previous = await ctx.db.customerCard.findMany({
+          where,
+          select: { id: true, vote: true },
+        });
         const result = await ctx.db.customerCard.updateMany({
-          where: { id: { in: input.ids } },
+          where,
           data: { vote: input.vote },
         });
+        const previousVotes = formatPreviousValues(
+          previous.map((c) => ({ id: c.id, value: c.vote })),
+        );
         const voteLabel = VOTES_SELECT_MAP.find(
           (v) => v.value === input.vote,
         )?.label;
@@ -647,8 +724,8 @@ export const customerCardRouter = createTRPCRouter({
           'SUCCESS',
           undefined,
           voteLabel
-            ? `${result.count} cari kartın oyu "${voteLabel}" olarak güncellendi (toplu)`
-            : `${result.count} cari kartın oyu temizlendi (toplu)`,
+            ? `${result.count} cari kartın oyu "${voteLabel}" olarak güncellendi (toplu). Önceki oylar: ${previousVotes}`
+            : `${result.count} cari kartın oyu temizlendi (toplu). Önceki oylar: ${previousVotes}`,
         );
         return result;
       } catch (error) {

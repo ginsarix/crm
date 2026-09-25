@@ -38,6 +38,7 @@ import { VOTES_SELECT_MAP } from '~/shared/constants';
 import { labelCompose } from '~/shared/labels/compose';
 import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
+import { BULK_IDS_MAX } from '~/shared/zod-schemas/bulk-ids';
 import { DistrictValidation } from '~/shared/zod-schemas/district';
 import { StatusValidation } from '~/shared/zod-schemas/status';
 import { VoteValidation } from '~/shared/zod-schemas/vote';
@@ -187,13 +188,11 @@ export function CustomerCardsPageClient({
     updateParamRef.current = updateParam;
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
-  useEffect(() => {
-    setRowSelection({});
-  }, [pagination.pageIndex, pagination.pageSize]);
-
   // Reset to page 0 when any filter changes. This effect fires after the URL update is
   // reflected in searchParams, preventing a query with page 0 + stale filter.
+  // Selection is keyed by row id, so it survives pagination and sorting — but a
+  // filter change can move selected cards out of view, and a bulk action would
+  // then hit cards the user can no longer see, so it is cleared here.
   const filterKey = [
     color,
     urlSearch,
@@ -211,6 +210,7 @@ export function CustomerCardsPageClient({
     if (filterKey !== prevFilterKeyRef.current) {
       prevFilterKeyRef.current = filterKey;
       setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+      setRowSelection({});
     }
   }, [filterKey]);
 
@@ -328,10 +328,16 @@ export function CustomerCardsPageClient({
   const columns = createColumns(labels, handleViewCustomerCard);
 
   const selectedIds = Object.keys(rowSelection);
+  const overBulkLimit = selectedIds.length > BULK_IDS_MAX;
+  const selectedOnPage = (data?.data ?? []).filter(
+    (row) => rowSelection[row.id],
+  ).length;
 
   const bulkActionsBar = (
     <BulkActionsBar
       count={selectedIds.length}
+      countOnPage={selectedOnPage}
+      limit={BULK_IDS_MAX}
       onClear={() => setRowSelection({})}
     >
       {/* Arrays, not fragments: BulkActionsBar animates each direct child
@@ -355,7 +361,9 @@ export function CustomerCardsPageClient({
           </SelectContent>
         </Select>,
         <Button
-          disabled={!bulkVote || bulkUpdateVoteMutation.isPending}
+          disabled={
+            !bulkVote || overBulkLimit || bulkUpdateVoteMutation.isPending
+          }
           key="apply"
           onClick={() =>
             bulkUpdateVoteMutation.mutate({
@@ -384,7 +392,9 @@ export function CustomerCardsPageClient({
           setColor={(c) => setBulkColor(c === 'all' ? null : (c as BulkColor))}
         />,
         <Button
-          disabled={!bulkColor || bulkUpdateColorMutation.isPending}
+          disabled={
+            !bulkColor || overBulkLimit || bulkUpdateColorMutation.isPending
+          }
           key="apply"
           onClick={() =>
             bulkUpdateColorMutation.mutate({
@@ -398,6 +408,7 @@ export function CustomerCardsPageClient({
         </Button>,
         isAdmin && (
           <Button
+            disabled={overBulkLimit}
             key="delete"
             onClick={() => setDeleteConfirmOpen(true)}
             size="sm"

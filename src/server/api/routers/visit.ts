@@ -1,6 +1,7 @@
 import { Prisma } from 'generated/prisma';
 import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
+import { BulkIdsSchema } from '~/shared/zod-schemas/bulk-ids';
 import { VisitCreateSchema } from '~/shared/zod-schemas/visit';
 import { getPassiveBusinessGroupNames } from '../lib/passive-business-groups';
 import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
@@ -530,7 +531,7 @@ export const visitRouter = createTRPCRouter({
     }),
 
   bulkDelete: adminProcedure
-    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .input(z.object({ ids: BulkIdsSchema }))
     .mutation(async ({ ctx, input }) => {
       try {
         const result = await ctx.db.visit.deleteMany({

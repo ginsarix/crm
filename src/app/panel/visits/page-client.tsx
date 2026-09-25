@@ -26,6 +26,7 @@ import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
 import { labelCompose } from '~/shared/labels/compose';
 import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
+import { BULK_IDS_MAX } from '~/shared/zod-schemas/bulk-ids';
 import { api } from '~/trpc/react';
 import type { RouterOutputs } from '~/trpc/types';
 
@@ -108,10 +109,23 @@ export function VisitsPageClient({
     setEmptyField((filters.empty_field ?? '') as typeof emptyField);
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
+  // Selection is keyed by row id, so it survives pagination and sorting — but a
+  // filter change can move selected visits out of view, and a bulk delete would
+  // then hit visits the user can no longer see, so it is cleared here.
+  const filterKey = [
+    search,
+    via,
+    searchScope,
+    salesRepresentativeId,
+    emptyField,
+  ].join('|');
+  const prevFilterKeyRef = useRef(filterKey);
   useEffect(() => {
-    setRowSelection({});
-  }, [pagination.pageIndex, pagination.pageSize]);
+    if (filterKey !== prevFilterKeyRef.current) {
+      prevFilterKeyRef.current = filterKey;
+      setRowSelection({});
+    }
+  }, [filterKey]);
 
   const bulkDeleteMutation = api.visit.bulkDelete.useMutation({
     onSuccess: (result) => {
@@ -195,13 +209,19 @@ export function VisitsPageClient({
   const columns = createColumns(labels, handleViewVisit);
 
   const selectedIds = Object.keys(rowSelection);
+  const selectedOnPage = (data?.data ?? []).filter(
+    (row) => rowSelection[row.id],
+  ).length;
 
   const bulkActionsBar = (
     <BulkActionsBar
       count={isAdmin ? selectedIds.length : 0}
+      countOnPage={selectedOnPage}
+      limit={BULK_IDS_MAX}
       onClear={() => setRowSelection({})}
     >
       <Button
+        disabled={selectedIds.length > BULK_IDS_MAX}
         onClick={() => setDeleteConfirmOpen(true)}
         size="sm"
         variant="destructive"

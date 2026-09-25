@@ -7,6 +7,10 @@ import { Button } from '~/components/ui/button';
 
 interface BulkActionsBarProps {
   count: number;
+  /** Selected rows on the visible page; shown when the selection spans pages. */
+  countOnPage?: number;
+  /** Shows a warning once `count` exceeds it; callers disable their own actions. */
+  limit?: number;
   onClear: () => void;
   children: ReactNode;
 }
@@ -56,9 +60,12 @@ const itemVariants = {
 
 export function BulkActionsBar({
   count,
+  countOnPage,
+  limit,
   onClear,
   children,
 }: BulkActionsBarProps) {
+  const overLimit = limit !== undefined && count > limit;
   return (
     <AnimatePresence>
       {count > 0 && (
@@ -75,6 +82,16 @@ export function BulkActionsBar({
               variants={itemVariants}
             >
               {count} kayıt seçildi
+              {countOnPage !== undefined && countOnPage !== count && (
+                <span className="ml-1.5 text-muted-foreground">
+                  ({countOnPage} bu sayfada)
+                </span>
+              )}
+              {overLimit && (
+                <span className="ml-1.5 text-destructive">
+                  (en fazla {limit})
+                </span>
+              )}
             </motion.span>
             {React.Children.map(children, (child) =>
               child != null ? (

@@ -4,6 +4,7 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { computePublishNowWindow } from '~/lib/announcement-status';
 import {
+  ANNOUNCEMENT_IMAGE_PATH_REGEX,
   AnnouncementCreateSchema,
   AnnouncementEditSchema,
   AnnouncementRescheduleSchema,
@@ -15,10 +16,19 @@ import {
   protectedProcedure,
 } from '../trpc';
 
+const UPLOAD_DIR = path.join(
+  process.cwd(),
+  'public',
+  'uploads',
+  'announcements',
+);
+
 async function deleteUploadedFile(imagePath: string | null) {
-  if (!imagePath?.startsWith('/uploads/announcements/')) return;
+  // Rows written before imagePath was validated may hold anything, so the
+  // path is re-checked here and only its file name is trusted.
+  if (!imagePath || !ANNOUNCEMENT_IMAGE_PATH_REGEX.test(imagePath)) return;
   try {
-    await unlink(path.join(process.cwd(), 'public', imagePath));
+    await unlink(path.join(UPLOAD_DIR, path.basename(imagePath)));
   } catch {
     // best effort — file may already be gone
   }
@@ -53,7 +63,7 @@ export const announcementRouter = createTRPCRouter({
           data: {
             title: input.title,
             body: input.body?.trim() || null,
-            imagePath: input.imagePath,
+            imagePath: input.imagePath || null,
             start: input.publishNow ? new Date() : (input.start ?? null),
             end: input.end ?? null,
             createdById: ctx.session.user.id,

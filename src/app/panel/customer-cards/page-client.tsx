@@ -329,10 +329,14 @@ export function CustomerCardsPageClient({
 
   const selectedIds = Object.keys(rowSelection);
   const overBulkLimit = selectedIds.length > BULK_IDS_MAX;
+  const selectedOnPage = (data?.data ?? []).filter(
+    (row) => rowSelection[row.id],
+  ).length;
 
   const bulkActionsBar = (
     <BulkActionsBar
       count={selectedIds.length}
+      countOnPage={selectedOnPage}
       limit={BULK_IDS_MAX}
       onClear={() => setRowSelection({})}
     >

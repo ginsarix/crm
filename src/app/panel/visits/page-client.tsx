@@ -209,10 +209,14 @@ export function VisitsPageClient({
   const columns = createColumns(labels, handleViewVisit);
 
   const selectedIds = Object.keys(rowSelection);
+  const selectedOnPage = (data?.data ?? []).filter(
+    (row) => rowSelection[row.id],
+  ).length;
 
   const bulkActionsBar = (
     <BulkActionsBar
       count={isAdmin ? selectedIds.length : 0}
+      countOnPage={selectedOnPage}
       limit={BULK_IDS_MAX}
       onClear={() => setRowSelection({})}
     >

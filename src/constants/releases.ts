@@ -23,7 +23,7 @@ export const RELEASES: Release[] = [
   {
     id: 'v1-26',
     version: '1.26',
-    date: '27 Eylül 2026',
+    date: '26 Eylül 2026',
     changes: [
       {
         type: 'new',

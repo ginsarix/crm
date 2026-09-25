@@ -339,8 +339,13 @@ export const customerCardRouter = createTRPCRouter({
       // Build orderBy clause
       const orderBy: Prisma.CustomerCardOrderByWithRelationInput[] = [];
 
+      // Sorting by color would order out-of-scope rows by their real color
+      // and so reveal it — only allowed when every returned row is in scope.
+      const canSortByColor = isAdmin || !input.includeRestricted;
+
       if (input.sorting && input.sorting.length > 0) {
         for (const sort of input.sorting) {
+          if (sort.id === 'color' && !canSortByColor) continue;
           if (sortableFields.includes(sort.id as SortableField)) {
             orderBy.push({
               [sort.id]: sort.desc ? 'desc' : 'asc',
@@ -406,10 +411,12 @@ export const customerCardRouter = createTRPCRouter({
               ],
             });
           } else {
+            // Only in-scope cards can match a real color. Layered as an AND
+            // so it also holds when a businessGroup filter for some other
+            // group is set — otherwise that group's cards of this color
+            // would come back and give their real color away.
             whereClause.color = requestedColor;
-            if (!whereClause.businessGroup) {
-              whereClause.businessGroup = { in: allowedNames };
-            }
+            andConditions.push({ businessGroup: { in: allowedNames } });
           }
         } else {
           whereClause.color = requestedColor;
@@ -433,12 +440,16 @@ export const customerCardRouter = createTRPCRouter({
       const totalPages = Math.ceil(totalItems / input.itemsPerPage);
 
       return {
-        data: data.map((card) => ({
-          ...card,
-          isRestricted: allowedNames
+        data: data.map((card) => {
+          const isRestricted = allowedNames
             ? !card.businessGroup || !allowedNames.includes(card.businessGroup)
-            : false,
-        })),
+            : false;
+          // An out-of-scope card's real color isn't visible to the user —
+          // it's reported as gray, matching the color filter and counts.
+          return isRestricted && 'color' in card
+            ? { ...card, color: 'gray' as const, isRestricted }
+            : { ...card, isRestricted };
+        }),
         pagination: {
           totalItems,
           totalPages,
@@ -471,7 +482,10 @@ export const customerCardRouter = createTRPCRouter({
         !customerCard.businessGroup ||
         !allowedNames.includes(customerCard.businessGroup);
 
-      return { ...customerCard, isRestricted };
+      // Same masking as `get` — an out-of-scope card's color reads as gray.
+      return isRestricted
+        ? { ...customerCard, color: 'gray' as const, isRestricted }
+        : { ...customerCard, isRestricted };
     }),
   create: protectedProcedure
     .input(CustomerCardCreateSchema)

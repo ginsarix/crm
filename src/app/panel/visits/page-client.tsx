@@ -26,6 +26,7 @@ import { cn } from '~/lib/utils';
 import { authClient } from '~/server/better-auth/client';
 import { labelCompose } from '~/shared/labels/compose';
 import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
+import { BULK_IDS_MAX } from '~/shared/zod-schemas/bulk-ids';
 import { api } from '~/trpc/react';
 import type { RouterOutputs } from '~/trpc/types';
 
@@ -212,9 +213,11 @@ export function VisitsPageClient({
   const bulkActionsBar = (
     <BulkActionsBar
       count={isAdmin ? selectedIds.length : 0}
+      limit={BULK_IDS_MAX}
       onClear={() => setRowSelection({})}
     >
       <Button
+        disabled={selectedIds.length > BULK_IDS_MAX}
         onClick={() => setDeleteConfirmOpen(true)}
         size="sm"
         variant="destructive"

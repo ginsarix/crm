@@ -38,6 +38,7 @@ import { VOTES_SELECT_MAP } from '~/shared/constants';
 import { labelCompose } from '~/shared/labels/compose';
 import type { PageSizeTableConfig } from '~/shared/page-sizes/types';
 import { AuthorizationDocumentValidation } from '~/shared/zod-schemas/authorization-document';
+import { BULK_IDS_MAX } from '~/shared/zod-schemas/bulk-ids';
 import { DistrictValidation } from '~/shared/zod-schemas/district';
 import { StatusValidation } from '~/shared/zod-schemas/status';
 import { VoteValidation } from '~/shared/zod-schemas/vote';
@@ -327,10 +328,12 @@ export function CustomerCardsPageClient({
   const columns = createColumns(labels, handleViewCustomerCard);
 
   const selectedIds = Object.keys(rowSelection);
+  const overBulkLimit = selectedIds.length > BULK_IDS_MAX;
 
   const bulkActionsBar = (
     <BulkActionsBar
       count={selectedIds.length}
+      limit={BULK_IDS_MAX}
       onClear={() => setRowSelection({})}
     >
       {/* Arrays, not fragments: BulkActionsBar animates each direct child
@@ -354,7 +357,9 @@ export function CustomerCardsPageClient({
           </SelectContent>
         </Select>,
         <Button
-          disabled={!bulkVote || bulkUpdateVoteMutation.isPending}
+          disabled={
+            !bulkVote || overBulkLimit || bulkUpdateVoteMutation.isPending
+          }
           key="apply"
           onClick={() =>
             bulkUpdateVoteMutation.mutate({
@@ -383,7 +388,9 @@ export function CustomerCardsPageClient({
           setColor={(c) => setBulkColor(c === 'all' ? null : (c as BulkColor))}
         />,
         <Button
-          disabled={!bulkColor || bulkUpdateColorMutation.isPending}
+          disabled={
+            !bulkColor || overBulkLimit || bulkUpdateColorMutation.isPending
+          }
           key="apply"
           onClick={() =>
             bulkUpdateColorMutation.mutate({
@@ -397,6 +404,7 @@ export function CustomerCardsPageClient({
         </Button>,
         isAdmin && (
           <Button
+            disabled={overBulkLimit}
             key="delete"
             onClick={() => setDeleteConfirmOpen(true)}
             size="sm"

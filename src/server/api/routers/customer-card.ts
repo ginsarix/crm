@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
 import { COLOR_DISPLAY_NAME_MAP, VOTES_SELECT_MAP } from '~/shared/constants';
 import type { CustomerCardBulkMode } from '~/shared/zod-schemas/app-setting';
+import { BulkIdsSchema } from '~/shared/zod-schemas/bulk-ids';
 import {
   CustomerCardCreateSchema,
   CustomerCardFindManySelectSchema,
@@ -615,7 +616,7 @@ export const customerCardRouter = createTRPCRouter({
     }),
 
   bulkDelete: adminProcedure
-    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .input(z.object({ ids: BulkIdsSchema }))
     .mutation(async ({ ctx, input }) => {
       await assertBulkMode(ctx.db, 'color_delete');
       try {
@@ -649,7 +650,7 @@ export const customerCardRouter = createTRPCRouter({
   bulkUpdateColor: protectedProcedure
     .input(
       z.object({
-        ids: z.array(z.string()).min(1),
+        ids: BulkIdsSchema,
         color: z.enum(['green', 'blue', 'orange', 'yellow', 'gray', 'purple']),
       }),
     )
@@ -693,7 +694,7 @@ export const customerCardRouter = createTRPCRouter({
   bulkUpdateVote: protectedProcedure
     .input(
       z.object({
-        ids: z.array(z.string()).min(1),
+        ids: BulkIdsSchema,
         vote: VoteValidation.nullable(),
       }),
     )

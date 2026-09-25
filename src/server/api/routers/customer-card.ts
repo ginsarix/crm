@@ -42,6 +42,54 @@ async function assertBulkMode(db: PrismaClient, allowed: CustomerCardBulkMode) {
   }
 }
 
+/**
+ * Non-admins may only bulk-edit cards in their assigned business groups —
+ * the same rule the single-card `update` enforces. Returns the scope filter
+ * to repeat on the updateMany itself, so a card moved between the check and
+ * the write still can't slip through.
+ */
+async function assertBulkScope(
+  ctx: {
+    db: PrismaClient;
+    session: { user: { id: string; role?: string | null } };
+  },
+  ids: string[],
+): Promise<Prisma.CustomerCardWhereInput> {
+  if (ctx.session.user.role === 'admin') return {};
+
+  const assignedGroups = await ctx.db.businessGroup.findMany({
+    where: { assignedUsers: { some: { id: ctx.session.user.id } } },
+    select: { name: true },
+  });
+  const allowedNames = assignedGroups.map((g) => g.name);
+
+  // Explicit null branch — NOT IN treats a NULL group as unknown, so a
+  // group-less card would otherwise pass this check unnoticed.
+  const outOfScope = await ctx.db.customerCard.count({
+    where: {
+      id: { in: ids },
+      OR: [{ businessGroup: null }, { businessGroup: { notIn: allowedNames } }],
+    },
+  });
+  if (outOfScope > 0) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Seçilen kartların bazıları yetki alanınızın dışında',
+    });
+  }
+  return { businessGroup: { in: allowedNames } };
+}
+
+/**
+ * "id=value" pairs of the values a bulk edit overwrites, so the audit entry
+ * holds enough to undo it.
+ */
+function formatPreviousValues(
+  rows: { id: string; value: string | null }[],
+): string {
+  return rows.map((r) => `${r.id}=${r.value ?? '-'}`).join(', ');
+}
+
 // Enum fields have no empty-string variant — "empty" means null for these
 const emptyEnumFields = ['district', 'status', 'authorizationDocument', 'vote'];
 
@@ -594,8 +642,14 @@ export const customerCardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await assertBulkMode(ctx.db, 'color_delete');
       try {
+        const scope = await assertBulkScope(ctx, input.ids);
+        const where = { id: { in: input.ids }, ...scope };
+        const previous = await ctx.db.customerCard.findMany({
+          where,
+          select: { id: true, color: true },
+        });
         const result = await ctx.db.customerCard.updateMany({
-          where: { id: { in: input.ids } },
+          where,
           data: { color: input.color },
         });
         await createAuditLog(
@@ -605,7 +659,7 @@ export const customerCardRouter = createTRPCRouter({
           input.ids.join(','),
           'SUCCESS',
           undefined,
-          `${result.count} cari kartın rengi "${COLOR_DISPLAY_NAME_MAP[input.color]}" olarak güncellendi (toplu)`,
+          `${result.count} cari kartın rengi "${COLOR_DISPLAY_NAME_MAP[input.color]}" olarak güncellendi (toplu). Önceki renkler: ${formatPreviousValues(previous.map((c) => ({ id: c.id, value: c.color })))}`,
         );
         return result;
       } catch (error) {
@@ -632,10 +686,19 @@ export const customerCardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await assertBulkMode(ctx.db, 'vote');
       try {
+        const scope = await assertBulkScope(ctx, input.ids);
+        const where = { id: { in: input.ids }, ...scope };
+        const previous = await ctx.db.customerCard.findMany({
+          where,
+          select: { id: true, vote: true },
+        });
         const result = await ctx.db.customerCard.updateMany({
-          where: { id: { in: input.ids } },
+          where,
           data: { vote: input.vote },
         });
+        const previousVotes = formatPreviousValues(
+          previous.map((c) => ({ id: c.id, value: c.vote })),
+        );
         const voteLabel = VOTES_SELECT_MAP.find(
           (v) => v.value === input.vote,
         )?.label;
@@ -647,8 +710,8 @@ export const customerCardRouter = createTRPCRouter({
           'SUCCESS',
           undefined,
           voteLabel
-            ? `${result.count} cari kartın oyu "${voteLabel}" olarak güncellendi (toplu)`
-            : `${result.count} cari kartın oyu temizlendi (toplu)`,
+            ? `${result.count} cari kartın oyu "${voteLabel}" olarak güncellendi (toplu). Önceki oylar: ${previousVotes}`
+            : `${result.count} cari kartın oyu temizlendi (toplu). Önceki oylar: ${previousVotes}`,
         );
         return result;
       } catch (error) {

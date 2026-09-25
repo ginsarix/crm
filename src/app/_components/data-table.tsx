@@ -392,6 +392,7 @@ export function DataTable<TData, TValue>({
         row,
       }: {
         row: {
+          getCanSelect: () => boolean;
           getIsSelected: () => boolean;
           toggleSelected: (v: boolean) => void;
         };
@@ -399,6 +400,7 @@ export function DataTable<TData, TValue>({
         <Checkbox
           aria-label="Satırı seç"
           checked={row.getIsSelected()}
+          disabled={!row.getCanSelect()}
           onCheckedChange={(v) => row.toggleSelected(!!v)}
           onClick={(e) => e.stopPropagation()}
         />
@@ -422,7 +424,11 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     onColumnSizingChange: setColumnSizing,
     ...(rowSelection !== undefined && {
-      enableRowSelection: true,
+      // Restricted (out-of-scope) rows can't be bulk-edited, so they can't
+      // be selected either — the server rejects them regardless.
+      enableRowSelection: getRowRestricted
+        ? (row: { original: TData }) => !getRowRestricted(row.original)
+        : true,
       onRowSelectionChange,
       getRowId:
         getRowId ??

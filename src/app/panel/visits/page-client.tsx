@@ -108,10 +108,23 @@ export function VisitsPageClient({
     setEmptyField((filters.empty_field ?? '') as typeof emptyField);
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
+  // Selection is keyed by row id, so it survives pagination and sorting — but a
+  // filter change can move selected visits out of view, and a bulk delete would
+  // then hit visits the user can no longer see, so it is cleared here.
+  const filterKey = [
+    search,
+    via,
+    searchScope,
+    salesRepresentativeId,
+    emptyField,
+  ].join('|');
+  const prevFilterKeyRef = useRef(filterKey);
   useEffect(() => {
-    setRowSelection({});
-  }, [pagination.pageIndex, pagination.pageSize]);
+    if (filterKey !== prevFilterKeyRef.current) {
+      prevFilterKeyRef.current = filterKey;
+      setRowSelection({});
+    }
+  }, [filterKey]);
 
   const bulkDeleteMutation = api.visit.bulkDelete.useMutation({
     onSuccess: (result) => {

@@ -187,13 +187,11 @@ export function CustomerCardsPageClient({
     updateParamRef.current = updateParam;
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally using pagination sub-fields as deps
-  useEffect(() => {
-    setRowSelection({});
-  }, [pagination.pageIndex, pagination.pageSize]);
-
   // Reset to page 0 when any filter changes. This effect fires after the URL update is
   // reflected in searchParams, preventing a query with page 0 + stale filter.
+  // Selection is keyed by row id, so it survives pagination and sorting — but a
+  // filter change can move selected cards out of view, and a bulk action would
+  // then hit cards the user can no longer see, so it is cleared here.
   const filterKey = [
     color,
     urlSearch,
@@ -211,6 +209,7 @@ export function CustomerCardsPageClient({
     if (filterKey !== prevFilterKeyRef.current) {
       prevFilterKeyRef.current = filterKey;
       setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+      setRowSelection({});
     }
   }, [filterKey]);
 

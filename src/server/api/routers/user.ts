@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server';
 import type { Prisma } from 'generated/prisma';
 import { z } from 'zod';
 import { columnMap } from '~/lib/column-map';
@@ -9,6 +10,7 @@ import {
   UserSelfUpdateSchema,
   UserUpdateSchema,
 } from '~/shared/zod-schemas/user';
+import { createAttemptLimiter } from '../lib/attempt-limiter';
 import { findTurkishSearchMatchesInTable } from '../lib/turkish-search';
 import {
   adminProcedure,
@@ -42,6 +44,14 @@ const sortableFields = [
 ] as const;
 
 type SortableField = (typeof sortableFields)[number];
+
+// changeMyPassword verifies the current password via auth.api, which skips
+// better-auth's rate limiter — without this a stolen session could guess the
+// current password without limit (and tie up the scrypt pool doing so).
+const changePasswordLimiter = createAttemptLimiter({
+  max: 5,
+  windowMs: 15 * 60 * 1000,
+});
 
 export const userRouter = createTRPCRouter({
   getTotal: adminProcedure.query(async ({ ctx }) => {
@@ -201,6 +211,13 @@ export const userRouter = createTRPCRouter({
   changeMyPassword: protectedProcedure
     .input(UserChangePasswordSchema)
     .mutation(async ({ ctx, input }) => {
+      if (!changePasswordLimiter.tryAcquire(ctx.session.user.id)) {
+        throw new TRPCError({
+          code: 'TOO_MANY_REQUESTS',
+          message:
+            'Çok fazla şifre değiştirme denemesi. Lütfen daha sonra tekrar deneyin.',
+        });
+      }
       try {
         await auth.api.changePassword({
           body: {

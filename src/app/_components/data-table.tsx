@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  type Column,
   type ColumnDef,
   type ColumnSizingState,
   flexRender,
@@ -21,6 +22,7 @@ import {
   ChevronRight,
   Columns3,
   Download,
+  FileText,
 } from 'lucide-react';
 import {
   Fragment,
@@ -228,6 +230,13 @@ function makeBorder(color: string) {
   return { top: side, bottom: side, left: side, right: side };
 }
 
+function columnLabel<TData>(col: Column<TData, unknown>) {
+  const h = col.columnDef.header;
+  return typeof h === 'string'
+    ? h
+    : col.id.charAt(0).toUpperCase() + col.id.slice(1);
+}
+
 function cellValue(value: unknown): {
   v: string | number | boolean;
   t: 's' | 'n' | 'b';
@@ -254,11 +263,7 @@ function exportToExcel<TData>(
 
   // Header row
   visibleColumns.forEach((col, c) => {
-    const h = col.columnDef.header;
-    const label =
-      typeof h === 'string'
-        ? h
-        : col.id.charAt(0).toUpperCase() + col.id.slice(1);
+    const label = columnLabel(col);
     ws[XLSX.utils.encode_cell({ r: 0, c })] = {
       v: label,
       t: 's',
@@ -305,11 +310,7 @@ function exportToExcel<TData>(
     e: { r: rows.length, c: visibleColumns.length - 1 },
   });
   ws['!cols'] = visibleColumns.map((col) => {
-    const h = col.columnDef.header;
-    const headerLabel =
-      typeof h === 'string'
-        ? h
-        : col.id.charAt(0).toUpperCase() + col.id.slice(1);
+    const headerLabel = columnLabel(col);
     const maxLen = rows.reduce((max, row) => {
       const { v } = cellValue(row.getValue(col.id));
       return Math.max(max, String(v).length);
@@ -321,6 +322,101 @@ function exportToExcel<TData>(
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Sayfa1');
   XLSX.writeFile(wb, `${env.NEXT_PUBLIC_APP_TITLE}_crm_${filename}.xlsx`);
+}
+
+// A4 landscape fits roughly this many columns at a readable font size; wider
+// tables switch to A3 so cells don't collapse into one-word-per-line.
+const PDF_A4_MAX_COLUMNS = 10;
+const PDF_PAGE_MARGIN = 20;
+const PDF_CELL_PADDING = 4;
+
+async function exportToPdf<TData>(
+  table: ReturnType<typeof useReactTable<TData>>,
+  filename: string,
+) {
+  // pdfmake + its embedded Roboto font are ~1MB, so load them only on click
+  // both builds are CommonJS (`module.exports = ...`), so `default` is the
+  // interop shape bundlers reliably provide for a dynamic import
+  const [{ default: pdfMake }, { default: pdfFonts }] = await Promise.all([
+    import('pdfmake/build/pdfmake'),
+    import('pdfmake/build/vfs_fonts'),
+  ]);
+  pdfMake.addVirtualFileSystem(pdfFonts);
+
+  const visibleColumns = table
+    .getVisibleLeafColumns()
+    .filter((col) => typeof col.accessorFn !== 'undefined');
+  const rows = table.getRowModel().rows;
+
+  const pageSize = visibleColumns.length > PDF_A4_MAX_COLUMNS ? 'A3' : 'A4';
+  // landscape width in points
+  const pageWidth = pageSize === 'A3' ? 1190.55 : 841.89;
+  // pdfmake widths exclude cell padding and the 1pt vertical lines
+  const available =
+    pageWidth -
+    PDF_PAGE_MARGIN * 2 -
+    visibleColumns.length * (PDF_CELL_PADDING * 2 + 1) -
+    1;
+  // keep the proportions the user set by resizing columns in the UI
+  const totalSize = visibleColumns.reduce((sum, col) => sum + col.getSize(), 0);
+  const widths = visibleColumns.map(
+    (col) => (col.getSize() / totalSize) * available,
+  );
+
+  const header = visibleColumns.map((col) => ({
+    text: columnLabel(col),
+    bold: true,
+    color: `#${EXCEL_COLORS.primaryFg}`,
+    fillColor: `#${EXCEL_COLORS.primary}`,
+  }));
+
+  // Data rows — use row color if present, otherwise alternate card/muted
+  const body = rows.map((row, r) => {
+    const rowColor = (row.original as Record<string, unknown>).color as
+      | string
+      | null
+      | undefined;
+    const bg =
+      (rowColor && EXCEL_ROW_COLORS[rowColor]) ??
+      (r % 2 === 1 ? EXCEL_COLORS.muted : EXCEL_COLORS.card);
+    return visibleColumns.map((col) => ({
+      text: String(cellValue(row.getValue(col.id)).v),
+      fillColor: `#${bg}`,
+    }));
+  });
+
+  const border = `#${EXCEL_COLORS.border}`;
+  pdfMake
+    .createPdf({
+      pageSize,
+      pageOrientation: 'landscape',
+      pageMargins: PDF_PAGE_MARGIN,
+      defaultStyle: {
+        font: 'Roboto',
+        fontSize: 8,
+        color: `#${EXCEL_COLORS.fg}`,
+      },
+      footer: (currentPage, pageCount) => ({
+        text: `${currentPage} / ${pageCount}`,
+        alignment: 'center',
+        fontSize: 8,
+        margin: [0, 4, 0, 0],
+      }),
+      content: [
+        {
+          table: { headerRows: 1, widths, body: [header, ...body] },
+          layout: {
+            hLineColor: () => border,
+            vLineColor: () => border,
+            paddingLeft: () => PDF_CELL_PADDING,
+            paddingRight: () => PDF_CELL_PADDING,
+            paddingTop: () => 3,
+            paddingBottom: () => 3,
+          },
+        },
+      ],
+    })
+    .download(`${env.NEXT_PUBLIC_APP_TITLE}_crm_${filename}.pdf`);
 }
 
 export function DataTable<TData, TValue>({
@@ -468,6 +564,17 @@ export function DataTable<TData, TValue>({
             Excel
           </Button>
         )}
+        {exportFilename && (
+          <Button
+            className="gap-2"
+            onClick={() => void exportToPdf(table, exportFilename)}
+            size="sm"
+            variant="outline"
+          >
+            <FileText className="h-4 w-4" />
+            PDF
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button className="gap-2" size="sm" variant="outline">
@@ -483,11 +590,7 @@ export function DataTable<TData, TValue>({
             <DropdownMenuSeparator />
             <div className="space-y-2 p-2">
               {toggleableColumns.map((column) => {
-                const header = column.columnDef.header;
-                const columnName =
-                  typeof header === 'string'
-                    ? header
-                    : column.id.charAt(0).toUpperCase() + column.id.slice(1);
+                const columnName = columnLabel(column);
 
                 return (
                   <div className="flex items-center gap-2" key={column.id}>

@@ -355,7 +355,16 @@ export const customerCardRouter = createTRPCRouter({
         }
       }
 
-      // Default sort if no sorting provided
+      // Default sort if no sorting provided.
+      //
+      // Known behavior: this ordering has no unique tiebreaker, so pagination
+      // is unstable across ties. Nearly all cards share one createdAt (bulk
+      // import), and Postgres returns tied rows in an unspecified order —
+      // page 1 (LIMIT 25) and page 2 (LIMIT 25 OFFSET 25) run as separate
+      // top-N sorts and can break ties differently, so a card may repeat on
+      // both pages while another appears on neither. User-chosen sorts on
+      // low-cardinality columns (district, businessGroup, ...) behave the
+      // same. Appending `{ id: 'desc' }` as the final key would fix it.
       if (orderBy.length === 0) {
         orderBy.push({ createdAt: 'desc' });
       }
